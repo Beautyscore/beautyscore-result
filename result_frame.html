@@ -296,11 +296,7 @@ html,body{
     <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
   </div>
 
-  <div class="sec"><div class="sec-bar"></div>분석 정확도</div>
-  <div class="trust">
-    <div class="trust-circ" id="tc"><div class="tg-l" id="tl">-</div><div class="tg-s">GRADE</div></div>
-    <div><div class="trust-lbl" id="tlbl">분석 정확도 확인 중</div><div class="trust-desc" id="td">데이터를 확인하고 있어요.</div></div>
-  </div>
+
 
   <!-- 대시보드 유입 CTA -->
   <div class="dash-cta" style="margin-top:28px">
@@ -427,15 +423,7 @@ html,body{
       sh('ab', analysis.replace(/\n/g,'<br>'));
     }
 
-    /* 신뢰도 */
-    if(tg){
-      st('tl',tg);
-      st('tlbl','분석 정확도 '+tg+'등급');
-      var gc={S:'linear-gradient(135deg,#7161EC,#9688F0)',A:'linear-gradient(135deg,#0F6E56,#3DA882)',B:'linear-gradient(135deg,#BA7517,#E09A35)',C:'linear-gradient(135deg,#E24B4A,#F07070)',D:'linear-gradient(135deg,#888780,#AAAAAA)'};
-      var tc=gi('tc');
-      if(tc&&gc[tg]){tc.style.background=gc[tg];tc.style.border='none';var tl=gi('tl');if(tl)tl.style.color='#fff';var ts=tc.querySelector('.tg-s');if(ts)ts.style.color='rgba(255,255,255,.7)'}
-    }
-    if(td) st('td',td);
+
 
     /* iframe 높이 부모에게 알림 */
     setTimeout(function(){
