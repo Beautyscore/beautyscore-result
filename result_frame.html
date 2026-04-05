@@ -392,14 +392,20 @@ html,body{
     /* 웹 점수 */
     st('num-w', score||'--');
     st('grade-w', grade?grade+' 등급':'--');
-    st('rank-w', rank||'--');
+    sh('rank-w', fmtRank(rank));
     st('issue-w', issue||'--');
     if(score) animRing('ring-w', score, 2*Math.PI*68);
+
+    /* rank 줄바꿈 처리 — — 기준으로 분리 */
+    function fmtRank(r){
+      if(!r) return '--';
+      return r.replace(' — ', '<br>').replace('—', '<br>');
+    }
 
     /* 모바일 점수 */
     st('num-m', score||'--');
     st('grade-m', grade?grade+' 등급':'--');
-    st('rank-m', rank||'--');
+    sh('rank-m', fmtRank(rank));
     st('issue-m', issue||'--');
     if(score) animRing('ring-m', score, 2*Math.PI*38);
 
