@@ -30,7 +30,7 @@ html,body{
   background:linear-gradient(160deg,#F5F3FF 0%,#EEF5FF 50%,#F0FAF5 100%);
   border-bottom:1px solid var(--bd);
   position:relative;overflow:hidden;
-  padding:28px 24px 0;
+  padding:20px 20px 0;
 }
 .orb1{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(113,97,236,.12) 0%,transparent 65%);top:-150px;right:-80px;pointer-events:none}
 .orb2{position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(15,110,86,.08) 0%,transparent 65%);bottom:-100px;left:-50px;pointer-events:none}
@@ -67,10 +67,10 @@ html,body{
   .score-wrap{
     display:flex;flex-direction:column;align-items:center;
     background:#fff;
-    border:1.5px solid var(--bd);
+    border:2px solid var(--p);
     border-radius:20px;
     padding:20px 20px;
-    box-shadow:0 4px 20px rgba(113,97,236,.12);
+    box-shadow:0 4px 20px rgba(113,97,236,.18);
   }
   .donut-box{position:relative;width:130px;height:130px;margin-bottom:12px}
   .donut-box svg{width:130px;height:130px;transform:rotate(-90deg)}
@@ -99,7 +99,7 @@ html,body{
 /* 모바일 히어로 */
 @media(max-width:1023px){
   .score-wrap{display:none}
-  .mobile-score{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--bd);border-radius:16px;padding:14px 16px;margin:10px 0 0;box-shadow:0 4px 16px rgba(113,97,236,.1);width:100%}
+  .mobile-score{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--p);border-radius:16px;padding:14px 16px;margin:8px 0 0;box-shadow:0 4px 20px rgba(113,97,236,.18);width:100%}
   .m-donut{position:relative;flex-shrink:0;width:90px;height:90px}
   .m-donut svg{width:90px;height:90px;transform:rotate(-90deg)}
   .m-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -122,7 +122,7 @@ html,body{
 }
 
 /* 물결 */
-.wave-wrap{position:relative;z-index:2;width:calc(100% + 48px);margin-left:-24px;margin-top:24px;line-height:0}
+.wave-wrap{position:relative;z-index:2;width:calc(100% + 48px);margin-left:-24px;margin-top:8px;line-height:0}
 .wave-wrap svg{display:block;width:100%;height:44px}
 
 /* ── 본문 ── */
@@ -303,11 +303,11 @@ html,body{
     <div class="dash-cta-inner">
       <div class="dash-icon">📊</div>
       <div>
-        <div class="dash-t">왜 이 점수인지, 항목별로 확인해보세요</div>
-        <div class="dash-d">매출 흐름·고객 패턴·운영 공백까지<br>대시보드에서 지금 바로 볼 수 있습니다.</div>
+        <div class="dash-t">점수별 세부 항목 확인하기</div>
+        <div class="dash-d">지금 바로 무료로 확인할 수 있어요.</div>
       </div>
     </div>
-    <a href="https://beautyscore.co.kr/dashboard" class="dash-btn">상세 분석 지금 보기 →</a>
+    <a href="https://beautyscore.co.kr/dashboard" class="dash-btn">대시보드 체험하기 →</a>
   </div>
 
   <!-- 업셀 배너 -->
