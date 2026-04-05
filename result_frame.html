@@ -162,7 +162,7 @@ html,body{
 .kpi.c3 .bar-fill{background:linear-gradient(90deg,var(--amber),#E09A35)}
 .kpi.c4 .bar-fill{background:linear-gradient(90deg,var(--pm),#C4B8FF)}
 
-/* 분析 카드 */
+/* 분석 카드 */
 .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sm);overflow:hidden;animation:up .5s .1s ease both}
 .card-hd{background:var(--pll);padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
 .card-hd-ico{width:32px;height:32px;border-radius:10px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:16px}
@@ -267,36 +267,36 @@ html,body{
   <div class="kpi-grid">
     <div class="kpi c1" style="animation-delay:.05s">
       <div class="kpi-top"><span class="kpi-lbl">재방문율</span><div class="kpi-ico c1">♻️</div></div>
-      <div class="kpi-val c1" id="rv">--<span class="kpi-unit">점</span></div>
+      <div class="kpi-val c1" id="rv">--</div>
       <div class="bar"><div class="bar-fill" id="rv-b"></div></div>
     </div>
     <div class="kpi c2" style="animation-delay:.1s">
       <div class="kpi-top"><span class="kpi-lbl">상담전환율</span><div class="kpi-ico c2">💬</div></div>
-      <div class="kpi-val c2" id="cn">--<span class="kpi-unit">점</span></div>
+      <div class="kpi-val c2" id="cn">--</div>
       <div class="bar"><div class="bar-fill" id="cn-b"></div></div>
     </div>
     <div class="kpi c3" style="animation-delay:.15s">
       <div class="kpi-top"><span class="kpi-lbl">매출구조</span><div class="kpi-ico c3">📊</div></div>
-      <div class="kpi-val c3" id="st">--<span class="kpi-unit">점</span></div>
+      <div class="kpi-val c3" id="st">--</div>
       <div class="bar"><div class="bar-fill" id="st-b"></div></div>
     </div>
     <div class="kpi c4" style="animation-delay:.2s">
       <div class="kpi-top"><span class="kpi-lbl">데이터 관리</span><div class="kpi-ico c4">📋</div></div>
-      <div class="kpi-val c4" id="fr">--<span class="kpi-unit">점</span></div>
+      <div class="kpi-val c4" id="fr">--</div>
       <div class="bar"><div class="bar-fill" id="fr-b"></div></div>
     </div>
   </div>
 
-  <div class="sec"><div class="sec-bar"></div>AI 분析 결과</div>
+  <div class="sec"><div class="sec-bar"></div>AI 분석 결과</div>
   <div class="card">
-    <div class="card-hd"><div class="card-hd-ico">🔍</div><div class="card-hd-ttl" id="at">분析 준비 중</div></div>
-    <div class="card-bd" id="ab">AI가 진단 데이터를 분析하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
+    <div class="card-hd"><div class="card-hd-ico">🔍</div><div class="card-hd-ttl" id="at">분석 준비 중</div></div>
+    <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
   </div>
 
-  <div class="sec"><div class="sec-bar"></div>분析 정확도</div>
+  <div class="sec"><div class="sec-bar"></div>분석 정확도</div>
   <div class="trust">
     <div class="trust-circ" id="tc"><div class="tg-l" id="tl">-</div><div class="tg-s">GRADE</div></div>
-    <div><div class="trust-lbl" id="tlbl">분析 정확도 확인 중</div><div class="trust-desc" id="td">데이터를 확인하고 있어요.</div></div>
+    <div><div class="trust-lbl" id="tlbl">분석 정확도 확인 중</div><div class="trust-desc" id="td">데이터를 확인하고 있어요.</div></div>
   </div>
 
   <div class="upsell" style="margin-top:28px">
@@ -391,21 +391,28 @@ html,body{
     if(score) animRing('ring-m', score, 2*Math.PI*38);
 
     /* KPI */
-    if(rv){st('rv',rv);bar('rv-b',rv);}
-    if(cn){st('cn',cn);bar('cn-b',cn);}
-    if(st2){st('st',st2);bar('st-b',st2);}
-    if(fr){st('fr',fr);bar('fr-b',fr);}
+    function setKPI(id,val,barId){
+      var e=gi(id);
+      if(e&&val){
+        e.innerHTML=val+'<span class="kpi-unit">점</span>';
+        bar(barId,val);
+      }
+    }
+    setKPI('rv',rv,'rv-b');
+    setKPI('cn',cn,'cn-b');
+    setKPI('st',st2,'st-b');
+    setKPI('fr',fr,'fr-b');
 
-    /* 분析 */
+    /* 분석 */
     if(analysis){
-      st('at', issue?'📌 '+issue:'분析 결과');
+      st('at', issue?'📌 '+issue:'분석 결과');
       sh('ab', analysis.replace(/\n/g,'<br>'));
     }
 
     /* 신뢰도 */
     if(tg){
       st('tl',tg);
-      st('tlbl','분析 정확도 '+tg+'등급');
+      st('tlbl','분석 정확도 '+tg+'등급');
       var gc={S:'linear-gradient(135deg,#7161EC,#9688F0)',A:'linear-gradient(135deg,#0F6E56,#3DA882)',B:'linear-gradient(135deg,#BA7517,#E09A35)',C:'linear-gradient(135deg,#E24B4A,#F07070)',D:'linear-gradient(135deg,#888780,#AAAAAA)'};
       var tc=gi('tc');
       if(tc&&gc[tg]){tc.style.background=gc[tg];tc.style.border='none';var tl=gi('tl');if(tl)tl.style.color='#fff';var ts=tc.querySelector('.tg-s');if(ts)ts.style.color='rgba(255,255,255,.7)'}
