@@ -8,13 +8,13 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --p:#7161EC;--pm:#9688F0;--pd:#5E4FD4;
-  --pl:#EEEDFE;--pll:#F7F5FF;
-  --t:#0F6E56;--tm:#3DA882;--tl:#E8F5F1;
+  --pl:#EEEDFE;--pll:#F0EEFF;
+  --t:#0F6E56;--tm:#3DA882;--tl:#E0F5ED;
   --navy:#12111F;
-  --ink:#2D2B3D;--body:#4A4760;--dim:#9896A4;
-  --bg:#F7F6FB;--card:#fff;--bd:#EBEBF5;
+  --ink:#1A1830;--body:#3D3B55;--dim:#8A88A0;
+  --bg:#F3F1FF;--card:#fff;--bd:#E2DEFF;
   --red:#E24B4A;--amber:#BA7517;--green:#1D9E75;
-  --sm:0 2px 12px rgba(113,97,236,.09);
+  --sm:0 4px 20px rgba(113,97,236,.12);
   --r:20px;
 }
 html,body{
@@ -48,13 +48,13 @@ html,body{
 
 /* ── 웹: 2컬럼 / 모바일: 히어로 ── */
 @media(min-width:1024px){
-  .hero{padding:40px 48px 0}
+  .hero{padding:28px 48px 0}
   .hero-inner{
     display:grid;
-    grid-template-columns:280px 1fr;
-    gap:48px;
+    grid-template-columns:260px 1fr;
+    gap:40px;
     align-items:center;
-    padding-bottom:40px;
+    padding-bottom:28px;
     max-width:1200px;
     margin:0 auto;
   }
@@ -67,11 +67,11 @@ html,body{
     background:rgba(255,255,255,.05);
     border:1px solid rgba(255,255,255,.1);
     border-radius:20px;
-    padding:28px 24px;
+    padding:20px 20px;
     backdrop-filter:blur(8px);
   }
-  .donut-box{position:relative;width:150px;height:150px;margin-bottom:16px}
-  .donut-box svg{width:150px;height:150px;transform:rotate(-90deg)}
+  .donut-box{position:relative;width:130px;height:130px;margin-bottom:12px}
+  .donut-box svg{width:130px;height:130px;transform:rotate(-90deg)}
   .donut-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .score-num{font-size:50px;font-weight:900;color:#fff;line-height:1;letter-spacing:-3px}
   .score-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:3px}
@@ -137,7 +137,7 @@ html,body{
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
 
-.kpi{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sm);position:relative;overflow:hidden;animation:up .5s ease both}
+.kpi{background:var(--card);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sm);position:relative;overflow:hidden;animation:up .5s ease both}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
 .kpi.c1::before{background:linear-gradient(90deg,var(--p),var(--pm))}
 .kpi.c2::before{background:linear-gradient(90deg,var(--t),var(--tm))}
@@ -164,7 +164,7 @@ html,body{
 
 /* 분석 카드 */
 .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sm);overflow:hidden;animation:up .5s .1s ease both}
-.card-hd{background:var(--pll);padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.card-hd{background:linear-gradient(135deg,var(--pll),#E8E4FF);padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
 .card-hd-ico{width:32px;height:32px;border-radius:10px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:16px}
 .card-hd-ttl{font-size:14px;font-weight:700;color:var(--p)}
 .card-bd{padding:18px 20px;font-size:13.5px;color:var(--body);line-height:1.9}
@@ -185,7 +185,7 @@ html,body{
 @media(max-width:680px){.upsell{flex-direction:column}.ubtn{width:100%;text-align:center}}
 
 /* 대시보드 CTA */
-.dash-cta{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sm);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.dash-cta{background:linear-gradient(135deg,#F0EEFF,#E8F5F0);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sm);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .dash-cta-inner{display:flex;align-items:center;gap:14px;flex:1;min-width:200px}
 .dash-icon{font-size:28px;flex-shrink:0}
 .dash-t{font-size:15px;font-weight:900;color:var(--ink);margin-bottom:4px;letter-spacing:-.2px}
@@ -296,6 +296,12 @@ html,body{
     <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
   </div>
 
+  <div class="sec"><div class="sec-bar"></div>분석 정확도</div>
+  <div class="trust">
+    <div class="trust-circ" id="tc"><div class="tg-l" id="tl">-</div><div class="tg-s">GRADE</div></div>
+    <div><div class="trust-lbl" id="tlbl">분석 정확도 확인 중</div><div class="trust-desc" id="td">데이터를 확인하고 있어요.</div></div>
+  </div>
+
   <!-- 대시보드 유입 CTA -->
   <div class="dash-cta" style="margin-top:28px">
     <div class="dash-cta-inner">
@@ -383,9 +389,9 @@ html,body{
 
     /* 공통 */
     st('store', store);
-    /* 날짜 — URL 파라미터 date 우선, 없으면 파싱 결과 사용 */
-    var urlDate = p.get('date');
-    var finalDate = urlDate ? decodeURIComponent(urlDate) : dateStr;
+    /* 날짜 — _date_direct 우선, 없으면 파싱 결과 */
+    var directDate = pick(f,['_date_direct']);
+    var finalDate = directDate || dateStr;
     if(finalDate){st('date-badge','진단일 '+finalDate);st('date-sm','진단일 '+finalDate);}
 
     /* 웹 점수 */
@@ -462,7 +468,8 @@ html,body{
       '데이터확인빈도점수_f': p.get('fr')||'',
       '문제유형해석': p.get('analysis')||'',
       '데이터신뢰도등급': p.get('tg')||'',
-      '데이터신뢰도_문구': p.get('td')||''
+      '데이터신뢰도_문구': p.get('td')||'',
+      '_date_direct': p.get('date')||''
     };
     render(f2);
   }
