@@ -403,18 +403,10 @@ html,body{
   }
 
   /* ✅ 핵심: recordId 추출 후 링크 주입 */
-  function injectLinks(recordId){
+function injectLinks(recordId){
     var dashLink = gi('dash-link');
-    var alertLink = gi('alert-link');
-    if(recordId){
-      if(dashLink)  dashLink.href  = 'https://app.beautyscore.co.kr/dashboard?recordId=' + recordId;
-      if(alertLink) alertLink.href = 'https://app.beautyscore.co.kr/daily?recordId=' + recordId;
-    } else {
-      if(dashLink)  dashLink.href  = 'https://app.beautyscore.co.kr/dashboard';
-      if(alertLink) alertLink.href = 'https://app.beautyscore.co.kr/daily';
-    }
+    if(dashLink) dashLink.href = 'https://app.beautyscore.co.kr/demo';
   }
-
   function render(f){
     console.log('[BS frame] 렌더 시작. fields:', Object.keys(f));
 
