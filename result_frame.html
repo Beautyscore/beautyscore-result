@@ -40,10 +40,11 @@ html,body{
 /* 로고 */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .logo{display:flex;align-items:center;gap:9px}
-.logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--pm));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;box-shadow:0 3px 10px rgba(113,97,236,.45)}
-.logo-n{font-size:13px;font-weight:700;color:#3D2F8F}
-.logo-s{font-size:9px;color:var(--dim);margin-top:1px}
-.date-badge{font-size:10px;color:var(--dim);background:#fff;border:1px solid var(--bd);border-radius:20px;padding:4px 12px}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--pm));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;box-shadow:0 3px 10px rgba(113,97,236,.45);flex-shrink:0}
+.logo-n{font-size:13px;font-weight:700;color:#3D2F8F;white-space:nowrap}
+/* ✅ 수정: 서브텍스트 줄바꿈 방지 */
+.logo-s{font-size:9px;color:var(--dim);margin-top:1px;white-space:nowrap}
+.date-badge{font-size:10px;color:var(--dim);background:#fff;border:1px solid var(--bd);border-radius:20px;padding:4px 12px;white-space:nowrap;flex-shrink:0}
 
 .greeting{font-size:13px;color:var(--dim);margin-bottom:3px;word-break:keep-all;line-height:1.6}
 .greeting b{color:var(--ink);font-weight:700}
@@ -105,13 +106,12 @@ html,body{
   .m-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .m-num{font-size:28px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1.5px}
   .m-sub{font-size:9px;color:var(--dim);margin-top:2px}
-  .m-info{flex:1}
+  .m-info{flex:1;min-width:0}
   .m-pill{display:inline-flex;align-items:center;background:var(--pl);border:2px solid var(--pd);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:900;color:var(--pd);margin-bottom:6px;box-shadow:0 2px 6px rgba(113,97,236,.2)}
   .m-rank{font-size:13px;font-weight:900;color:var(--ink);line-height:1.35;margin-bottom:6px;word-break:keep-all}
   .m-issue-row{display:flex;align-items:center;gap:5px}
   .m-ilbl{font-size:9px;color:var(--dim)}
   .m-ichip{background:#FEF0F0;border:1.5px solid #F5A5A5;color:#C0392B;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px}
-  
 }
 .score-wrap{display:none}
 @media(min-width:1024px){
@@ -172,7 +172,45 @@ html,body{
 .card-hd-ttl{font-size:14px;font-weight:700;color:var(--p)}
 .card-bd{padding:18px 20px;font-size:13.5px;color:var(--body);line-height:1.9}
 
-
+/* ✅ 수정: 알림 배너 줄바꿈 개선 */
+.data-alert{
+  background:#FFF8F0;
+  border:1.5px solid #FFCC80;
+  border-radius:14px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:0;
+}
+.data-alert-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.data-alert-icon{font-size:22px;flex-shrink:0}
+.data-alert-txt{min-width:0}
+.data-alert-title{
+  font-size:14px;font-weight:900;color:#B45309;
+  word-break:keep-all;line-height:1.4;
+  white-space:nowrap;
+}
+.data-alert-desc{
+  font-size:12px;color:#92400E;
+  word-break:keep-all;line-height:1.5;
+  margin-top:2px;
+}
+.data-alert-btn{
+  background:#F59E0B;color:#fff;
+  font-size:13px;font-weight:900;
+  padding:10px 18px;border-radius:10px;
+  text-decoration:none;white-space:nowrap;
+  flex-shrink:0;
+  box-shadow:0 3px 10px rgba(245,158,11,.35);
+}
+@media(max-width:480px){
+  .data-alert{flex-direction:column;align-items:flex-start}
+  .data-alert-title{white-space:normal}
+  .data-alert-btn{width:100%;text-align:center}
+}
 
 /* 업셀 */
 .upsell{background:linear-gradient(135deg,var(--p),var(--pd));border-radius:var(--r);padding:24px;position:relative;overflow:hidden;animation:up .5s .2s ease both;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
@@ -195,8 +233,6 @@ html,body{
 .dash-d{font-size:12px;color:var(--dim);line-height:1.6;word-break:keep-all}
 .dash-btn{background:var(--p);color:#fff;font-size:13px;font-weight:900;padding:12px 20px;border-radius:12px;text-decoration:none;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 14px rgba(113,97,236,.35)}
 @media(max-width:680px){.dash-cta{flex-direction:column}.dash-btn{width:100%;text-align:center}}
-
-
 </style>
 </head>
 <body>
@@ -231,7 +267,11 @@ html,body{
       <div class="topbar">
         <div class="logo">
           <div class="logo-mark">B</div>
-          <div><div class="logo-n">뷰티스코어</div><div class="logo-s">에스테틱 경영데이터 연구소</div></div>
+          <div>
+            <div class="logo-n">뷰티스코어</div>
+            <!-- ✅ 수정: white-space:nowrap 적용 -->
+            <div class="logo-s">에스테틱 경영데이터 연구소</div>
+          </div>
         </div>
         <div class="date-badge" id="date-badge">진단일 --</div>
       </div>
@@ -296,10 +336,20 @@ html,body{
     <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
   </div>
 
+  <!-- ✅ 수정: 알림 배너 — 줄바꿈 개선된 새 구조 -->
+  <div class="data-alert" style="margin-top:20px">
+    <div class="data-alert-left">
+      <div class="data-alert-icon">⚠️</div>
+      <div class="data-alert-txt">
+        <div class="data-alert-title">분석을 시작하려면 데이터가 필요해요</div>
+        <div class="data-alert-desc">오늘 매출을 입력하면 모든 지표가 활성화됩니다</div>
+      </div>
+    </div>
+    <a href="#" class="data-alert-btn" id="alert-link">지금 입력하기 →</a>
+  </div>
 
-
-  <!-- 대시보드 유입 CTA -->
-  <div class="dash-cta" style="margin-top:28px">
+  <!-- 대시보드 CTA -->
+  <div class="dash-cta" style="margin-top:16px">
     <div class="dash-cta-inner">
       <div class="dash-icon">📊</div>
       <div>
@@ -307,7 +357,8 @@ html,body{
         <div class="dash-d">지금 바로 무료로 확인할 수 있어요.</div>
       </div>
     </div>
-    <a href="https://app.beautyscore.co.kr/dashboard" class="dash-btn">대시보드 체험하기 →</a>
+    <!-- ✅ 수정: href="#" + id="dash-link" → JS에서 recordId 동적 주입 -->
+    <a href="#" class="dash-btn" id="dash-link">대시보드 체험하기 →</a>
   </div>
 
   <!-- 업셀 배너 -->
@@ -327,8 +378,6 @@ html,body{
   </div>
 
 </div>
-
-
 
 <script>
 (function(){
@@ -361,30 +410,44 @@ html,body{
     }return null;
   }
 
+  function fmtRank(r){
+    if(!r) return '--';
+    return r.replace(' — ', '<br>').replace('—', '<br>');
+  }
+
+  /* ✅ 핵심: recordId 추출 후 링크 주입 */
+  function injectLinks(recordId){
+    var dashLink = gi('dash-link');
+    var alertLink = gi('alert-link');
+    if(recordId){
+      if(dashLink)  dashLink.href  = 'https://app.beautyscore.co.kr/dashboard?recordId=' + recordId;
+      if(alertLink) alertLink.href = 'https://app.beautyscore.co.kr/daily?recordId=' + recordId;
+    } else {
+      if(dashLink)  dashLink.href  = 'https://app.beautyscore.co.kr/dashboard';
+      if(alertLink) alertLink.href = 'https://app.beautyscore.co.kr/daily';
+    }
+  }
+
   function render(f){
     console.log('[BS frame] 렌더 시작. fields:', Object.keys(f));
 
-    var store  = pick(f,['매장명','매장명_f'])||'원장님';
-    var score  = parseInt(pick(f,['진단점수_f','진단점수','종합점수_f','종합점수'])||0);
-    var grade  = pick(f,['진단등급','진단등급_f']);
-    var rank   = pick(f,['상위점수_표시','상위점수_표시_f']);
-    var issue  = pick(f,['문제유형','문제유형_f']);
-    var rv     = parseInt(pick(f,['재방문율점수_f','재방문율_점수_f','재방문율_점수','재방문율점수'])||0);
-    var cn     = parseInt(pick(f,['상담전환율점수_f','상담전환율_점수_f','상담전환율_점수','상담전환율점수'])||0);
-    var st2    = parseInt(pick(f,['매출구조점수_f','매출구조_점수_f','매출구조_점수','매출구조점수'])||0);
-    var fr     = parseInt(pick(f,['데이터확인빈도점수_f','데이터확인빈도_점수_f','데이터확인빈도_점수','데이터확인빈도점수'])||0);
+    var store    = pick(f,['매장명','매장명_f'])||'원장님';
+    var score    = parseInt(pick(f,['진단점수_f','진단점수','종합점수_f','종합점수'])||0);
+    var grade    = pick(f,['진단등급','진단등급_f']);
+    var rank     = pick(f,['상위점수_표시','상위점수_표시_f']);
+    var issue    = pick(f,['문제유형','문제유형_f']);
+    var rv       = parseInt(pick(f,['재방문율점수_f','재방문율_점수_f','재방문율_점수','재방문율점수'])||0);
+    var cn       = parseInt(pick(f,['상담전환율점수_f','상담전환율_점수_f','상담전환율_점수','상담전환율점수'])||0);
+    var st2      = parseInt(pick(f,['매출구조점수_f','매출구조_점수_f','매출구조_점수','매출구조점수'])||0);
+    var fr       = parseInt(pick(f,['데이터확인빈도점수_f','데이터확인빈도_점수_f','데이터확인빈도_점수','데이터확인빈도점수'])||0);
     var analysis = pick(f,['문제유형해석','문제유형해석_f','결과요약','결과요약_f']);
-    var tg     = pick(f,['데이터신뢰도등급_f','데이터신뢰도등급']);
-    var td     = pick(f,['데이터신뢰도_문구_f','데이터신뢰도_문구']);
 
     /* 날짜 */
     var dt = pick(f,['토큰생성일시','토큰생성일시_f','Created Time','진단일시','생성일']);
     var dateStr = '';
     if(dt){try{var d=new Date(dt);var dy=['일','월','화','수','목','금','토'];dateStr=d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+dy[d.getDay()]+')';}catch(e){}}
 
-    /* 공통 */
     st('store', store);
-    /* 날짜 — _date_direct 우선, 없으면 파싱 결과 */
     var directDate = pick(f,['_date_direct']);
     var finalDate = directDate || dateStr;
     if(finalDate){st('date-badge','진단일 '+finalDate);}
@@ -395,12 +458,6 @@ html,body{
     sh('rank-w', fmtRank(rank));
     st('issue-w', issue||'--');
     if(score) animRing('ring-w', score, 2*Math.PI*68);
-
-    /* rank 줄바꿈 처리 — — 기준으로 분리 */
-    function fmtRank(r){
-      if(!r) return '--';
-      return r.replace(' — ', '<br>').replace('—', '<br>');
-    }
 
     /* 모바일 점수 */
     st('num-m', score||'--');
@@ -428,41 +485,41 @@ html,body{
       sh('ab', analysis.replace(/\n/g,'<br>'));
     }
 
-
-
-    /* iframe 높이 부모에게 알림 */
+    /* iframe 높이 */
     setTimeout(function(){
-      try{
-        window.parent.postMessage({type:'BS_HEIGHT',height:document.body.scrollHeight},'*');
-      }catch(e){}
+      try{window.parent.postMessage({type:'BS_HEIGHT',height:document.body.scrollHeight},'*');}catch(e){}
     },300);
   }
 
-  /* ① postMessage 수신 (메인 방식) */
+  /* ① URL에서 recordId 추출 → 링크 즉시 주입 */
+  var urlParams = new URLSearchParams(window.location.search);
+  var recordId  = urlParams.get('recordId');
+  injectLinks(recordId);
+
+  /* ② postMessage 수신 */
   window.addEventListener('message', function(e){
     if(!e.data||e.data.type!=='BS_DATA')return;
     console.log('[BS frame] postMessage 수신!', e.data);
     render(e.data.fields||e.data);
   });
 
-  /* ② URL 파라미터 fallback */
-  var p = new URLSearchParams(window.location.search);
-  if(p.get('score')){
+  /* ③ URL 파라미터 score fallback */
+  if(urlParams.get('score')){
     console.log('[BS frame] URL 파라미터로 렌더');
     var f2 = {
-      '매장명': p.get('store')||'',
-      '진단점수': p.get('score')||'',
-      '진단등급': p.get('grade')||'',
-      '상위점수_표시': p.get('rank')||'',
-      '문제유형': p.get('issue')||'',
-      '재방문율점수_f': p.get('rv')||'',
-      '상담전환율점수_f': p.get('cn')||'',
-      '매출구조점수_f': p.get('st')||'',
-      '데이터확인빈도점수_f': p.get('fr')||'',
-      '문제유형해석': p.get('analysis')||'',
-      '데이터신뢰도등급': p.get('tg')||'',
-      '데이터신뢰도_문구': p.get('td')||'',
-      '_date_direct': p.get('date')||''
+      '매장명':               urlParams.get('store')||'',
+      '진단점수':             urlParams.get('score')||'',
+      '진단등급':             urlParams.get('grade')||'',
+      '상위점수_표시':        urlParams.get('rank')||'',
+      '문제유형':             urlParams.get('issue')||'',
+      '재방문율점수_f':       urlParams.get('rv')||'',
+      '상담전환율점수_f':     urlParams.get('cn')||'',
+      '매출구조점수_f':       urlParams.get('st')||'',
+      '데이터확인빈도점수_f': urlParams.get('fr')||'',
+      '문제유형해석':         urlParams.get('analysis')||'',
+      '데이터신뢰도등급':     urlParams.get('tg')||'',
+      '데이터신뢰도_문구':    urlParams.get('td')||'',
+      '_date_direct':         urlParams.get('date')||''
     };
     render(f2);
   }
@@ -470,3 +527,5 @@ html,body{
   console.log('[BS frame] 로드 완료. postMessage 대기 중...');
 })();
 </script>
+</body>
+</html>
