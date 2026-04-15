@@ -1,67 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-#item-details1,[id^="item-details"],[class*="ItemDetails"]{
-  display:none!important;height:0!important;overflow:hidden!important;
-  margin:0!important;padding:0!important;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#7161EC;--pm:#9688F0;--pd:#5E4FD4;
+  --pl:#EEEDFE;--pll:#F0EEFF;
+  --t:#0F6E56;--tm:#3DA882;--tl:#E0F5ED;
+  --hero-bg:#F5F3FF;
+  --hero-border:#E2DEFF;
+  --ink:#1A1830;--body:#3D3B55;--dim:#8A88A0;
+  --bg:#F3F1FF;--card:#fff;--bd:#E2DEFF;
+  --red:#E24B4A;--amber:#BA7517;--green:#1D9E75;
+  --sm:0 4px 20px rgba(113,97,236,.12);
+  --r:20px;
 }
-#result-iframe{
-  width:100%;border:none;display:block;min-height:100vh;
+html,body{
+  font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo',sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
 }
-#bs-loading{
+
+/* ── 로딩 오버레이 ── */
+#loading-overlay{
   position:fixed;inset:0;
-  background:linear-gradient(160deg,#F5F3FF,#EEF5FF);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#F5F3FF 0%,#EEF5FF 50%,#F0FAF5 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
   z-index:9999;
   transition:opacity .5s ease, visibility .5s ease;
 }
-#bs-loading.hide{
-  opacity:0;visibility:hidden;pointer-events:none;
+#loading-overlay.hidden{
+  opacity:0;visibility:hidden;
 }
-.bs-logo{display:flex;align-items:center;gap:10px;margin-bottom:40px;}
-.bs-logo-mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7161EC,#9688F0);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;box-shadow:0 4px 16px rgba(113,97,236,.45);}
-.bs-logo-name{font-size:18px;font-weight:900;color:#3D2F8F;font-family:'Apple SD Gothic Neo',sans-serif;}
-.bs-spinner-wrap{position:relative;width:80px;height:80px;margin-bottom:28px;}
-.bs-spinner{position:absolute;inset:0;border-radius:50%;border:4px solid #EEEDFE;border-top:4px solid #7161EC;animation:bsspin 1s linear infinite;}
-.bs-spinner-inner{position:absolute;inset:10px;border-radius:50%;border:3px solid transparent;border-top:3px solid #9688F0;animation:bsspin .6s linear infinite reverse;}
-@keyframes bsspin{to{transform:rotate(360deg)}}
-.bs-title{font-size:17px;font-weight:900;color:#1A1830;margin-bottom:8px;font-family:'Apple SD Gothic Neo',sans-serif;}
-.bs-desc{font-size:13px;color:#8A88A0;text-align:center;line-height:1.7;font-family:'Apple SD Gothic Neo',sans-serif;}
-.bs-dots{display:flex;gap:5px;margin-top:20px;}
-.bs-dot{width:8px;height:8px;border-radius:50%;background:#7161EC;opacity:.3;animation:bsdot .9s ease-in-out infinite;}
-.bs-dot:nth-child(2){animation-delay:.15s;}
-.bs-dot:nth-child(3){animation-delay:.3s;}
-@keyframes bsdot{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+.loading-logo{
+  display:flex;align-items:center;gap:10px;margin-bottom:40px;
+}
+.loading-logo-mark{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--p),var(--pm));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:900;color:#fff;
+  box-shadow:0 4px 16px rgba(113,97,236,.45);
+}
+.loading-logo-name{font-size:18px;font-weight:900;color:#3D2F8F;}
+
+.loading-spinner-wrap{position:relative;width:80px;height:80px;margin-bottom:28px;}
+.loading-spinner{
+  width:80px;height:80px;border-radius:50%;
+  border:4px solid var(--pl);
+  border-top:4px solid var(--p);
+  animation:spin 1s linear infinite;
+}
+.loading-spinner-inner{
+  position:absolute;inset:10px;border-radius:50%;
+  border:3px solid transparent;
+  border-top:3px solid var(--pm);
+  animation:spin .6s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.loading-title{
+  font-size:17px;font-weight:900;color:var(--ink);
+  margin-bottom:8px;letter-spacing:-.3px;
+}
+.loading-desc{
+  font-size:13px;color:var(--dim);
+  line-height:1.7;text-align:center;
+  max-width:260px;
+}
+.loading-dots{display:inline-flex;gap:5px;margin-top:20px;}
+.loading-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--p);opacity:.3;
+  animation:dot .9s ease-in-out infinite;
+}
+.loading-dot:nth-child(2){animation-delay:.15s;}
+.loading-dot:nth-child(3){animation-delay:.3s;}
+@keyframes dot{
+  0%,100%{opacity:.3;transform:scale(1);}
+  50%{opacity:1;transform:scale(1.3);}
+}
+
+/* ── 히어로 ── */
+.hero{
+  background:linear-gradient(160deg,#F5F3FF 0%,#EEF5FF 50%,#F0FAF5 100%);
+  border-bottom:1px solid var(--bd);
+  position:relative;overflow:hidden;
+  padding:20px 20px 0;
+}
+.orb1{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(113,97,236,.12) 0%,transparent 65%);top:-150px;right:-80px;pointer-events:none}
+.orb2{position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(15,110,86,.08) 0%,transparent 65%);bottom:-100px;left:-50px;pointer-events:none}
+.grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(113,97,236,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(113,97,236,.04) 1px,transparent 1px);background-size:28px 28px}
+.hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--pm));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;box-shadow:0 3px 10px rgba(113,97,236,.45);flex-shrink:0}
+.logo-n{font-size:13px;font-weight:700;color:#3D2F8F;white-space:nowrap}
+.logo-s{font-size:9px;color:var(--dim);margin-top:1px;white-space:nowrap}
+.date-badge{font-size:10px;color:var(--dim);background:#fff;border:1px solid var(--bd);border-radius:20px;padding:4px 12px;white-space:nowrap;flex-shrink:0}
+
+.greeting{font-size:13px;color:var(--dim);margin-bottom:3px;word-break:keep-all;line-height:1.6}
+.greeting b{color:var(--ink);font-weight:700}
+
+@media(min-width:1024px){
+  .hero{padding:28px 48px 0}
+  .hero-inner{display:grid;grid-template-columns:260px 1fr;gap:40px;align-items:center;padding-bottom:28px;max-width:1200px;margin:0 auto;}
+  .wave-wrap{display:none}
+  .greeting{font-size:16px;margin-bottom:16px;line-height:1.6;color:var(--dim)}
+  .score-wrap{display:flex;flex-direction:column;align-items:center;background:#fff;border:2px solid var(--p);border-radius:20px;padding:20px 20px;box-shadow:0 4px 20px rgba(113,97,236,.18);}
+  .donut-box{position:relative;width:130px;height:130px;margin-bottom:12px}
+  .donut-box svg{width:130px;height:130px;transform:rotate(-90deg)}
+  .donut-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-num{font-size:50px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-3px}
+  .score-sub{font-size:11px;color:var(--dim);margin-top:3px}
+  .grade-pill{display:inline-block;background:var(--pl);border:2.5px solid var(--pd);border-radius:20px;padding:5px 16px;font-size:13px;font-weight:900;color:var(--pd);margin-bottom:12px;text-align:center;box-shadow:0 2px 8px rgba(113,97,236,.2);}
+  .rank-txt{font-size:16px;font-weight:900;color:var(--ink);line-height:1.4;letter-spacing:-.3px;margin-bottom:10px;text-align:center;}
+  .issue-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+  .issue-lbl{font-size:10px;color:rgba(255,255,255,.3)}
+  .issue-chip{background:#FEF0F0;border:1.5px solid #F5A5A5;color:#C0392B;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+}
+
+@media(max-width:1023px){
+  .score-wrap{display:none}
+  .mobile-score{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--p);border-radius:16px;padding:14px 16px;margin:8px 0 0;box-shadow:0 4px 20px rgba(113,97,236,.18);width:100%}
+  .m-donut{position:relative;flex-shrink:0;width:90px;height:90px}
+  .m-donut svg{width:90px;height:90px;transform:rotate(-90deg)}
+  .m-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .m-num{font-size:28px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1.5px}
+  .m-sub{font-size:9px;color:var(--dim);margin-top:2px}
+  .m-info{flex:1;min-width:0}
+  .m-pill{display:inline-flex;align-items:center;background:var(--pl);border:2px solid var(--pd);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:900;color:var(--pd);margin-bottom:6px;box-shadow:0 2px 6px rgba(113,97,236,.2)}
+  .m-rank{font-size:13px;font-weight:900;color:var(--ink);line-height:1.35;margin-bottom:6px;word-break:keep-all}
+  .m-issue-row{display:flex;align-items:center;gap:5px}
+  .m-ilbl{font-size:9px;color:var(--dim)}
+  .m-ichip{background:#FEF0F0;border:1.5px solid #F5A5A5;color:#C0392B;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px}
+}
+.score-wrap{display:none}
+@media(min-width:1024px){
+  .score-wrap{display:flex}
+  .mobile-score{display:none!important}
+  .date-sm{display:none}
+  .topbar{margin-bottom:20px}
+}
+
+.wave-wrap{position:relative;z-index:2;width:calc(100% + 48px);margin-left:-24px;margin-top:8px;line-height:0}
+.wave-wrap svg{display:block;width:100%;height:44px}
+
+.page{max-width:1200px;margin:0 auto;padding:28px 24px 40px}
+@media(min-width:1024px){.page{padding:36px 48px 40px}}
+
+.sec{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink);margin:28px 0 14px}
+.sec:first-child{margin-top:0}
+.sec-bar{width:3px;height:16px;background:linear-gradient(180deg,var(--p),var(--pm));border-radius:2px;flex-shrink:0}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
+
+.kpi{background:var(--card);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sm);position:relative;overflow:hidden;animation:up .5s ease both}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.kpi.c1::before{background:linear-gradient(90deg,var(--p),var(--pm))}
+.kpi.c2::before{background:linear-gradient(90deg,var(--t),var(--tm))}
+.kpi.c3::before{background:linear-gradient(90deg,var(--amber),#E09A35)}
+.kpi.c4::before{background:linear-gradient(90deg,var(--pm),#C4B8FF)}
+.kpi::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.06;pointer-events:none}
+.kpi.c1::after{background:var(--p)}.kpi.c2::after{background:var(--t)}.kpi.c3::after{background:var(--amber)}.kpi.c4::after{background:var(--pm)}
+
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi-lbl{font-size:11px;font-weight:500;color:var(--dim);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;position:relative;z-index:1}
+.kpi-ico.c1{background:var(--pl)}.kpi-ico.c2{background:var(--tl)}.kpi-ico.c3{background:#FEF3E2}.kpi-ico.c4{background:var(--pl)}
+.kpi-val{font-size:36px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-1px;margin-bottom:10px}
+.kpi-val.c1{color:var(--p)}.kpi-val.c2{color:var(--t)}.kpi-val.c3{color:var(--amber)}.kpi-val.c4{color:var(--pm)}
+.kpi-unit{font-size:14px;font-weight:400;color:var(--dim)}
+.bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.kpi.c1 .bar-fill{background:linear-gradient(90deg,var(--p),var(--pm))}
+.kpi.c2 .bar-fill{background:linear-gradient(90deg,var(--t),var(--tm))}
+.kpi.c3 .bar-fill{background:linear-gradient(90deg,var(--amber),#E09A35)}
+.kpi.c4 .bar-fill{background:linear-gradient(90deg,var(--pm),#C4B8FF)}
+
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sm);overflow:hidden;animation:up .5s .1s ease both}
+.card-hd{background:linear-gradient(135deg,var(--pll),#E8E4FF);padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.card-hd-ico{width:32px;height:32px;border-radius:10px;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:16px}
+.card-hd-ttl{font-size:14px;font-weight:700;color:var(--p)}
+.card-bd{padding:18px 20px;font-size:13.5px;color:var(--body);line-height:1.9}
+
+.dash-cta{background:linear-gradient(135deg,#F0EEFF,#E8F5F0);border:1.5px solid var(--bd);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sm);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.dash-cta-inner{display:flex;align-items:center;gap:14px;flex:1;min-width:200px}
+.dash-icon{font-size:28px;flex-shrink:0}
+.dash-t{font-size:15px;font-weight:900;color:var(--ink);margin-bottom:4px;letter-spacing:-.2px}
+.dash-d{font-size:12px;color:var(--dim);line-height:1.6;word-break:keep-all}
+.dash-btn{background:var(--p);color:#fff;font-size:13px;font-weight:900;padding:12px 20px;border-radius:12px;text-decoration:none;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 14px rgba(113,97,236,.35)}
+@media(max-width:680px){.dash-cta{flex-direction:column}.dash-btn{width:100%;text-align:center}}
 </style>
+</head>
+<body>
 
 <!-- 로딩 오버레이 -->
-<div id="bs-loading">
-  <div class="bs-logo">
-    <div class="bs-logo-mark">B</div>
-    <div class="bs-logo-name">뷰티스코어</div>
+<div id="loading-overlay">
+  <div class="loading-logo">
+    <div class="loading-logo-mark">B</div>
+    <div class="loading-logo-name">뷰티스코어</div>
   </div>
-  <div class="bs-spinner-wrap">
-    <div class="bs-spinner"></div>
-    <div class="bs-spinner-inner"></div>
+  <div class="loading-spinner-wrap">
+    <div class="loading-spinner"></div>
+    <div class="loading-spinner-inner"></div>
   </div>
-  <div class="bs-title">분석 결과를 불러오는 중</div>
-  <div class="bs-desc">원장님 매장 데이터를<br>분석하고 있습니다</div>
-  <div class="bs-dots">
-    <div class="bs-dot"></div>
-    <div class="bs-dot"></div>
-    <div class="bs-dot"></div>
+  <div class="loading-title">분석 결과를 불러오는 중</div>
+  <div class="loading-desc">원장님 매장 데이터를<br>분석하고 있습니다</div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
   </div>
 </div>
 
-<iframe id="result-iframe" src="" frameborder="0" scrolling="yes"></iframe>
+<!-- 히어로 -->
+<div class="hero">
+  <div class="orb1"></div><div class="orb2"></div><div class="grid-bg"></div>
+  <div class="hero-inner">
+    <div class="score-wrap">
+      <div class="donut-box">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="#E2DEFF" stroke-width="10"/>
+          <circle cx="80" cy="80" r="68" fill="none" id="ring-w" stroke-width="10" stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="427" style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1),stroke .3s"/>
+        </svg>
+        <div class="donut-inner">
+          <div class="score-num" id="num-w">--</div>
+          <div class="score-sub">/ 100점</div>
+        </div>
+      </div>
+      <div class="grade-pill" id="grade-w">등급 --</div>
+      <div class="rank-txt" id="rank-w">--</div>
+      <div class="issue-row">
+        <span class="issue-lbl">주요 문제</span>
+        <span class="issue-chip" id="issue-w">--</span>
+      </div>
+    </div>
+    <div>
+      <div class="topbar">
+        <div class="logo">
+          <div class="logo-mark">B</div>
+          <div>
+            <div class="logo-n">뷰티스코어</div>
+            <div class="logo-s">에스테틱 경영데이터 연구소</div>
+          </div>
+        </div>
+        <div class="date-badge" id="date-badge">진단일 --</div>
+      </div>
+      <div class="greeting"><b id="store">--</b> 원장님<br><span style="font-weight:400">매장의 진단 결과가 나왔습니다.</span></div>
+      <div class="mobile-score">
+        <div class="m-donut">
+          <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#E2DEFF" stroke-width="8"/>
+            <circle cx="45" cy="45" r="38" fill="none" id="ring-m" stroke-width="8" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="239" style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1),stroke .3s"/>
+          </svg>
+          <div class="m-inner"><div class="m-num" id="num-m">--</div><div class="m-sub">점</div></div>
+        </div>
+        <div class="m-info">
+          <div class="m-pill" id="grade-m">등급 --</div>
+          <div class="m-rank" id="rank-m">--</div>
+          <div class="m-issue-row"><span class="m-ilbl">주요 문제</span><span class="m-ichip" id="issue-m">--</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wave-wrap">
+    <svg viewBox="0 0 1200 44" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,28 C200,48 400,8 600,28 C800,48 1000,8 1200,28 L1200,44 L0,44 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+</div>
+
+<div class="page">
+  <div class="sec" style="margin-top:0"><div class="sec-bar"></div>핵심 운영 지표</div>
+  <div class="kpi-grid">
+    <div class="kpi c1" style="animation-delay:.05s">
+      <div class="kpi-top"><span class="kpi-lbl">재방문율</span><div class="kpi-ico c1">♻️</div></div>
+      <div class="kpi-val c1" id="rv">--</div>
+      <div class="bar"><div class="bar-fill" id="rv-b"></div></div>
+    </div>
+    <div class="kpi c2" style="animation-delay:.1s">
+      <div class="kpi-top"><span class="kpi-lbl">상담전환율</span><div class="kpi-ico c2">💬</div></div>
+      <div class="kpi-val c2" id="cn">--</div>
+      <div class="bar"><div class="bar-fill" id="cn-b"></div></div>
+    </div>
+    <div class="kpi c3" style="animation-delay:.15s">
+      <div class="kpi-top"><span class="kpi-lbl">매출구조</span><div class="kpi-ico c3">📊</div></div>
+      <div class="kpi-val c3" id="st">--</div>
+      <div class="bar"><div class="bar-fill" id="st-b"></div></div>
+    </div>
+    <div class="kpi c4" style="animation-delay:.2s">
+      <div class="kpi-top"><span class="kpi-lbl">데이터 관리</span><div class="kpi-ico c4">📋</div></div>
+      <div class="kpi-val c4" id="fr">--</div>
+      <div class="bar"><div class="bar-fill" id="fr-b"></div></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-bar"></div>AI 분석 결과</div>
+  <div class="card">
+    <div class="card-hd"><div class="card-hd-ico">🔍</div><div class="card-hd-ttl" id="at">분석 준비 중</div></div>
+    <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
+  </div>
+
+  <!-- 대시보드 체험하기 CTA -->
+  <div class="dash-cta" style="margin-top:16px">
+    <div class="dash-cta-inner">
+      <div class="dash-icon">📊</div>
+      <div>
+        <div class="dash-t">점수별 세부 항목 확인하기</div>
+        <div class="dash-d">지금 바로 무료로 확인할 수 있어요.</div>
+      </div>
+    </div>
+    <a href="#" class="dash-btn" id="dash-link">대시보드 체험하기 →</a>
+  </div>
+
+  <!-- 요금제 보기 CTA -->
+  <div style="text-align:center;margin-top:20px;padding:18px 20px;background:var(--card);border-radius:var(--r);border:1px solid var(--bd);">
+    <p style="font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.7;">
+      숨은매출 · 노쇼손실 · 매장 비교까지<br>더 자세한 분석이 필요하신가요?
+    </p>
+    <!-- ★ 수정 2: id="pricing-link" 추가 — injectLinks에서 recordId 자동 주입 -->
+    <a href="https://app.beautyscore.co.kr/pricing" id="pricing-link"
+       style="display:inline-block;font-size:13px;font-weight:700;color:var(--p);text-decoration:none;padding:10px 28px;border:1.5px solid var(--p);border-radius:10px;transition:all .2s;background:#fff;"
+       onmouseover="this.style.background='var(--pl)'"
+       onmouseout="this.style.background='#fff'">
+      요금제 보기 →
+    </a>
+  </div>
+</div>
 
 <script>
 (function(){
-  /* ★ 현재 페이지 URL에서 recordId 추출 */
-  var pageRecordId = (new URLSearchParams(window.location.search)).get('recordId') || '';
+  function gi(id){return document.getElementById(id)}
+  function st(id,v){var e=gi(id);if(e&&v!==null&&v!==undefined&&String(v).trim()!=='')e.textContent=String(v).trim()}
+  function sh(id,v){var e=gi(id);if(e&&v)e.innerHTML=v}
+  function bar(id,val){var e=gi(id);if(!e)return;setTimeout(function(){e.style.width=Math.min(Math.max(parseInt(val||0),0),100)+'%'},200)}
 
   function hideLoading(){
-    var el=document.getElementById('bs-loading');
-    if(el) el.classList.add('hide');
+    var overlay=gi('loading-overlay');
+    if(overlay)overlay.classList.add('hidden');
+  }
+
+  function scoreClr(n){
+    if(n>=80)return'#1D9E75';
+    if(n>=60)return'#7161EC';
+    if(n>=40)return'#E8832A';
+    return'#E24B4A';
+  }
+  function animRing(id,score,circ){
+    var r=gi(id);if(!r)return;
+    r.style.stroke=scoreClr(score);
+    r.style.strokeDasharray=circ;
+    r.style.strokeDashoffset=circ;
+    setTimeout(function(){r.style.strokeDashoffset=circ-(score/100)*circ},150);
   }
 
   function pick(f,ks){
@@ -69,69 +368,120 @@
       var v=f[ks[i]];
       if(v!==undefined&&v!==null){
         var s=Array.isArray(v)?v[0]:v;
-        if(s!==null&&String(s).trim()!=='')return String(s).trim();
+        if(s!==null&&s!==undefined&&String(s).trim()!=='')return String(s).trim();
       }
-    }return '';
+    }return null;
   }
 
-  function loadIframe(f){
-    var params=new URLSearchParams();
+  function fmtRank(r){
+    if(!r) return '--';
+    return r.replace(' — ', '<br>').replace('—', '<br>');
+  }
 
-    /* ★ recordId 포함 — result_frame.html의 대시보드/요금제 링크에 자동 주입 */
-    var rid = pageRecordId || pick(f,['전환ID','대시보드_토큰','recordId']) || '';
-    if(rid) params.set('recordId', rid);
+  /* ★ 수정 1: injectLinks — recordId를 dash-link와 pricing-link 모두에 주입 */
+  function injectLinks(recordId){
+    var dashLink    = gi('dash-link');
+    var pricingLink = gi('pricing-link');
+    var rid = recordId || '';
+    if(dashLink){
+      dashLink.href   = 'https://app.beautyscore.co.kr/dashboard' + (rid ? '?recordId=' + rid : '');
+      dashLink.target = '_top';
+    }
+    if(pricingLink){
+      pricingLink.href   = 'https://app.beautyscore.co.kr/pricing' + (rid ? '?recordId=' + rid : '');
+      pricingLink.target = '_top';
+    }
+  }
 
-    params.set('store',   pick(f,['매장명','매장명_f']));
-    params.set('score',   pick(f,['진단점수_f','진단점수','종합점수_f','종합점수']));
-    params.set('grade',   pick(f,['진단등급','진단등급_f']));
-    params.set('rank',    pick(f,['상위점수_표시','상위점수_표시_f']));
-    params.set('issue',   pick(f,['문제유형','문제유형_f']));
-    params.set('rv',      pick(f,['재방문율점수_f','재방문율_점수_f','재방문율_점수','재방문율점수']));
-    params.set('cn',      pick(f,['상담전환율점수_f','상담전환율_점수_f','상담전환율_점수','상담전환율점수']));
-    params.set('st',      pick(f,['매출구조점수_f','매출구조_점수_f','매출구조_점수','매출구조점수']));
-    params.set('fr',      pick(f,['데이터확인빈도점수_f','데이터확인빈도_점수_f','데이터확인빈도_점수','데이터확인빈도점수']));
-    params.set('analysis',pick(f,['문제유형해석','문제유형해석_f','결과요약','결과요약_f']));
-    params.set('tg',      pick(f,['데이터신뢰도등급_f','데이터신뢰도등급']));
-    params.set('td',      pick(f,['데이터신뢰도_문구_f','데이터신뢰도_문구']));
+  function render(f){
+    var store    = pick(f,['매장명','매장명_f'])||'원장님';
+    var score    = parseInt(pick(f,['진단점수_f','진단점수','종합점수_f','종합점수'])||0);
+    var grade    = pick(f,['진단등급','진단등급_f']);
+    var rank     = pick(f,['상위점수_표시','상위점수_표시_f']);
+    var issue    = pick(f,['문제유형','문제유형_f']);
+    var rv       = parseInt(pick(f,['재방문율점수_f','재방문율_점수_f','재방문율_점수','재방문율점수'])||0);
+    var cn       = parseInt(pick(f,['상담전환율점수_f','상담전환율_점수_f','상담전환율_점수','상담전환율점수'])||0);
+    var st2      = parseInt(pick(f,['매출구조점수_f','매출구조_점수_f','매출구조_점수','매출구조점수'])||0);
+    var fr       = parseInt(pick(f,['데이터확인빈도점수_f','데이터확인빈도_점수_f','데이터확인빈도_점수','데이터확인빈도점수'])||0);
+    var analysis = pick(f,['문제유형해석','문제유형해석_f','결과요약','결과요약_f']);
 
     var dt=pick(f,['토큰생성일시','토큰생성일시_f','Created Time','진단일시','생성일']);
-    if(dt){
-      try{
-        var d=new Date(dt);
-        var dy=['일','월','화','수','목','금','토'];
-        params.set('date',d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+dy[d.getDay()]+')');
-      }catch(e){}
+    var dateStr='';
+    if(dt){try{var d=new Date(dt);var dy=['일','월','화','수','목','금','토'];dateStr=d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+dy[d.getDay()]+')';}catch(e){}}
+
+    st('store',store);
+    var directDate=pick(f,['_date_direct']);
+    var finalDate=directDate||dateStr;
+    if(finalDate){st('date-badge','진단일 '+finalDate);}
+
+    st('num-w',score||'--');
+    st('grade-w',grade?grade+' 등급':'--');
+    sh('rank-w',fmtRank(rank));
+    st('issue-w',issue||'--');
+    if(score) animRing('ring-w',score,2*Math.PI*68);
+
+    st('num-m',score||'--');
+    st('grade-m',grade?grade+' 등급':'--');
+    sh('rank-m',fmtRank(rank));
+    st('issue-m',issue||'--');
+    if(score) animRing('ring-m',score,2*Math.PI*38);
+
+    function setKPI(id,val,barId){
+      var e=gi(id);
+      if(e&&val){e.innerHTML=val+'<span class="kpi-unit">점</span>';bar(barId,val);}
+    }
+    setKPI('rv',rv,'rv-b');
+    setKPI('cn',cn,'cn-b');
+    setKPI('st',st2,'st-b');
+    setKPI('fr',fr,'fr-b');
+
+    if(analysis){
+      st('at',issue?'📌 '+issue:'분석 결과');
+      sh('ab',analysis.replace(/\n/g,'<br>'));
     }
 
-    var url='https://beautyscore.github.io/beautyscore-result/result_frame.html?'+params.toString()+'&v='+Date.now();
-    console.log('[BS] iframe URL:', url);
-    console.log('[BS] recordId:', rid);
-    document.getElementById('result-iframe').src=url;
+    hideLoading();
+
+    setTimeout(function(){
+      try{window.parent.postMessage({type:'BS_HEIGHT',height:document.body.scrollHeight},'*');}catch(e){}
+    },300);
   }
 
-  /* iframe에서 높이 메시지 오면 로딩 숨기기 */
+  var urlParams=new URLSearchParams(window.location.search);
+  var recordId=urlParams.get('recordId');
+
+  /* recordId URL에서 읽어서 모든 링크에 주입 */
+  injectLinks(recordId);
+
   window.addEventListener('message',function(e){
-    if(e.data&&e.data.type==='BS_HEIGHT'){
-      hideLoading();
-    }
+    if(!e.data||e.data.type!=='BS_DATA')return;
+    render(e.data.fields||e.data);
   });
 
-  /* Softr 이벤트 수신 */
-  ['1','2','3','4'].forEach(function(n){
-    window.addEventListener('get-record-item-details'+n,function(e){
-      console.log('[BS] 이벤트 수신 event'+n, e.detail);
-      if(e.detail) loadIframe(e.detail.fields||e.detail);
-    });
-    window.addEventListener('get-record-list-details'+n,function(e){
-      if(e.detail) loadIframe(e.detail.fields||e.detail);
-    });
-  });
+  if(urlParams.get('score')){
+    var f2={
+      '매장명':               urlParams.get('store')||'',
+      '진단점수':             urlParams.get('score')||'',
+      '진단등급':             urlParams.get('grade')||'',
+      '상위점수_표시':        urlParams.get('rank')||'',
+      '문제유형':             urlParams.get('issue')||'',
+      '재방문율점수_f':       urlParams.get('rv')||'',
+      '상담전환율점수_f':     urlParams.get('cn')||'',
+      '매출구조점수_f':       urlParams.get('st')||'',
+      '데이터확인빈도점수_f': urlParams.get('fr')||'',
+      '문제유형해석':         urlParams.get('analysis')||'',
+      '데이터신뢰도등급':     urlParams.get('tg')||'',
+      '데이터신뢰도_문구':    urlParams.get('td')||'',
+      '_date_direct':         urlParams.get('date')||''
+    };
+    render(f2);
+  }
 
-  /* 12초 타임아웃 */
   setTimeout(function(){
     hideLoading();
-  },12000);
+  }, 10000);
 
-  console.log('[BS] /result 코드 로드. recordId:', pageRecordId);
 })();
 </script>
+</body>
+</html>
