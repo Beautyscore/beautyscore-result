@@ -458,7 +458,8 @@ html,body{
     render(e.data.fields||e.data);
   });
 
-  if(urlParams.get('score')){
+  /* score 또는 store 파라미터가 있으면 렌더링 — score=0이어도 렌더 */
+  if(urlParams.get('score') !== null || urlParams.get('store')){
     var f2={
       '매장명':               urlParams.get('store')||'',
       '진단점수':             urlParams.get('score')||'',
