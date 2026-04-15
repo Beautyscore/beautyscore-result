@@ -384,12 +384,12 @@ html,body{
     var pricingLink = gi('pricing-link');
     var rid = recordId || '';
     if(dashLink){
-      /* /demo?recordId=XXX — 체험 후 요금제로 돌아올 때 recordId 유지 */
-      dashLink.href = 'https://app.beautyscore.co.kr/dashboard' + (rid ? '?recordId=' + rid : '');
+      dashLink.href   = 'https://app.beautyscore.co.kr/dashboard' + (rid ? '?recordId=' + rid : '');
+      dashLink.target = '_top';
     }
     if(pricingLink){
-      /* /pricing?recordId=XXX — 결제 완료 후 본인 대시보드로 자동 연결 */
-      pricingLink.href = 'https://app.beautyscore.co.kr/pricing' + (rid ? '?recordId=' + rid : '');
+      pricingLink.href   = 'https://app.beautyscore.co.kr/pricing' + (rid ? '?recordId=' + rid : '');
+      pricingLink.target = '_top';
     }
   }
 
