@@ -412,7 +412,7 @@ html, body {
     var pricingLink = gi('pricing-link');
     var rid = recordId || '';
     if(dashLink){
-      dashLink.href = 'https://app.beautyscore.co.kr/dashboard' + (rid ? '?recordId=' + rid : '');
+      dashLink.href = 'https://app.beautyscore.co.kr/dashboard-preview?source=result' + (rid ? '&recordId=' + rid : '');
       dashLink.target = '_top';
     }
     if(pricingLink){
