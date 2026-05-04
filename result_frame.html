@@ -426,12 +426,20 @@ html, body {
     var score    = parseInt(pick(f, ['진단점수_f','진단점수','종합점수_f','종합점수']) || 0);
     var grade    = pick(f, ['진단등급','진단등급_f']);
     var rank     = pick(f, ['상위점수_표시','상위점수_표시_f']);
-    var issue    = pick(f, ['문제유형','문제유형_f']);
+    var issue    = pick(f, ['문제유형자동분','문제유형자동분_f','문제유형','문제유형_f']);
     var rv       = parseInt(pick(f, ['재방문율점수_f','재방문율_점수_f','재방문율_점수','재방문율점수']) || 0);
     var cn       = parseInt(pick(f, ['상담전환율점수_f','상담전환율_점수_f','상담전환율_점수','상담전환율점수']) || 0);
     var st2      = parseInt(pick(f, ['매출구조점수_f','매출구조_점수_f','매출구조_점수','매출구조점수']) || 0);
     var fr       = parseInt(pick(f, ['데이터확인빈도점수_f','데이터확인빈도_점수_f','데이터확인빈도_점수','데이터확인빈도점수']) || 0);
     var analysis = pick(f, ['문제유형해석','문제유형해석_f','결과요약','결과요약_f']);
+
+    /* 5/4 +δ Phase 3 — 신규 6 formula 필드 (상단 팩트·주요문제 단문·AI 4종) */
+    var fact       = pick(f, ['상단_팩트','상단_팩트_f']);
+    var issueShort = pick(f, ['주요문제_단문','주요문제_단문_f']);
+    var aiCore     = pick(f, ['AI_핵심영역','AI_핵심영역_f']);
+    var aiWatch    = pick(f, ['AI_주의영역','AI_주의영역_f']);
+    var aiAction   = pick(f, ['AI_액션','AI_액션_f']);
+    var aiFlow     = pick(f, ['AI_운영흐름','AI_운영흐름_f']);
 
     var dt = pick(f, ['토큰생성일시','토큰생성일시_f','Created Time','진단일시','생성일']);
     var dateStr = '';
@@ -448,18 +456,22 @@ html, body {
     var finalDate = directDate || dateStr;
     if(finalDate){ st('date-badge', '진단일 ' + finalDate); }
 
+    /* 5/4 +δ Phase 3 — 신규 단문/팩트 우선 표시 */
+    var rankDisplay  = fact || rank;          // 상단_팩트 우선
+    var issueDisplay = issueShort || issue;   // 주요문제_단문 우선
+
     /* 데스크탑 score */
     st('num-w', score || '--');
     st('grade-w', grade ? grade + ' 등급' : '--');
-    sh('rank-w', fmtRank(rank));
-    st('issue-w', issue || '--');
+    sh('rank-w', fmtRank(rankDisplay));
+    st('issue-w', issueDisplay || '--');
     if(score) animRing('ring-w', score, 2 * Math.PI * 68);
 
     /* 모바일 score */
     st('num-m', score || '--');
     st('grade-m', grade ? grade + ' 등급' : '--');
-    sh('rank-m', fmtRank(rank));
-    st('issue-m', issue || '--');
+    sh('rank-m', fmtRank(rankDisplay));
+    st('issue-m', issueDisplay || '--');
     if(score) animRing('ring-m', score, 2 * Math.PI * 38);
 
     function setKPI(id, val, barId){
@@ -471,8 +483,28 @@ html, body {
     setKPI('st', st2, 'st-b');
     setKPI('fr', fr, 'fr-b');
 
-    if(analysis){
-      st('at', issue ? '📌 ' + issue : '분석 결과');
+    /* 5/4 +δ Phase 3 — AI 분석 4 카드 (핵심·주의·액션·흐름)
+       기존 'ab' 영역에 신규 4 필드 우선 출력. 신규 필드 없을 시 기존 analysis fallback */
+    var hasAi = aiCore || aiWatch || aiAction || aiFlow;
+    if(hasAi){
+      var nl2br = function(s){ return (s||'').replace(/\n/g, '<br>'); };
+      var card = function(emoji, label, content, accent){
+        if(!content) return '';
+        return '<div style="background:rgba(250,248,244,0.04);border-left:3px solid ' + accent +
+               ';border-radius:10px;padding:14px 16px;margin-bottom:10px;line-height:1.6">' +
+               '<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:' + accent +
+               ';margin-bottom:6px">' + emoji + ' ' + label + '</div>' +
+               '<div style="font-size:14px;font-weight:500">' + nl2br(content) + '</div></div>';
+      };
+      var cardsHTML = '';
+      cardsHTML += card('🟢', '핵심 영역',  aiCore,   '#5DCAA5');
+      cardsHTML += card('🟡', '주의 영역',  aiWatch,  '#E8B4A8');
+      cardsHTML += card('🎯', '다음 액션',  aiAction, '#C9856E');
+      cardsHTML += card('📈', '운영 흐름',  aiFlow,   '#9DA8BD');
+      st('at', issueDisplay ? '📌 ' + issueDisplay : '분석 결과');
+      sh('ab', cardsHTML);
+    } else if(analysis){
+      st('at', issueDisplay ? '📌 ' + issueDisplay : '분석 결과');
       sh('ab', analysis.replace(/\n/g, '<br>'));
     }
 
@@ -495,7 +527,7 @@ html, body {
   });
 
   /* URL 파라미터로 직접 렌더 (Softr embed → iframe URL params) */
-  if(urlParams.get('score') !== null || urlParams.get('store')){
+  if(urlParams.get('score') !== null || urlParams.get('store') || urlParams.get('fact')){
     var f2 = {
       '매장명':               urlParams.get('store') || '',
       '진단점수':             urlParams.get('score') || '',
@@ -509,6 +541,13 @@ html, body {
       '문제유형해석':         urlParams.get('analysis') || '',
       '데이터신뢰도등급':     urlParams.get('tg') || '',
       '데이터신뢰도_문구':    urlParams.get('td') || '',
+      /* 5/4 +δ Phase 3 — 신규 6 formula 필드 */
+      '상단_팩트':            urlParams.get('fact') || '',
+      '주요문제_단문':        urlParams.get('issueShort') || '',
+      'AI_핵심영역':          urlParams.get('aiCore') || '',
+      'AI_주의영역':          urlParams.get('aiWatch') || '',
+      'AI_액션':              urlParams.get('aiAction') || '',
+      'AI_운영흐름':          urlParams.get('aiFlow') || '',
       '_date_direct':         urlParams.get('date') || ''
     };
     render(f2);
