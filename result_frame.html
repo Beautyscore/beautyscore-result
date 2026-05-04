@@ -492,12 +492,13 @@ html, body {
         if(!content) return '';
         /* 5/4 +ζ — 한국어 전용 줄바꿈 (word-break: keep-all)
            단어 단위 줄바꿈 + 조사·접속어 자연 처리 + 화면 폭 자동 적응 */
+        /* 5/4 +η — 50-60대 가독성 확대: 라벨 12→16px, 본문 14→15.5px (라벨이 미세하게 더 큼) */
         return '<div style="background:rgba(250,248,244,0.04);border-left:3px solid ' + accent +
-               ';border-radius:10px;padding:14px 16px;margin-bottom:10px;line-height:1.7;' +
+               ';border-radius:10px;padding:16px 18px;margin-bottom:11px;line-height:1.75;' +
                'word-break:keep-all;overflow-wrap:break-word;">' +
-               '<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:' + accent +
-               ';margin-bottom:6px;word-break:keep-all">' + emoji + ' ' + label + '</div>' +
-               '<div style="font-size:14px;font-weight:500;word-break:keep-all;overflow-wrap:break-word">' +
+               '<div style="font-size:16px;font-weight:800;letter-spacing:0.04em;color:' + accent +
+               ';margin-bottom:8px;word-break:keep-all">' + emoji + ' ' + label + '</div>' +
+               '<div style="font-size:15.5px;font-weight:500;word-break:keep-all;overflow-wrap:break-word">' +
                nl2br(content) + '</div></div>';
       };
       var cardsHTML = '';
