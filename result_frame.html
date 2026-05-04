@@ -490,11 +490,15 @@ html, body {
       var nl2br = function(s){ return (s||'').replace(/\n/g, '<br>'); };
       var card = function(emoji, label, content, accent){
         if(!content) return '';
+        /* 5/4 +ζ — 한국어 전용 줄바꿈 (word-break: keep-all)
+           단어 단위 줄바꿈 + 조사·접속어 자연 처리 + 화면 폭 자동 적응 */
         return '<div style="background:rgba(250,248,244,0.04);border-left:3px solid ' + accent +
-               ';border-radius:10px;padding:14px 16px;margin-bottom:10px;line-height:1.6">' +
+               ';border-radius:10px;padding:14px 16px;margin-bottom:10px;line-height:1.7;' +
+               'word-break:keep-all;overflow-wrap:break-word;">' +
                '<div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:' + accent +
-               ';margin-bottom:6px">' + emoji + ' ' + label + '</div>' +
-               '<div style="font-size:14px;font-weight:500">' + nl2br(content) + '</div></div>';
+               ';margin-bottom:6px;word-break:keep-all">' + emoji + ' ' + label + '</div>' +
+               '<div style="font-size:14px;font-weight:500;word-break:keep-all;overflow-wrap:break-word">' +
+               nl2br(content) + '</div></div>';
       };
       var cardsHTML = '';
       cardsHTML += card('🟢', '핵심 영역',  aiCore,   '#5DCAA5');
