@@ -4,8 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>뷰티스코어 진단 결과</title>
-<!-- 뷰티스코어 result_frame v2.0.0 (2026-05-01 — KIRA·NOVA, dashboard·landing·daily v2 톤 일치)
+<!-- 뷰티스코어 result_frame v2.0.1 (2026-05-06 — KIRA·HANA, 작업지시서 v1.0 PAGE 2)
      ═══════════════════════════════════════════════════════════════
+     v2.0.0 → v2.0.1 변경 (2026-05-06 D-9):
+       ⭐ 상단 배너 카피 교체:
+          헤드: "어디를 고쳐야 매출이 오르는지, 이제 알 수 있습니다"
+          서브: "감이 아닌 숫자로, 추측이 아닌 액션으로"
+          기존 "<매장명> 원장님 / 매장의 진단 결과가 나왔습니다" → 작은 보조 라인으로 유지
+       ⭐ 하단 메인 CTA 카피·링크 교체:
+          기존: "대시보드 체험하기 →" + dashLink → /dashboard-preview
+          변경: "1분 무료진단으로 내 매장 액션 확인하기 →" + dashLink → /pricing
+          (BASIC 유도 = /pricing 직진)
+       ⭐ 보조 "요금제 보기 →" 링크는 그대로 유지
+     ─ 점수·등급 노출, 4 KPI, AI 분석, recordId·retry·필드 fallback 모두 100% 보존
+     ───────────────────────────────────────────────────────────────
      v2.0.0 (2026-05-01) — 톤 통일 + CTA 최소화:
        ⭐ 컬러: purple/teal → Navy #16213E + Rose #C9856E + ok green
        ⭐ 폰트: Noto Sans KR → Pretendard Variable
@@ -118,14 +130,43 @@ html, body {
 .logo-s { font-size: 9.5px; color: var(--rf-muted); white-space: nowrap; letter-spacing: -.1px; }
 .date-badge { font-size: 10px; color: var(--rf-muted); background: var(--rf-white); border: 1px solid var(--rf-bd); border-radius: 20px; padding: 4px 12px; white-space: nowrap; flex-shrink: 0; }
 
-.greeting { font-size: 13px; color: var(--rf-muted); margin-bottom: 3px; word-break: keep-all; line-height: 1.6; }
+/* v2.0.1 — 상단 배너 (헤드라인 + 서브카피 + 보조 인사문) */
+.banner-head {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--rf-navy);
+  letter-spacing: -.4px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  word-break: keep-all;
+}
+.banner-head em {
+  color: var(--rf-rose);
+  font-style: normal;
+  font-weight: 900;
+  background: linear-gradient(180deg, transparent 58%, rgba(201,133,110,.34) 58%);
+  padding: 0 4px;
+}
+.banner-sub {
+  font-size: 13px;
+  color: var(--rf-navy2);
+  font-weight: 600;
+  letter-spacing: -.2px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  word-break: keep-all;
+  opacity: .85;
+}
+.greeting { font-size: 12px; color: var(--rf-muted); margin-bottom: 3px; word-break: keep-all; line-height: 1.6; opacity: .8; }
 .greeting b { color: var(--rf-navy); font-weight: 700; }
 
 @media(min-width:1024px) {
   .hero { padding: 28px 48px 0; }
   .hero-inner { display: grid; grid-template-columns: 260px 1fr; gap: 40px; align-items: center; padding-bottom: 28px; max-width: 1200px; margin: 0 auto; }
   .wave-wrap { display: none; }
-  .greeting { font-size: 16px; margin-bottom: 16px; line-height: 1.6; color: var(--rf-muted); }
+  .banner-head { font-size: 26px; margin-bottom: 8px; }
+  .banner-sub { font-size: 15px; margin-bottom: 12px; }
+  .greeting { font-size: 13px; margin-bottom: 14px; line-height: 1.6; color: var(--rf-muted); }
   .score-wrap { display: flex; flex-direction: column; align-items: center; background: var(--rf-white); border: 2px solid var(--rf-rose); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(201,133,110,.18); }
   .donut-box { position: relative; width: 130px; height: 130px; margin-bottom: 12px; }
   .donut-box svg { width: 130px; height: 130px; transform: rotate(-90deg); }
@@ -287,7 +328,9 @@ html, body {
         </div>
         <div class="date-badge" id="date-badge">진단일 --</div>
       </div>
-      <div class="greeting"><b id="store">--</b> 원장님<br><span style="font-weight:400">매장의 진단 결과가 나왔습니다.</span></div>
+      <h1 class="banner-head">어디를 고쳐야 매출이 오르는지,<br><em>이제 알 수 있습니다</em></h1>
+      <p class="banner-sub">감이 아닌 숫자로, 추측이 아닌 액션으로</p>
+      <div class="greeting"><b id="store">--</b> 원장님 — 매장의 진단 결과가 나왔습니다</div>
       <div class="mobile-score">
         <div class="m-donut">
           <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
@@ -342,16 +385,16 @@ html, body {
     <div class="card-bd" id="ab">AI가 진단 데이터를 분석하고 있습니다.<br>잠시 후 알림톡으로 전달드릴게요.</div>
   </div>
 
-  <!-- 메인 CTA: 대시보드 체험하기 -->
+  <!-- 메인 CTA: BASIC 유도 — /pricing (v2.0.1 변경) -->
   <div class="dash-cta">
     <div class="dash-cta-inner">
-      <div class="dash-icon">📊</div>
+      <div class="dash-icon">🎯</div>
       <div>
-        <div class="dash-t">점수별 세부 항목 확인하기</div>
-        <div class="dash-d">지금 바로 무료로 확인할 수 있어요</div>
+        <div class="dash-t">내 매장의 다음 액션 확인하기</div>
+        <div class="dash-d">매일 1분, BASIC 진단으로 어디를 고쳐야 매출이 오르는지 알려드립니다</div>
       </div>
     </div>
-    <a href="#" class="dash-btn" id="dash-link">대시보드 체험하기 →</a>
+    <a href="#" class="dash-btn" id="dash-link">1분 무료진단으로 내 매장 액션 확인하기 →</a>
   </div>
 
   <!-- 보조 링크: 요금제 (압축) -->
@@ -412,7 +455,8 @@ html, body {
     var pricingLink = gi('pricing-link');
     var rid = recordId || '';
     if(dashLink){
-      dashLink.href = 'https://app.beautyscore.co.kr/dashboard-preview?source=result' + (rid ? '&recordId=' + rid : '');
+      /* v2.0.1: BASIC 유도 — /pricing 직진 (기존 /dashboard-preview에서 변경) */
+      dashLink.href = 'https://app.beautyscore.co.kr/pricing' + (rid ? '?recordId=' + rid : '');
       dashLink.target = '_top';
     }
     if(pricingLink){
