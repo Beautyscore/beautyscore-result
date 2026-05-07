@@ -202,25 +202,25 @@ html, body {
 #bs-wrap .bs-bubble-group .bs-bubble-wrap:last-child { margin-bottom: 0 !important; }
 #bs-wrap .bs-bubble-group .bs-bubble-wrap:not(:first-child) .bs-mini-avatar { visibility: hidden !important; }
 
-/* CTA 가운데 정렬 */
+/* CTA — 좌측 정렬 (시안 C 채팅 톤, 대표님 5/8 명시) */
 #bs-wrap .bs-cta-bubble {
-  display: flex !important; flex-direction: column !important; gap: 10px !important;
-  margin: 18px auto 0 !important;
-  align-items: center !important;
-  max-width: 360px !important; width: 100% !important;
+  display: flex !important; flex-direction: column !important; gap: 8px !important;
+  margin-top: 14px !important; margin-left: 36px !important;
+  max-width: calc(100% - 40px) !important;
 }
 #bs-wrap .bs-cta-option {
   background: var(--bs-rose) !important; color: var(--bs-white) !important;
-  border: none !important; border-radius: 14px !important;
-  padding: 14px 20px !important;
+  border: none !important; border-radius: 18px !important; border-bottom-right-radius: 6px !important;
+  padding: 13px 18px !important;
   font-size: 14.5px !important; font-weight: 800 !important;
-  text-align: center !important; cursor: pointer !important; font-family: inherit !important;
+  text-align: left !important; cursor: pointer !important; font-family: inherit !important;
   letter-spacing: -.2px !important;
   box-shadow: 0 4px 14px rgba(201,133,110,.30) !important;
   transition: transform .15s ease !important;
   text-decoration: none !important;
-  display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important;
+  display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important;
   width: 100% !important;
+  line-height: 1.5 !important;
 }
 #bs-wrap .bs-cta-option:hover { transform: translateY(-1px) !important; }
 #bs-wrap .bs-cta-option-secondary {
@@ -394,7 +394,7 @@ html, body {
           <span class="bs-mini-card-ico">✨</span>
           <span class="bs-mini-card-text"><span id="bs-strength-name-2">상담 성공률</span> <b id="bs-strength-delta">+14%p</b> · 평균보다 높음</span>
         </div>
-        <div style="margin-top:10px;">이건 잘 유지하시면서 다음 영역만 보강하면 됩니다.</div>
+        <div style="margin-top:10px;">이건 잘 유지하시면서<br>다음 영역만 보강하면 됩니다.</div>
       </div>
     </div>
   </div>
@@ -429,7 +429,7 @@ html, body {
 
   <!-- 초기 CTA 옵션 -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
-    <a class="bs-cta-option" href="/dashboard-preview" id="bs-cta-dashboard-1">
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
       <span>네, 대시보드 체험할게요</span>
       <span class="bs-cta-arrow">→</span>
     </a>
@@ -465,7 +465,9 @@ html, body {
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        평균 대비 <em id="bs-kpi-cs-delta">+14%p ↑</em>. 첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요.
+        평균 대비 <em id="bs-kpi-cs-delta">+14%p ↑</em>.<br>
+        첫 상담의 신뢰 형성과 시술 권유가<br>
+        잘 맞춰져 있어요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
           <span class="bs-kpi-mini-name">상담 성공률</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"></span>
@@ -480,7 +482,8 @@ html, body {
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
         🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
-        가장 큰 회복 영역이에요. 첫 방문 고객의 2회차 전환이 끊기는 패턴이고요.<br>
+        가장 큰 회복 영역이에요.<br>
+        첫 방문 고객의 2회차 전환이 끊기는 패턴이고요.<br>
         <em>+5%p만 회복해도 +12점</em> 올라갑니다.
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
           <span class="bs-kpi-mini-name">재방문율</span>
@@ -525,7 +528,7 @@ html, body {
 
   <!-- 자세히 끝 새 CTA -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
-    <a class="bs-cta-option" href="/dashboard-preview" id="bs-cta-dashboard-2">
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-2">
       <span>지금 체험해볼게요</span>
       <span class="bs-cta-arrow">→</span>
     </a>
@@ -606,6 +609,15 @@ html, body {
       var pct = Math.min(100, Math.max(0, parseInt(DATA.score, 10) || 0));
       fg.setAttribute('stroke-dasharray', (donutLen * pct / 100).toFixed(1) + ' ' + donutLen);
     }
+    /* dashboard CTA href에 recordId 동적 보존 (박제 정합 v0.1) */
+    var dashUrl = 'https://app.beautyscore.co.kr/dashboard-preview';
+    if (DATA.recordId && DATA.recordId !== 'demo') {
+      dashUrl += '?recordId=' + encodeURIComponent(DATA.recordId);
+    }
+    ['bs-cta-dashboard-1','bs-cta-dashboard-2'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.setAttribute('href', dashUrl);
+    });
   }
   function setBarWidth(parentId, val) {
     var el = document.getElementById(parentId);
@@ -616,31 +628,32 @@ html, body {
 
   /* ═══ 시퀀스 ═══ */
   var SEEN_KEY = 'bs_result_seen_' + DATA.recordId;
+  /* 시퀀스 타이밍 — 대표님 5/8 명시 "좀 빨라" → 약 35% 늦춤 (총 ~13초) */
   var INITIAL_SEQUENCE = [
+    { type: 'typing', wait: 700 },
+    { type: 'bubble', id: 'bubble-1', wait: 1400 },
     { type: 'typing', wait: 500 },
-    { type: 'bubble', id: 'bubble-1', wait: 900 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-score', wait: 1300 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-2', wait: 1500 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-3', wait: 1500 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-4', wait: 1500 },
-    { type: 'cta', id: 'bs-cta-initial', wait: 700 }
+    { type: 'bubble', id: 'bubble-score', wait: 1900 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-2', wait: 2100 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-3', wait: 2100 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-4', wait: 2100 },
+    { type: 'cta', id: 'bs-cta-initial', wait: 900 }
   ];
   var DETAIL_SEQUENCE = [
-    { type: 'typing', wait: 600 },
-    { type: 'bubble', id: 'bubble-detail-1', wait: 900 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-detail-2', wait: 1300 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-detail-3', wait: 1500 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-detail-4', wait: 1500 },
-    { type: 'typing', wait: 250 },
-    { type: 'bubble', id: 'bubble-detail-5', wait: 1700 },
-    { type: 'cta', id: 'bs-cta-detail', wait: 700 }
+    { type: 'typing', wait: 800 },
+    { type: 'bubble', id: 'bubble-detail-1', wait: 1300 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-detail-2', wait: 1900 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-detail-3', wait: 2100 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-detail-4', wait: 2100 },
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-detail-5', wait: 2300 },
+    { type: 'cta', id: 'bs-cta-detail', wait: 900 }
   ];
   var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-3','bubble-4','bs-cta-initial'];
   var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-5','bs-cta-detail'];
