@@ -554,6 +554,14 @@ html, body {
   /* ═══ URL params + mock fallback ═══ */
   var p = new URLSearchParams(window.location.search);
   function pq(k, fb) { var v = p.get(k); return (v && v.trim() !== '') ? v.trim() : fb; }
+  /* alias 다중 키 (v2_0_4 wrapper와 호환) */
+  function pqA(keys, fb) {
+    for (var i=0; i<keys.length; i++) {
+      var v = p.get(keys[i]);
+      if (v && v.trim() !== '') return v.trim();
+    }
+    return fb;
+  }
 
   var DATA = {
     recordId:    pq('recordId', 'demo'),
@@ -563,18 +571,18 @@ html, body {
     grade:       pq('grade', 'C+ 등급'),
     rank:        pq('rank', '상위 50%'),
     scoreDelta:  pq('scoreDelta', '평균 67점 -4점'),
-    /* 4 운영지표 점수 (rv·cs·rs·dm) */
+    /* 4 운영지표 점수 — v2_0_4 wrapper 변수명(cn/st/fr) alias 호환 */
     rv:          parseInt(pq('rv', '65'), 10),
-    cs:          parseInt(pq('cs', '80'), 10),
-    rs:          parseInt(pq('rs', '75'), 10),
-    dm:          parseInt(pq('dm', '65'), 10),
+    cs:          parseInt(pqA(['cs','cn'], '80'), 10),
+    rs:          parseInt(pqA(['rs','st'], '75'), 10),
+    dm:          parseInt(pqA(['dm','fr'], '65'), 10),
     /* 강점·약점 */
     strKpi:      pq('strKpi', 'cs'),
     weakKpi:     pq('weakKpi', 'rv'),
-    strDelta:    pq('strDelta', '+14%p'),
+    strDelta:    pqA(['strDelta','strD'], '+14%p'),
     weakImprove: pq('weakImprove', '+5%p'),
     weakScoreUp: pq('weakScoreUp', '+12점'),
-    monthlyGap:  pq('monthlyGap', '___만원')
+    monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
 
   var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' };
