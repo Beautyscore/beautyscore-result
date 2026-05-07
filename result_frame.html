@@ -6,13 +6,32 @@
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>뷰티스코어 진단 결과</title>
-<meta name="description" content="에스테틱 매장 경영진단 결과 — 매장 진단 코치의 첫 보고">
+<meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.3 (2026-05-08 — KIRA, A안 디벨롭 standalone iframe 버전)
+  뷰티스코어 result-frame v2.0.4 (2026-05-07 — KIRA, 카피 정정 patch)
   ═══════════════════════════════════════════════════════════════
   용도: GitHub Pages 호스팅 + Softr `/result-frame` iframe 임베드용
-  짝 박제: result_v2_0_3.html (Softr Custom Code 위젯, 동일 디자인·UX)
+  짝 박제: result_v2_0_4.html (Softr Custom Code wrapper, iframe URL → v2_0_4)
 
+  v2.0.4 patch (2026-05-07 — 대표님 실데이터 검수 후 즉시 정정):
+    🔴 v2.0.3 라이브 진단 시 카피 결함 발견 → 즉시 v2.0.4 정정
+    ⭐ 카피 정정 (Phase 1):
+       (1) 메타 description / 환영 태그 / 환영 본문 / 미션 카피 4건
+       (2) "코치의 첫 보고" → "원장님의 첫 진단 결과" 정체성 분리
+    ⭐ Hero·강점 카드·약점 카피 추가 (Phase 2 — 5/7 즉시 추가, v2.0.5 미루지 X):
+       (3) Hero에 매장 유형 추가 — "{매장} 원장님, {매장유형}, {position} 매장입니다"
+           (URL params ?op= ?size= → bsGetStoreType() 매핑 함수 신설, 20 조합)
+       (4) 강점 카드 신설 (Hero 직후) — STRENGTH_COPY 매핑 (rv/cs/rs/dm → C 톤 카피)
+       (5) 약점 카피 매핑 신설 — WEAKNESS_COPY 매핑 (긍정 프레임)
+    ⭐ 정체성 분리 명확화 (대표님 5/7 명시):
+       - dashboard = "원장님 전용비서" (매일 사용자, 결제 가입자)
+       - result = "원장님의 첫 진단 결과" (진단한 사람만 1회 보는 페이지)
+    ⭐ 짝 박제 신규: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md
+       (4종 강점 C 톤 + 4종 약점 긍정 프레임 + 매장 유형 20 매핑)
+    ⭐ 후속 작업 (KIRA-OPS·KIRA-DB 5/14):
+       - Make A 시나리오 patch — URL params 추가 (op, size, strKpi, weakKpi)
+       - T7 강점/약점 KPI 코드 필드 추가 (rv/cs/rs/dm)
+  ───────────────────────────────────────────────────────────────
   v2.0.1 → v2.0.3 변경 (5/8 디벨롭, A안 채택):
     ⭐ result_v2_0_3 본문 그대로 standalone wrapping (DOCTYPE + html + head + body)
     ⭐ postMessage 통신 유지 (BS_DATA 수신, BS_HEIGHT 송신)
@@ -91,6 +110,30 @@ html, body {
 #bs-wrap .bs-greet-h { font-size:17px !important; font-weight:800 !important; line-height:1.45 !important; letter-spacing:-.4px !important; position:relative !important; z-index:2 !important; }
 #bs-wrap .bs-greet-h b { color:var(--bs-nude) !important; font-weight:900 !important; }
 #bs-wrap .bs-greet-em { display:inline-block !important; background:linear-gradient(180deg, transparent 56%, rgba(232,180,168,.45) 56%, rgba(232,180,168,.45) 92%, transparent 92%) !important; padding:0 5px !important; font-weight:900 !important; letter-spacing:-.3px !important; }
+/* ⭐ 강점 카드 (v2.0.4 patch — Hero 직후) */
+#bs-wrap .bs-strength-card {
+  background: linear-gradient(135deg, var(--bs-nude-soft) 0%, var(--bs-cream2) 100%) !important;
+  border: 1px solid rgba(201,133,110,.25) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin: 12px 0 14px !important;
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+#bs-wrap .bs-strength-tag {
+  font-size: 11px !important; font-weight: 800 !important;
+  color: var(--bs-rose-dk) !important;
+  background: rgba(255,255,255,.7) !important;
+  padding: 4px 10px !important; border-radius: 10px !important;
+  letter-spacing: .04em !important;
+  flex-shrink: 0 !important;
+}
+#bs-wrap .bs-strength-h {
+  font-size: 14px !important; font-weight: 800 !important;
+  color: var(--bs-navy) !important;
+  letter-spacing: -.3px !important; line-height: 1.5 !important;
+  flex: 1 !important; min-width: 0 !important;
+}
 
 /* Hero */
 #bs-wrap .bs-hero { background:linear-gradient(180deg, var(--bs-navy2) 0%, var(--bs-navy) 60%) !important; color:var(--bs-white) !important; padding:20px 18px 22px !important; border-radius:0 0 18px 18px !important; margin-bottom:14px !important; position:relative !important; overflow:hidden !important; }
@@ -234,12 +277,20 @@ html, body {
   <main class="bs-main">
 
     <div class="bs-greet">
-      <div class="bs-greet-tag">🎯 매장 진단 코치의 첫 보고</div>
+      <div class="bs-greet-tag">🎯 원장님의 첫 진단 결과</div>
       <div class="bs-greet-h">
-        <b id="bs-store-name">지영</b> 원장님 매장,<br>
-        <span class="bs-greet-em" id="bs-store-position">상위 38%</span>에서 출발하셨습니다.
+        <b id="bs-store-name">지영</b> 원장님,<br>
+        <span id="bs-store-type">소규모 페이스 관리 매장</span><br>
+        <span class="bs-greet-em" id="bs-store-position">상위 38%</span> 매장입니다.
       </div>
     </div>
+
+    <!-- ⭐ 강점 카드 (v2.0.4 patch — Hero 직후 신설) -->
+    <!-- 짝 박제: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md §1·5 -->
+    <section class="bs-strength-card">
+      <div class="bs-strength-tag">🌟 우리 매장 강점</div>
+      <div class="bs-strength-h" id="bs-strength-h">재방문 단골이 자산인 매장</div>
+    </section>
 
     <section class="bs-hero">
       <div class="bs-hero-inner">
@@ -300,7 +351,7 @@ html, body {
           <div class="bs-rx-step-ico">🎯</div>
           <div class="bs-rx-step-body">
             <span class="bs-rx-step-tag">무료 · 진단 코치</span>
-            <div class="bs-rx-step-h">오늘의 액션 1건 — 코치의 첫 미션</div>
+            <div class="bs-rx-step-h">오늘의 액션 1건 — 첫 진단 미션</div>
           </div>
         </div>
         <div class="bs-rx-step basic">
@@ -412,19 +463,69 @@ html, body {
     } catch (e) {}
   })();
 
+  /* ═══ v2.0.4 patch: 매장 유형 + 강점/약점 KPI 매핑 ═══
+     짝 박제: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md */
+
+  /* 운영형태 × 매장규모 → 매장 유형 카피 (20 조합) */
+  function bsGetStoreType(operType, size) {
+    if (!operType && !size) return '';
+    if (operType === '복합 관리' && size === '10인 이상') return '대형 종합 매장';
+    if (operType === '기타(부속)') {
+      if (size === '1인샵') return '1인 운영 매장';
+      if (size === '2-4인') return '소규모 매장';
+      if (size === '5-9인') return '여러 직원과 운영하시는 매장';
+      if (size === '10인 이상') return '대형 매장';
+      return '';
+    }
+    var sizeMap = { '1인샵': '1인', '2-4인': '소규모', '5-9인': '여러 직원과 운영하시는', '10인 이상': '대형' };
+    var typeMap = {
+      '페이스 관리': '페이스 관리 전문',
+      '바디 관리': '바디 관리 전문',
+      '두피 관리': '두피 관리 전문',
+      '복합 관리': '복합 관리'
+    };
+    var sizeStr = sizeMap[size] || '';
+    var typeStr = typeMap[operType] || '';
+    if (!sizeStr || !typeStr) return '';
+    return sizeStr + ' ' + typeStr + ' 매장';
+  }
+
+  /* 강점 KPI 코드 → C 톤 카피 (대표님 5/7 명시) */
+  var STRENGTH_COPY = {
+    rv: '재방문 단골이 자산인 매장',
+    cs: '상담 전환력이 강한 매장',
+    rs: '매출 구성이 안정적인 매장',
+    dm: '고객 이력 관리 잘하는 매장'
+  };
+
+  /* 약점 KPI 코드 → 긍정 프레임 카피 (대표님 5/7 명시) */
+  var WEAKNESS_COPY = {
+    rv: '재방문 고객을 더 늘릴 기회가 있어요',
+    cs: '상담은 결제로 전환시킬 수 있는 기회를 만들어보세요',
+    rs: '매출 구성에 균형이 필요해요',
+    dm: '매일 입력하시면 분석이 더 정밀해져요'
+  };
+
   /* ═══ 데이터 로딩 — 우선순위: postMessage > URL params > mock ═══ */
   function bsLoadDataFromUrl(){
     if (!urlParams.get('score') && !urlParams.get('store')) return null;
+    var operType = urlParams.get('op') || '';
+    var size     = urlParams.get('size') || '';
+    var strKpi   = urlParams.get('strKpi') || '';
+    var weakKpi  = urlParams.get('weakKpi') || '';
     return {
       store_name: urlParams.get('store') || '지영',
+      store_type: bsGetStoreType(operType, size),
       score: parseInt(urlParams.get('score') || 75),
       grade: urlParams.get('grade') || 'B',
       position_text: urlParams.get('rank') || '상위 38%',
       delta_industry: urlParams.get('di') || '+12%',
       weakness_1: urlParams.get('weak') || '재방문율(32%)',
+      weakness_copy: WEAKNESS_COPY[weakKpi] || null,
       impact_money: urlParams.get('im') || '120만원',
       strength: urlParams.get('str') || '상담 성공률',
       strength_delta: urlParams.get('strD') || '+14%p',
+      strength_copy: STRENGTH_COPY[strKpi] || null,
       ai_core: urlParams.get('aiCore') || null,
       ai_watch: urlParams.get('aiWatch') || null,
       ai_action: urlParams.get('aiAction') || null,
@@ -441,6 +542,10 @@ html, body {
   function bsApply(d){
     if (!d) return;
     setText('bs-store-name', d.store_name);
+    /* v2.0.4: 매장 유형 (op + size 조합 → 카피) */
+    if (d.store_type) {
+      setText('bs-store-type', d.store_type);
+    }
     setText('bs-store-position', d.position_text);
     setText('bs-score', d.score);
     setText('bs-grade', (d.grade ? d.grade + ' 등급' : ''));
@@ -450,6 +555,10 @@ html, body {
     setText('bs-impact-money', d.impact_money);
     setText('bs-strength', d.strength);
     setText('bs-strength-delta', d.strength_delta);
+    /* v2.0.4: 강점 카드 카피 (KPI 코드 → C 톤 카피) */
+    if (d.strength_copy) {
+      setText('bs-strength-h', d.strength_copy);
+    }
     if (d.ai_core)   setText('bs-ai-core', d.ai_core);
     if (d.ai_watch)  setText('bs-ai-watch', d.ai_watch);
     if (d.ai_action) setText('bs-ai-action', d.ai_action);
