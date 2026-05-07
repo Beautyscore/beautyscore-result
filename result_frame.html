@@ -8,630 +8,795 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.4 (2026-05-07 — KIRA, 카피 정정 patch)
+  뷰티스코어 result-frame v2.0.5 (2026-05-08 KIRA, Coach Conversation 라이브 박제)
   ═══════════════════════════════════════════════════════════════
-  용도: GitHub Pages 호스팅 + Softr `/result-frame` iframe 임베드용
-  짝 박제: result_v2_0_4.html (Softr Custom Code wrapper, iframe URL → v2_0_4)
-
-  v2.0.4 patch (2026-05-07 — 대표님 실데이터 검수 후 즉시 정정):
-    🔴 v2.0.3 라이브 진단 시 카피 결함 발견 → 즉시 v2.0.4 정정
-    ⭐ 카피 정정 (Phase 1):
-       (1) 메타 description / 환영 태그 / 환영 본문 / 미션 카피 4건
-       (2) "코치의 첫 보고" → "원장님의 첫 진단 결과" 정체성 분리
-    ⭐ Hero·강점 카드·약점 카피 추가 (Phase 2 — 5/7 즉시 추가, v2.0.5 미루지 X):
-       (3) Hero에 매장 유형 추가 — "{매장} 원장님, {매장유형}, {position} 매장입니다"
-           (URL params ?op= ?size= → bsGetStoreType() 매핑 함수 신설, 20 조합)
-       (4) 강점 카드 신설 (Hero 직후) — STRENGTH_COPY 매핑 (rv/cs/rs/dm → C 톤 카피)
-       (5) 약점 카피 매핑 신설 — WEAKNESS_COPY 매핑 (긍정 프레임)
-    ⭐ 정체성 분리 명확화 (대표님 5/7 명시):
-       - dashboard = "원장님 전용비서" (매일 사용자, 결제 가입자)
-       - result = "원장님의 첫 진단 결과" (진단한 사람만 1회 보는 페이지)
-    ⭐ 짝 박제 신규: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md
-       (4종 강점 C 톤 + 4종 약점 긍정 프레임 + 매장 유형 20 매핑)
-    ⭐ 후속 작업 (KIRA-OPS·KIRA-DB 5/14):
-       - Make A 시나리오 patch — URL params 추가 (op, size, strKpi, weakKpi)
-       - T7 강점/약점 KPI 코드 필드 추가 (rv/cs/rs/dm)
-  ───────────────────────────────────────────────────────────────
-  v2.0.1 → v2.0.3 변경 (5/8 디벨롭, A안 채택):
-    ⭐ result_v2_0_3 본문 그대로 standalone wrapping (DOCTYPE + html + head + body)
-    ⭐ postMessage 통신 유지 (BS_DATA 수신, BS_HEIGHT 송신)
-    ⭐ URL params 전체 매핑 (Make A 진단 결과 직접 받기)
-    ⭐ recordId·token 처리 (v2.6.2 동등)
-    ⭐ 정체성 분리 (FREE 진단 코치 / BASIC+ 전용비서)
-    ⭐ PRO "6월 중순 활성" badge
-    ⭐ 강점 한 줄 = 운영지표 4종 중 1위 자동 산출
-    ⭐ footer disclaimer (수치 mock 명시)
+  v2.0.5 (대표님 5/8 명시):
+    ⭐ 시안 C 채택 — 진단 코치 채팅 톡 시퀀스
+       (시안 D B+C 하이브리드 폐기, 시안 C v2 베이스)
+    ⭐ 카피 변경 8건:
+       1) "운영하시는 — 이것만으로도..." → "운영하시는 👍 / 매장 운영 점수를 해봤어요!"
+       2) 점수 안내 "분석해보니 — 여기에요" → 삭제 (Hero 통합)
+       3) 강점 "이건 지키시면서 — 다음 영역만 보강하면 됩니다"
+          → "이건 잘 유지하시면서 다음 영역만 보강하면 됩니다"
+       4) 기회 "그리고 — 가장 큰 기회는..." → "가장 큰 기회는..."
+       5) 권유 "보고, 액션 1건씩 코칭드려요" → "보고하고, / 액션 1건씩 코칭해드려요"
+       6) 자세히 정리 "정리하면 — 강점은..." → "강점은..."
+       7) 카톡 옵션 "나중에 다시 봐드릴게요 (카톡)" → "나중에 다시 볼게요(카톡 채널 추가)"
+       8) CTA 가운데 정렬 (max-width:360px + 텍스트 center)
+    ⭐ CTA 이동 퍼널:
+       - 카톡 채널 추가: window.open('http://pf.kakao.com/_SXpxhX/friend')
+       - 1.8초 후 자동 redirect: https://beautyscore.co.kr
+    ⭐ 톡 시퀀스 애니메이션:
+       - 페이지 로드 0.5초 후 자동 시작 (5개 버블 + 점수 도넛, 약 9초)
+       - "진단 자세히" 클릭 시 추가 5개 버블 (운영지표 4종 분해, 약 9초)
+       - Skip 버튼 (sticky, 시퀀스 진행 중만)
+       - localStorage `bs_result_seen_{recordId}` 재방문 시 즉시 표시
+    ⭐ 라이브 배포 정합:
+       - postMessage BS_HEIGHT 송신 (Softr wrapper iframe 높이 동기)
+       - URL params: ?recordId·?store·?score·?grade·?rank·?period 우선 적용
+       - mock fallback (윤혜뷰티 진단ID 227 데이터)
+       - mockup tag·reset 버튼 제거 (라이브)
 
   배포:
     GitHub repo: Beautyscore/beautyscore-result
-    GitHub Pages URL: https://beautyscore.github.io/beautyscore-result/result-frame.html
-    Softr iframe: <iframe src="...?score=75&store=지영&...">
+    GitHub Pages: https://beautyscore.github.io/beautyscore-result/result_frame.html
+    Softr wrapper: result_v2_0_4.html (iframe URL 그대로 사용 가능)
 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-/* ═══ standalone body 환경 ═══ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   width: 100%; min-height: 100vh;
   background: #FAF8F4;
   font-family: 'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   -webkit-font-smoothing: antialiased;
-  word-break: keep-all;
-  overflow-wrap: break-word;
+  word-break: keep-all; overflow-wrap: break-word;
 }
 
-/* ═══ #bs-wrap 격리 (Softr 위젯과 동등) ═══ */
 #bs-wrap, #bs-wrap *, #bs-wrap *::before, #bs-wrap *::after {
   box-sizing: border-box !important;
   font-family: 'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif !important;
+  word-break: keep-all !important; overflow-wrap: break-word !important;
   -webkit-font-smoothing: antialiased !important;
-  word-break: keep-all !important;
-  overflow-wrap: break-word !important;
 }
 #bs-wrap {
   --bs-navy:#16213E; --bs-navy2:#243152; --bs-rose:#C9856E; --bs-rose-dk:#B8745E;
   --bs-nude:#E8B4A8; --bs-nude-soft:#F4DCD2; --bs-cream:#FAF8F4; --bs-cream2:#F1EFE8;
-  --bs-white:#FFFFFF; --bs-text:#16213E; --bs-muted:#6B7488;
-  --bs-bd:rgba(22,33,62,.09); --bs-bd2:rgba(22,33,62,.16);
-  --bs-ok:#2E7D5E; --bs-warn:#B36015; --bs-action:#0F172A;
-  --bs-hi:#FBBF24; --bs-pro:#6D28D9;
-  --bs-sh-sm:0 2px 12px rgba(22,33,62,.07),0 0 0 .5px rgba(22,33,62,.06);
+  --bs-white:#FFFFFF; --bs-text:#16213E; --bs-muted:#6B7488; --bs-bd:rgba(22,33,62,.09);
+  --bs-ok:#2E7D5E; --bs-warn:#B36015;
+  --bs-sh-sm:0 2px 12px rgba(22,33,62,.07);
+  --bs-sh-md:0 4px 20px rgba(22,33,62,.10);
   --bs-ease:cubic-bezier(.4,0,.2,1);
-  background:var(--bs-cream) !important; color:var(--bs-text) !important;
-  font-size:16px !important; line-height:1.55 !important;
-  letter-spacing:-.2px !important; min-height:100vh !important;
+  background: var(--bs-cream) !important; color: var(--bs-text) !important;
+  font-size: 15px !important; line-height: 1.6 !important; min-height: 100vh !important;
 }
 
-/* 헤더 */
+/* ═══ Header ═══ */
 #bs-wrap .bs-hdr {
-  position:sticky !important; top:0 !important; z-index:100 !important;
-  background:rgba(255,255,255,.96) !important;
-  backdrop-filter:blur(12px) !important; -webkit-backdrop-filter:blur(12px) !important;
-  border-bottom:1px solid var(--bs-bd) !important;
-  padding:12px 18px !important;
-  display:flex !important; align-items:center !important; justify-content:space-between !important; gap:14px !important;
+  position: sticky !important; top: 0 !important; z-index: 100 !important;
+  background: var(--bs-white) !important;
+  border-bottom: 1px solid var(--bs-bd) !important;
+  padding: 12px 18px !important;
+  display: flex !important; align-items: center !important; gap: 12px !important;
 }
-#bs-wrap .bs-h-logo { display:flex !important; align-items:center !important; gap:9px !important; flex-shrink:0 !important; }
-#bs-wrap .bs-h-logo-img { width:38px !important; height:38px !important; border-radius:11px !important; object-fit:contain !important; flex-shrink:0 !important; box-shadow:0 2px 8px rgba(22,33,62,.12) !important; background:var(--bs-white) !important; padding:2px !important; }
-#bs-wrap .bs-h-text { display:flex !important; flex-direction:column !important; line-height:1.2 !important; }
-#bs-wrap .bs-h-name { font-size:15px !important; font-weight:800 !important; color:var(--bs-navy) !important; letter-spacing:-.4px !important; }
-#bs-wrap .bs-h-slogan { font-size:11px !important; color:var(--bs-muted) !important; letter-spacing:-.1px !important; margin-top:1px !important; }
-#bs-wrap .bs-h-tag { font-size:11px !important; font-weight:800 !important; color:var(--bs-rose) !important; background:var(--bs-cream2) !important; padding:5px 11px !important; border-radius:12px !important; letter-spacing:.04em !important; }
-
-/* 본문 */
-#bs-wrap .bs-main { max-width:480px !important; margin:0 auto !important; padding:16px 16px 80px !important; }
-@media(min-width:768px) { #bs-wrap .bs-main { max-width:760px !important; padding:20px 24px 80px !important; } }
-@media(min-width:1200px) { #bs-wrap .bs-main { max-width:1180px !important; padding:24px 32px 80px !important; } }
-
-/* Greet */
-#bs-wrap .bs-greet { background:linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important; color:var(--bs-white) !important; border-radius:18px 18px 0 0 !important; padding:18px 18px 14px !important; position:relative !important; overflow:hidden !important; }
-#bs-wrap .bs-greet::before { content:'' !important; position:absolute !important; top:-40px !important; right:-40px !important; width:130px !important; height:130px !important; border-radius:50% !important; background:radial-gradient(circle, rgba(201,133,110,.28) 0%, transparent 70%) !important; pointer-events:none !important; }
-#bs-wrap .bs-greet-tag { display:inline-flex !important; align-items:center !important; gap:5px !important; font-size:11px !important; font-weight:800 !important; background:rgba(255,255,255,.18) !important; color:var(--bs-nude) !important; padding:4px 11px !important; border-radius:12px !important; letter-spacing:.04em !important; margin-bottom:8px !important; position:relative !important; z-index:2 !important; }
-#bs-wrap .bs-greet-h { font-size:17px !important; font-weight:800 !important; line-height:1.45 !important; letter-spacing:-.4px !important; position:relative !important; z-index:2 !important; }
-#bs-wrap .bs-greet-h b { color:var(--bs-nude) !important; font-weight:900 !important; }
-#bs-wrap .bs-greet-em { display:inline-block !important; background:linear-gradient(180deg, transparent 56%, rgba(232,180,168,.45) 56%, rgba(232,180,168,.45) 92%, transparent 92%) !important; padding:0 5px !important; font-weight:900 !important; letter-spacing:-.3px !important; }
-/* ⭐ 강점 카드 (v2.0.4 patch — Hero 직후) */
-#bs-wrap .bs-strength-card {
-  background: linear-gradient(135deg, var(--bs-nude-soft) 0%, var(--bs-cream2) 100%) !important;
-  border: 1px solid rgba(201,133,110,.25) !important;
-  border-radius: 14px !important;
-  padding: 14px 16px !important;
-  margin: 12px 0 14px !important;
-  display: flex !important; align-items: center !important; gap: 10px !important;
-  flex-wrap: wrap !important;
+#bs-wrap .bs-h-avatar {
+  width: 40px !important; height: 40px !important; border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-rose-dk) 100%) !important;
+  color: var(--bs-white) !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  font-size: 18px !important; flex-shrink: 0 !important; position: relative !important;
 }
-#bs-wrap .bs-strength-tag {
-  font-size: 11px !important; font-weight: 800 !important;
+#bs-wrap .bs-h-avatar::after {
+  content: ''; position: absolute !important; bottom: 1px !important; right: 1px !important;
+  width: 10px !important; height: 10px !important; border-radius: 50% !important;
+  background: var(--bs-ok) !important; border: 2px solid var(--bs-white) !important;
+}
+#bs-wrap .bs-h-info { flex: 1 !important; min-width: 0 !important; }
+#bs-wrap .bs-h-name { font-size: 15px !important; font-weight: 800 !important; color: var(--bs-navy) !important; letter-spacing: -.2px !important; line-height: 1.3 !important; }
+#bs-wrap .bs-h-status { font-size: 11px !important; color: var(--bs-ok) !important; font-weight: 700 !important; letter-spacing: -.1px !important; margin-top: 2px !important; }
+#bs-wrap .bs-h-status::before { content: '●'; margin-right: 4px; }
+#bs-wrap .bs-h-tag {
+  font-size: 10px !important; font-weight: 800 !important;
+  color: var(--bs-rose) !important; background: var(--bs-cream2) !important;
+  padding: 4px 10px !important; border-radius: 10px !important; letter-spacing: .04em !important;
+}
+
+/* Skip 버튼 */
+#bs-wrap .bs-skip {
+  position: sticky !important;
+  top: 64px !important; z-index: 90 !important;
+  margin: 0 16px 0 auto !important;
+  padding: 4px 0 !important;
+  text-align: right !important;
+  display: none !important;
+  pointer-events: none !important;
+}
+#bs-wrap .bs-skip.show { display: block !important; }
+#bs-wrap .bs-skip-btn {
+  pointer-events: auto !important;
+  background: var(--bs-white) !important;
+  border: 1px solid var(--bs-bd) !important;
   color: var(--bs-rose-dk) !important;
-  background: rgba(255,255,255,.7) !important;
-  padding: 4px 10px !important; border-radius: 10px !important;
-  letter-spacing: .04em !important;
-  flex-shrink: 0 !important;
+  font-size: 11.5px !important; font-weight: 800 !important;
+  padding: 6px 14px !important; border-radius: 16px !important;
+  cursor: pointer !important; font-family: inherit !important;
+  box-shadow: var(--bs-sh-sm) !important;
+  transition: transform .15s ease, background .15s ease !important;
+  letter-spacing: -.1px !important;
 }
-#bs-wrap .bs-strength-h {
-  font-size: 14px !important; font-weight: 800 !important;
-  color: var(--bs-navy) !important;
-  letter-spacing: -.3px !important; line-height: 1.5 !important;
-  flex: 1 !important; min-width: 0 !important;
+#bs-wrap .bs-skip-btn:hover { background: var(--bs-cream2) !important; transform: translateY(-1px) !important; }
+
+/* ═══ Main ═══ */
+#bs-wrap .bs-main { max-width: 480px !important; margin: 0 auto !important; padding: 24px 16px 100px !important; }
+@media(min-width:768px){ #bs-wrap .bs-main { max-width: 580px !important; padding: 32px 24px 100px !important; } }
+
+#bs-wrap .bs-time {
+  text-align: center !important; font-size: 11px !important;
+  color: var(--bs-muted) !important; font-weight: 600 !important;
+  margin-bottom: 18px !important;
 }
 
-/* Hero */
-#bs-wrap .bs-hero { background:linear-gradient(180deg, var(--bs-navy2) 0%, var(--bs-navy) 60%) !important; color:var(--bs-white) !important; padding:20px 18px 22px !important; border-radius:0 0 18px 18px !important; margin-bottom:14px !important; position:relative !important; overflow:hidden !important; }
-#bs-wrap .bs-hero-inner { display:flex !important; align-items:center !important; gap:18px !important; }
-#bs-wrap .bs-donut { flex-shrink:0 !important; width:108px !important; height:108px !important; position:relative !important; }
-#bs-wrap .bs-donut svg { width:100% !important; height:100% !important; transform:rotate(-90deg) !important; }
-#bs-wrap .bs-donut-bg { fill:none !important; stroke:rgba(255,255,255,.12) !important; stroke-width:9 !important; }
-#bs-wrap .bs-donut-fg { fill:none !important; stroke:var(--bs-nude) !important; stroke-width:9 !important; stroke-linecap:round !important; transition:stroke-dasharray 1.4s var(--bs-ease) !important; }
-#bs-wrap .bs-donut-num { position:absolute !important; inset:0 !important; display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; line-height:1 !important; }
-#bs-wrap .bs-donut-num-v { font-size:34px !important; font-weight:900 !important; letter-spacing:-.04em !important; }
-#bs-wrap .bs-donut-num-u { font-size:11px !important; color:rgba(255,255,255,.6) !important; font-weight:600 !important; margin-top:3px !important; }
-#bs-wrap .bs-hero-side { flex:1 !important; min-width:0 !important; }
-#bs-wrap .bs-hero-grade { display:inline-block !important; background:var(--bs-rose) !important; color:var(--bs-white) !important; font-size:13px !important; font-weight:900 !important; padding:4px 13px !important; border-radius:14px !important; letter-spacing:-.2px !important; margin-bottom:8px !important; }
-#bs-wrap .bs-hero-mean { font-size:14.5px !important; color:rgba(255,255,255,.95) !important; font-weight:700 !important; line-height:1.5 !important; letter-spacing:-.2px !important; }
-#bs-wrap .bs-hero-mean b { color:var(--bs-nude) !important; font-weight:900 !important; }
-
-/* Delta */
-#bs-wrap .bs-delta { display:grid !important; grid-template-columns:1fr 1fr !important; gap:10px !important; margin-bottom:14px !important; }
-#bs-wrap .bs-delta-card { background:var(--bs-white) !important; border:1px solid var(--bs-bd) !important; border-radius:14px !important; padding:13px 14px !important; box-shadow:var(--bs-sh-sm) !important; text-align:center !important; }
-#bs-wrap .bs-delta-card.first { background:linear-gradient(160deg, var(--bs-cream2) 0%, var(--bs-nude-soft) 100%) !important; border-color:var(--bs-nude) !important; }
-#bs-wrap .bs-delta-lbl { font-size:10.5px !important; font-weight:800 !important; color:var(--bs-muted) !important; letter-spacing:.04em !important; margin-bottom:4px !important; text-transform:uppercase !important; }
-#bs-wrap .bs-delta-val { font-size:18px !important; font-weight:900 !important; color:var(--bs-navy) !important; letter-spacing:-.04em !important; line-height:1.1 !important; }
-#bs-wrap .bs-delta-val.up { color:var(--bs-ok) !important; }
-#bs-wrap .bs-delta-sub { font-size:10.5px !important; color:var(--bs-muted) !important; font-weight:600 !important; margin-top:3px !important; line-height:1.4 !important; }
-
-/* Impact */
-#bs-wrap .bs-impact { background:var(--bs-white) !important; border:1px solid var(--bs-bd) !important; border-left:4px solid var(--bs-rose) !important; border-radius:14px !important; padding:16px 18px !important; margin-bottom:14px !important; box-shadow:var(--bs-sh-sm) !important; }
-#bs-wrap .bs-impact-tag { font-size:10.5px !important; font-weight:800 !important; color:var(--bs-rose) !important; letter-spacing:.04em !important; text-transform:uppercase !important; margin-bottom:6px !important; }
-#bs-wrap .bs-impact-h { font-size:15.5px !important; font-weight:800 !important; color:var(--bs-navy) !important; line-height:1.5 !important; letter-spacing:-.3px !important; margin-bottom:8px !important; }
-#bs-wrap .bs-impact-h b { background:linear-gradient(180deg, transparent 56%, rgba(251,191,36,.45) 56%, rgba(251,191,36,.45) 92%, transparent 92%) !important; font-weight:900 !important; padding:0 4px !important; }
-#bs-wrap .bs-impact-money { font-size:13px !important; color:var(--bs-rose-dk) !important; font-weight:800 !important; letter-spacing:-.2px !important; }
-#bs-wrap .bs-impact-money em { font-style:normal !important; color:var(--bs-rose) !important; font-weight:900 !important; font-size:1.15em !important; }
-
-/* Rx */
-#bs-wrap .bs-rx { background:linear-gradient(160deg, var(--bs-white) 0%, var(--bs-nude-soft) 100%) !important; border:2px solid var(--bs-rose) !important; border-radius:18px !important; padding:18px !important; margin-bottom:14px !important; box-shadow:0 6px 20px rgba(201,133,110,.16) !important; position:relative !important; }
-#bs-wrap .bs-rx-tag { display:inline-flex !important; align-items:center !important; gap:5px !important; font-size:11px !important; font-weight:900 !important; color:var(--bs-white) !important; background:var(--bs-rose) !important; padding:4px 12px !important; border-radius:14px !important; margin-bottom:10px !important; letter-spacing:.04em !important; }
-#bs-wrap .bs-rx-weak { font-size:16px !important; font-weight:900 !important; color:var(--bs-navy) !important; letter-spacing:-.3px !important; margin-bottom:5px !important; line-height:1.4 !important; }
-#bs-wrap .bs-rx-weak em { font-style:normal !important; color:var(--bs-rose-dk) !important; font-weight:900 !important; }
-#bs-wrap .bs-rx-meta { font-size:12px !important; color:var(--bs-muted) !important; font-weight:700 !important; letter-spacing:-.2px !important; margin-bottom:14px !important; }
-#bs-wrap .bs-rx-ladder { display:flex !important; flex-direction:column !important; gap:10px !important; }
-#bs-wrap .bs-rx-step { background:var(--bs-white) !important; border:1px solid var(--bs-bd) !important; border-radius:12px !important; padding:13px 14px !important; display:flex !important; align-items:center !important; gap:12px !important; color:inherit !important; }
-#bs-wrap .bs-rx-step.free { border-left:4px solid var(--bs-ok) !important; }
-#bs-wrap .bs-rx-step.basic { border-left:4px solid var(--bs-rose) !important; }
-#bs-wrap .bs-rx-step.pro { border-left:4px solid var(--bs-pro) !important; }
-#bs-wrap .bs-rx-step-ico { width:38px !important; height:38px !important; border-radius:10px !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:18px !important; flex-shrink:0 !important; background:var(--bs-cream2) !important; }
-#bs-wrap .bs-rx-step.free .bs-rx-step-ico { background:rgba(46,125,94,.12) !important; }
-#bs-wrap .bs-rx-step.basic .bs-rx-step-ico { background:var(--bs-nude-soft) !important; }
-#bs-wrap .bs-rx-step.pro .bs-rx-step-ico { background:rgba(109,40,217,.12) !important; }
-#bs-wrap .bs-rx-step-body { flex:1 !important; min-width:0 !important; }
-#bs-wrap .bs-rx-step-tag { display:inline-block !important; font-size:9.5px !important; font-weight:900 !important; padding:2px 7px !important; border-radius:6px !important; letter-spacing:.06em !important; margin-bottom:3px !important; }
-#bs-wrap .bs-rx-step.free .bs-rx-step-tag { background:rgba(46,125,94,.12) !important; color:var(--bs-ok) !important; }
-#bs-wrap .bs-rx-step.basic .bs-rx-step-tag { background:var(--bs-rose) !important; color:var(--bs-white) !important; }
-#bs-wrap .bs-rx-step.pro .bs-rx-step-tag { background:var(--bs-pro) !important; color:var(--bs-white) !important; }
-#bs-wrap .bs-rx-step-h { font-size:13.5px !important; font-weight:800 !important; color:var(--bs-navy) !important; letter-spacing:-.2px !important; line-height:1.4 !important; }
-#bs-wrap .bs-rx-step-soon { display:inline-block !important; font-size:10px !important; font-weight:800 !important; color:var(--bs-pro) !important; background:rgba(109,40,217,.10) !important; padding:2px 7px !important; border-radius:6px !important; letter-spacing:.04em !important; margin-top:4px !important; }
-
-/* Strength */
-#bs-wrap .bs-strength { background:linear-gradient(135deg, rgba(46,125,94,.06) 0%, var(--bs-white) 100%) !important; border:1px solid rgba(46,125,94,.18) !important; border-radius:14px !important; padding:14px 16px !important; margin-bottom:14px !important; display:flex !important; align-items:center !important; gap:12px !important; }
-#bs-wrap .bs-strength-ico { width:36px !important; height:36px !important; border-radius:10px !important; background:rgba(46,125,94,.12) !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:18px !important; flex-shrink:0 !important; }
-#bs-wrap .bs-strength-body { flex:1 !important; min-width:0 !important; }
-#bs-wrap .bs-strength-tag { font-size:10px !important; font-weight:900 !important; color:var(--bs-ok) !important; letter-spacing:.04em !important; text-transform:uppercase !important; margin-bottom:2px !important; }
-#bs-wrap .bs-strength-h { font-size:13.5px !important; font-weight:800 !important; color:var(--bs-navy) !important; letter-spacing:-.2px !important; line-height:1.5 !important; }
-#bs-wrap .bs-strength-h b { color:var(--bs-ok) !important; font-weight:900 !important; }
-
-/* Detail */
-#bs-wrap .bs-detail { background:var(--bs-white) !important; border:1px solid var(--bs-bd) !important; border-radius:14px !important; margin-bottom:14px !important; overflow:hidden !important; }
-#bs-wrap .bs-detail-toggle { width:100% !important; background:transparent !important; border:none !important; padding:14px 16px !important; display:flex !important; align-items:center !important; justify-content:space-between !important; cursor:pointer !important; font-family:inherit !important; text-align:left !important; }
-#bs-wrap .bs-detail-toggle:hover { background:var(--bs-cream) !important; }
-#bs-wrap .bs-detail-toggle-h { font-size:13.5px !important; font-weight:800 !important; color:var(--bs-navy) !important; letter-spacing:-.2px !important; }
-#bs-wrap .bs-detail-toggle-arrow { color:var(--bs-muted) !important; font-size:14px !important; transition:transform .2s var(--bs-ease) !important; }
-#bs-wrap .bs-detail-toggle.open .bs-detail-toggle-arrow { transform:rotate(180deg) !important; }
-#bs-wrap .bs-detail-body { display:none !important; padding:0 16px 16px !important; border-top:1px solid var(--bs-bd) !important; }
-#bs-wrap .bs-detail-toggle.open + .bs-detail-body { display:block !important; }
-#bs-wrap .bs-detail-card { padding:12px 0 !important; border-bottom:1px solid var(--bs-bd) !important; }
-#bs-wrap .bs-detail-card:last-child { border-bottom:none !important; padding-bottom:4px !important; }
-#bs-wrap .bs-detail-card-h { font-size:12px !important; font-weight:900 !important; letter-spacing:.04em !important; margin-bottom:5px !important; margin-top:6px !important; }
-#bs-wrap .bs-detail-card.core .bs-detail-card-h { color:var(--bs-ok) !important; }
-#bs-wrap .bs-detail-card.watch .bs-detail-card-h { color:var(--bs-warn) !important; }
-#bs-wrap .bs-detail-card.act .bs-detail-card-h { color:var(--bs-rose) !important; }
-#bs-wrap .bs-detail-card.flow .bs-detail-card-h { color:var(--bs-muted) !important; }
-#bs-wrap .bs-detail-card-d { font-size:13px !important; color:var(--bs-text) !important; line-height:1.65 !important; font-weight:500 !important; }
-
-/* Hook */
-#bs-wrap .bs-hook { background:linear-gradient(160deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important; color:var(--bs-white) !important; border-radius:18px !important; padding:22px 20px !important; margin-bottom:14px !important; text-align:center !important; position:relative !important; overflow:hidden !important; }
-#bs-wrap .bs-hook::before { content:'' !important; position:absolute !important; top:-50px !important; left:-50px !important; width:140px !important; height:140px !important; border-radius:50% !important; background:radial-gradient(circle, rgba(232,180,168,.20) 0%, transparent 70%) !important; pointer-events:none !important; }
-#bs-wrap .bs-hook-tag { display:inline-block !important; font-size:11px !important; font-weight:800 !important; color:var(--bs-nude) !important; background:rgba(255,255,255,.12) !important; padding:4px 12px !important; border-radius:13px !important; letter-spacing:.04em !important; margin-bottom:10px !important; position:relative !important; z-index:2 !important; }
-#bs-wrap .bs-hook-h { font-size:18px !important; font-weight:900 !important; line-height:1.45 !important; letter-spacing:-.4px !important; margin-bottom:6px !important; position:relative !important; z-index:2 !important; }
-#bs-wrap .bs-hook-h em { font-style:normal !important; color:var(--bs-nude) !important; font-weight:900 !important; }
-#bs-wrap .bs-hook-d { font-size:13px !important; color:rgba(255,255,255,.78) !important; font-weight:600 !important; letter-spacing:-.1px !important; margin-bottom:16px !important; position:relative !important; z-index:2 !important; }
-#bs-wrap .bs-hook-cta { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:8px !important; background:var(--bs-rose) !important; color:var(--bs-white) !important; font-size:15px !important; font-weight:900 !important; padding:14px 28px !important; border-radius:14px !important; text-decoration:none !important; letter-spacing:-.2px !important; box-shadow:0 6px 20px rgba(201,133,110,.36) !important; position:relative !important; z-index:2 !important; transition:transform .15s var(--bs-ease) !important; }
-#bs-wrap .bs-hook-cta:hover { transform:translateY(-1px) !important; }
-#bs-wrap .bs-hook-sub { display:flex !important; align-items:center !important; justify-content:center !important; gap:14px !important; margin-top:14px !important; font-size:11px !important; color:rgba(255,255,255,.55) !important; font-weight:600 !important; position:relative !important; z-index:2 !important; flex-wrap:wrap !important; }
-#bs-wrap .bs-hook-sub-item { display:inline-flex !important; align-items:center !important; gap:4px !important; }
-#bs-wrap .bs-hook-sub-item::before { content:'·' !important; color:var(--bs-nude) !important; font-weight:900 !important; margin-right:2px !important; }
-#bs-wrap .bs-hook-sub-item:first-child::before { content:'' !important; margin-right:0 !important; }
-
-/* Footer */
-#bs-wrap .bs-foot { text-align:center !important; padding:14px 14px !important; font-size:11px !important; color:var(--bs-muted) !important; line-height:1.7 !important; }
-
-/* Mobile 480px 우선 */
-@media(max-width:480px) {
-  #bs-wrap .bs-main { padding:14px 14px 60px !important; }
-  #bs-wrap .bs-greet { padding:16px 16px 13px !important; }
-  #bs-wrap .bs-greet-h { font-size:16px !important; }
-  #bs-wrap .bs-hero { padding:18px 16px 20px !important; }
-  #bs-wrap .bs-hero-inner { gap:14px !important; }
-  #bs-wrap .bs-donut { width:92px !important; height:92px !important; }
-  #bs-wrap .bs-donut-num-v { font-size:30px !important; }
-  #bs-wrap .bs-hero-mean { font-size:13.5px !important; }
-  #bs-wrap .bs-delta { gap:8px !important; }
-  #bs-wrap .bs-delta-card { padding:12px 12px !important; }
-  #bs-wrap .bs-impact { padding:14px 16px !important; }
-  #bs-wrap .bs-impact-h { font-size:14.5px !important; }
-  #bs-wrap .bs-rx { padding:16px !important; }
-  #bs-wrap .bs-rx-weak { font-size:15px !important; }
-  #bs-wrap .bs-rx-step { padding:12px !important; gap:10px !important; }
-  #bs-wrap .bs-rx-step-ico { width:34px !important; height:34px !important; font-size:16px !important; }
-  #bs-wrap .bs-rx-step-h { font-size:13px !important; }
-  #bs-wrap .bs-strength { padding:13px 14px !important; }
-  #bs-wrap .bs-strength-h { font-size:13px !important; }
-  #bs-wrap .bs-hook { padding:20px 18px !important; }
-  #bs-wrap .bs-hook-h { font-size:17px !important; }
-  #bs-wrap .bs-hook-cta { font-size:14.5px !important; padding:13px 24px !important; width:100% !important; }
+/* ═══ 채팅 버블 ═══ */
+#bs-wrap .bs-bubble-wrap {
+  display: flex !important; gap: 8px !important;
+  margin-bottom: 14px !important; align-items: flex-end !important;
 }
+#bs-wrap .bs-mini-avatar {
+  width: 28px !important; height: 28px !important; border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-rose-dk) 100%) !important;
+  color: var(--bs-white) !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  font-size: 13px !important; flex-shrink: 0 !important;
+}
+#bs-wrap .bs-bubble {
+  background: var(--bs-white) !important;
+  border: 1px solid var(--bs-bd) !important;
+  border-radius: 18px !important; border-bottom-left-radius: 6px !important;
+  padding: 14px 16px !important;
+  font-size: 14.5px !important; color: var(--bs-text) !important;
+  line-height: 1.65 !important; letter-spacing: -.1px !important;
+  max-width: calc(100% - 40px) !important;
+  box-shadow: var(--bs-sh-sm) !important;
+}
+#bs-wrap .bs-bubble b { color: var(--bs-navy) !important; font-weight: 800 !important; }
+#bs-wrap .bs-bubble em {
+  font-style: normal !important; color: var(--bs-rose-dk) !important; font-weight: 800 !important;
+  background: var(--bs-nude-soft) !important; padding: 1px 6px !important; border-radius: 6px !important;
+}
+
+/* 점수 버블 (Hero급) */
+#bs-wrap .bs-bubble-score {
+  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important;
+  color: var(--bs-white) !important; border: none !important;
+  padding: 18px 20px !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-row {
+  display: flex !important; align-items: center !important; gap: 14px !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-donut {
+  width: 64px !important; height: 64px !important; flex-shrink: 0 !important; position: relative !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-donut svg { width: 100% !important; height: 100% !important; transform: rotate(-90deg) !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-inner {
+  position: absolute !important; inset: 0 !important;
+  display: flex !important; flex-direction: column !important;
+  align-items: center !important; justify-content: center !important; line-height: 1 !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-d-num { font-size: 22px !important; font-weight: 900 !important; color: var(--bs-white) !important; letter-spacing: -.04em !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-lbl { font-size: 9px !important; color: rgba(255,255,255,.7) !important; font-weight: 700 !important; margin-top: 2px !important; }
+#bs-wrap .bs-bubble-score .bs-score-info { flex: 1 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade {
+  display: inline-block !important;
+  background: var(--bs-rose) !important; color: var(--bs-white) !important;
+  font-size: 12px !important; font-weight: 900 !important;
+  padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-rank {
+  font-size: 13px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,.92) !important; line-height: 1.5 !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-rank b { color: var(--bs-nude) !important; font-weight: 900 !important; }
+
+#bs-wrap .bs-bubble-group { margin-bottom: 18px !important; }
+#bs-wrap .bs-bubble-group .bs-bubble-wrap { margin-bottom: 6px !important; }
+#bs-wrap .bs-bubble-group .bs-bubble-wrap:last-child { margin-bottom: 0 !important; }
+#bs-wrap .bs-bubble-group .bs-bubble-wrap:not(:first-child) .bs-mini-avatar { visibility: hidden !important; }
+
+/* CTA 가운데 정렬 */
+#bs-wrap .bs-cta-bubble {
+  display: flex !important; flex-direction: column !important; gap: 10px !important;
+  margin: 18px auto 0 !important;
+  align-items: center !important;
+  max-width: 360px !important; width: 100% !important;
+}
+#bs-wrap .bs-cta-option {
+  background: var(--bs-rose) !important; color: var(--bs-white) !important;
+  border: none !important; border-radius: 14px !important;
+  padding: 14px 20px !important;
+  font-size: 14.5px !important; font-weight: 800 !important;
+  text-align: center !important; cursor: pointer !important; font-family: inherit !important;
+  letter-spacing: -.2px !important;
+  box-shadow: 0 4px 14px rgba(201,133,110,.30) !important;
+  transition: transform .15s ease !important;
+  text-decoration: none !important;
+  display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important;
+  width: 100% !important;
+}
+#bs-wrap .bs-cta-option:hover { transform: translateY(-1px) !important; }
+#bs-wrap .bs-cta-option-secondary {
+  background: var(--bs-white) !important; color: var(--bs-navy) !important;
+  border: 1px solid var(--bs-bd) !important;
+  box-shadow: var(--bs-sh-sm) !important;
+}
+#bs-wrap .bs-cta-arrow { font-size: 16px !important; opacity: .9 !important; }
+
+/* 미니 카드 */
+#bs-wrap .bs-mini-card {
+  display: flex !important; align-items: center !important; gap: 8px !important;
+  padding: 8px 10px !important;
+  background: var(--bs-cream) !important;
+  border-radius: 10px !important;
+  margin-top: 8px !important;
+  font-size: 13px !important;
+}
+#bs-wrap .bs-mini-card-ico { font-size: 16px !important; flex-shrink: 0 !important; }
+#bs-wrap .bs-mini-card-text { flex: 1 !important; line-height: 1.4 !important; font-weight: 600 !important; }
+#bs-wrap .bs-mini-card-text b { color: var(--bs-navy) !important; font-weight: 800 !important; }
+
+/* 타이핑 인디케이터 */
+#bs-wrap .bs-typing-row {
+  display: none;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#bs-wrap .bs-typing-row.show { display: flex !important; }
+#bs-wrap .bs-typing-bubble {
+  background: var(--bs-white) !important;
+  border: 1px solid var(--bs-bd) !important;
+  border-radius: 18px !important; border-bottom-left-radius: 6px !important;
+  padding: 12px 18px !important;
+  display: inline-flex !important; gap: 5px !important; align-items: center !important;
+  box-shadow: var(--bs-sh-sm) !important;
+}
+#bs-wrap .bs-typing-dot {
+  width: 7px !important; height: 7px !important; border-radius: 50% !important;
+  background: var(--bs-muted) !important;
+  animation: bsBounceDot 1.2s ease-in-out infinite !important;
+}
+#bs-wrap .bs-typing-dot:nth-child(2) { animation-delay: .15s !important; }
+#bs-wrap .bs-typing-dot:nth-child(3) { animation-delay: .30s !important; }
+@keyframes bsBounceDot {
+  0%, 60%, 100% { opacity: .3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-5px); }
+}
+
+/* 버블 등장 애니메이션 */
+#bs-wrap .bs-pending {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+#bs-wrap .bs-pending.show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* 4 운영지표 미니 인포 */
+#bs-wrap .bs-kpi-mini {
+  display: flex !important; align-items: center !important; gap: 8px !important;
+  padding: 10px 12px !important;
+  background: var(--bs-cream) !important;
+  border-radius: 10px !important;
+  margin-top: 10px !important;
+  font-size: 13px !important;
+  border-left: 3px solid var(--bs-bd) !important;
+}
+#bs-wrap .bs-kpi-mini.good { border-left-color: var(--bs-ok) !important; background: rgba(46,125,94,.05) !important; }
+#bs-wrap .bs-kpi-mini.warn { border-left-color: var(--bs-warn) !important; background: rgba(179,96,21,.05) !important; }
+#bs-wrap .bs-kpi-mini.flat { border-left-color: var(--bs-rose-dk) !important; background: rgba(201,133,110,.06) !important; }
+#bs-wrap .bs-kpi-mini-name {
+  font-weight: 800 !important; color: var(--bs-navy) !important;
+  flex-shrink: 0 !important; font-size: 12.5px !important;
+}
+#bs-wrap .bs-kpi-mini-bar {
+  flex: 1 !important; height: 6px !important; border-radius: 3px !important;
+  background: rgba(22,33,62,.08) !important;
+  overflow: hidden !important; position: relative !important;
+}
+#bs-wrap .bs-kpi-mini-bar::after {
+  content: ''; position: absolute !important;
+  left: 0 !important; top: 0 !important; bottom: 0 !important;
+  border-radius: 3px !important;
+  width: 0% !important;
+  background: var(--bs-kpi-c, var(--bs-rose-dk)) !important;
+  transition: width 1s cubic-bezier(.4,0,.2,1) !important;
+}
+#bs-wrap .bs-pending.show .bs-kpi-mini-bar::after { width: var(--bs-kpi-w, 0%) !important; }
+#bs-wrap .bs-kpi-mini-val {
+  font-weight: 900 !important; color: var(--bs-navy) !important;
+  font-size: 14px !important; flex-shrink: 0 !important;
+  letter-spacing: -.04em !important;
+}
+
+/* Foot */
+#bs-wrap .bs-foot { text-align: center !important; padding: 24px 14px 0 !important; font-size: 11px !important; color: var(--bs-muted) !important; line-height: 1.7 !important; }
 </style>
 </head>
 <body>
 
 <div id="bs-wrap">
-  <header class="bs-hdr">
-    <div class="bs-h-logo">
-      <img class="bs-h-logo-img" src="https://github.com/Beautyscore/beautyscore-result/raw/main/logo.png" alt="뷰티스코어">
-      <div class="bs-h-text">
-        <div class="bs-h-name">뷰티스코어</div>
-        <div class="bs-h-slogan">원장님의 경영 스코어</div>
+
+<header class="bs-hdr">
+  <div class="bs-h-avatar">👤</div>
+  <div class="bs-h-info">
+    <div class="bs-h-name">진단 코치</div>
+    <div class="bs-h-status">매장 분석 완료</div>
+  </div>
+  <div class="bs-h-tag">진단 완료</div>
+</header>
+
+<!-- Skip 버튼 -->
+<div class="bs-skip" id="bs-skip">
+  <button class="bs-skip-btn" type="button" id="bs-skip-btn">전체 보기 →</button>
+</div>
+
+<main class="bs-main">
+
+  <div class="bs-time" id="bs-time">진단 코치 보고</div>
+
+  <!-- ⭐ 자동 시퀀스 — 5개 버블 (default hidden) -->
+  <div class="bs-bubble-group bs-pending" id="bubble-1" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        <b id="bs-store-name">윤혜뷰티</b> 원장님, 안녕하세요. 첫 진단 보고드릴게요. 🎯<br>
+        <b id="bs-period">운영 3년차</b>에 데이터를 보고 운영하시는 👍<br>
+        매장 운영 점수를 해봤어요!
       </div>
     </div>
-    <div class="bs-h-tag">진단 완료</div>
-  </header>
+  </div>
 
-  <main class="bs-main">
-
-    <div class="bs-greet">
-      <div class="bs-greet-tag">🎯 원장님의 첫 진단 결과</div>
-      <div class="bs-greet-h">
-        <b id="bs-store-name">지영</b> 원장님,<br>
-        <span id="bs-store-type">소규모 페이스 관리 매장</span><br>
-        <span class="bs-greet-em" id="bs-store-position">상위 38%</span> 매장입니다.
+  <!-- 점수 (Hero 버블) -->
+  <div class="bs-bubble-group bs-pending" id="bubble-score" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble bs-bubble-score">
+        <div class="bs-score-row">
+          <div class="bs-mini-donut">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/>
+              <circle id="bs-donut-fg" cx="50" cy="50" r="42" fill="none" stroke="#E8B4A8" stroke-width="9"
+                stroke-dasharray="166.5 263.89" stroke-linecap="round"/>
+            </svg>
+            <div class="bs-mini-d-inner">
+              <span class="bs-mini-d-num" id="bs-score">63</span>
+              <span class="bs-mini-d-lbl">점</span>
+            </div>
+          </div>
+          <div class="bs-score-info">
+            <div class="bs-score-grade" id="bs-grade">C+ 등급</div>
+            <div class="bs-score-rank">동일 카테고리<br><b id="bs-rank">상위 50%</b> · <span id="bs-score-delta">평균 67점 -4점</span></div>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- ⭐ 강점 카드 (v2.0.4 patch — Hero 직후 신설) -->
-    <!-- 짝 박제: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md §1·5 -->
-    <section class="bs-strength-card">
-      <div class="bs-strength-tag">🌟 우리 매장 강점</div>
-      <div class="bs-strength-h" id="bs-strength-h">재방문 단골이 자산인 매장</div>
-    </section>
-
-    <section class="bs-hero">
-      <div class="bs-hero-inner">
-        <div class="bs-donut">
-          <svg viewBox="0 0 100 100">
-            <circle class="bs-donut-bg" cx="50" cy="50" r="42"></circle>
-            <circle class="bs-donut-fg" id="bs-donut-fg" cx="50" cy="50" r="42" stroke-dasharray="0 263.89" stroke-dashoffset="0"></circle>
-          </svg>
-          <div class="bs-donut-num">
-            <div class="bs-donut-num-v" id="bs-score">75</div>
-            <div class="bs-donut-num-u">점</div>
-          </div>
+  <!-- 강점 -->
+  <div class="bs-bubble-group bs-pending" id="bubble-2" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        먼저 강점부터요. 💎<br>
+        <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
+        <div class="bs-mini-card">
+          <span class="bs-mini-card-ico">✨</span>
+          <span class="bs-mini-card-text"><span id="bs-strength-name-2">상담 성공률</span> <b id="bs-strength-delta">+14%p</b> · 평균보다 높음</span>
         </div>
-        <div class="bs-hero-side">
-          <div class="bs-hero-grade" id="bs-grade">B 등급</div>
-          <div class="bs-hero-mean">
-            동일 카테고리 매장 중<br>
-            <b id="bs-position-mean">상위 38%</b> 위치입니다.
-          </div>
-        </div>
+        <div style="margin-top:10px;">이건 잘 유지하시면서 다음 영역만 보강하면 됩니다.</div>
       </div>
-    </section>
-
-    <section class="bs-delta">
-      <div class="bs-delta-card first">
-        <div class="bs-delta-lbl">이번 진단</div>
-        <div class="bs-delta-val">신규</div>
-        <div class="bs-delta-sub">다음 진단 시<br>변화 추적 시작</div>
-      </div>
-      <div class="bs-delta-card">
-        <div class="bs-delta-lbl">업계 평균 대비</div>
-        <div class="bs-delta-val up" id="bs-delta-industry">+12%</div>
-        <div class="bs-delta-sub">동일 카테고리<br>평균 67점</div>
-      </div>
-    </section>
-
-    <section class="bs-impact">
-      <div class="bs-impact-tag">🎯 가장 큰 기회</div>
-      <div class="bs-impact-h">
-        코치가 분석해보니 —<br>
-        <b id="bs-weakness-1">재방문율(32%)</b>이 가장 큰 지렛대입니다.
-      </div>
-      <div class="bs-impact-money">
-        이거 하나만 잡아도 — 월 <em id="bs-impact-money">120만원</em> 회수 가능
-      </div>
-    </section>
-
-    <section class="bs-rx">
-      <div class="bs-rx-tag">💡 처방</div>
-      <div class="bs-rx-weak">
-        <em>재방문율 낮음</em> — 32% / 업계 평균 48%
-      </div>
-      <div class="bs-rx-meta">
-        매장에 맞춰 — 코치 1회 → 전용비서 매일 → AI 풀세트로 강도를 키웁니다.
-      </div>
-      <div class="bs-rx-ladder">
-        <div class="bs-rx-step free">
-          <div class="bs-rx-step-ico">🎯</div>
-          <div class="bs-rx-step-body">
-            <span class="bs-rx-step-tag">무료 · 진단 코치</span>
-            <div class="bs-rx-step-h">오늘의 액션 1건 — 첫 진단 미션</div>
-          </div>
-        </div>
-        <div class="bs-rx-step basic">
-          <div class="bs-rx-step-ico">📅</div>
-          <div class="bs-rx-step-body">
-            <span class="bs-rx-step-tag">BASIC · 전용비서</span>
-            <div class="bs-rx-step-h">매일 모닝톡 보고 + 14일 도장 챌린지</div>
-          </div>
-        </div>
-        <div class="bs-rx-step pro">
-          <div class="bs-rx-step-ico">🤖</div>
-          <div class="bs-rx-step-body">
-            <span class="bs-rx-step-tag">PRO · AI 풀세트</span>
-            <div class="bs-rx-step-h">24시간 AI 챗봇 + 액션 시뮬레이터</div>
-            <div class="bs-rx-step-soon">6월 중순 활성</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bs-strength">
-      <div class="bs-strength-ico">💎</div>
-      <div class="bs-strength-body">
-        <div class="bs-strength-tag">강점 자산</div>
-        <div class="bs-strength-h">
-          <b id="bs-strength">상담 성공률</b>이 매장의 자산입니다 — 동일 카테고리 평균 <b id="bs-strength-delta">+14%p</b> 상회
-        </div>
-      </div>
-    </section>
-
-    <section class="bs-detail">
-      <button class="bs-detail-toggle" id="bs-detail-toggle" type="button">
-        <div class="bs-detail-toggle-h">📑 분석 자세히 보기</div>
-        <div class="bs-detail-toggle-arrow">▼</div>
-      </button>
-      <div class="bs-detail-body">
-        <div class="bs-detail-card core">
-          <div class="bs-detail-card-h">🟢 핵심 영역</div>
-          <div class="bs-detail-card-d" id="bs-ai-core">
-            상담 성공률이 동일 카테고리 평균을 +14%p 상회.<br>
-            첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있습니다.
-          </div>
-        </div>
-        <div class="bs-detail-card watch">
-          <div class="bs-detail-card-h">🟡 주의 영역</div>
-          <div class="bs-detail-card-d" id="bs-ai-watch">
-            재방문율 32%는 업계 평균 48% 대비 −16%p.<br>
-            첫 방문 고객의 2회차 전환이 끊기는 패턴입니다.
-          </div>
-        </div>
-        <div class="bs-detail-card act">
-          <div class="bs-detail-card-h">🎯 다음 액션 (확장)</div>
-          <div class="bs-detail-card-d" id="bs-ai-action">
-            재방문 부스터 캠페인 + 30일 캘린더 알림.<br>
-            매일 1분 입력으로 흐름 변화 즉시 포착 가능합니다.
-          </div>
-        </div>
-        <div class="bs-detail-card flow">
-          <div class="bs-detail-card-h">📈 운영 흐름</div>
-          <div class="bs-detail-card-d" id="bs-ai-flow">
-            전반적인 운영은 안정적.<br>
-            단, 재방문 한 축만 보강하면 동일 카테고리 상위 20% 진입 가능합니다.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bs-hook">
-      <div class="bs-hook-tag">🔥 다음 단계</div>
-      <div class="bs-hook-h">
-        <em>전용비서</em>가 매일 옆에 있으면<br>
-        매장은 매일 1분이면 충분합니다
-      </div>
-      <div class="bs-hook-d">
-        대시보드에서 전용비서가 매일 모닝톡으로 보고합니다.<br>
-        감이 아닌 숫자, 추측이 아닌 액션 — 매일.
-      </div>
-      <a class="bs-hook-cta" href="https://app.beautyscore.co.kr/dashboard-preview" id="bs-hook-cta" target="_top">
-        대시보드 체험하기 →
-      </a>
-      <div class="bs-hook-sub">
-        <span class="bs-hook-sub-item">무료 체험</span>
-        <span class="bs-hook-sub-item">설치 없이 바로</span>
-        <span class="bs-hook-sub-item">언제든 해지</span>
-      </div>
-    </section>
-
-    <div class="bs-foot">
-      ※ 위 수치는 예시입니다. 실제 점수·기여도·금액은 진단 데이터에 따라 산정됩니다.<br>
-      문의 안내 — 카카오 채널 @뷰티스코어 · 평일 9~18시
     </div>
+  </div>
 
-  </main>
+  <!-- 가장 큰 기회 -->
+  <div class="bs-bubble-group bs-pending" id="bubble-3" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        가장 큰 기회는 <em id="bs-weak-name">재방문율</em>입니다.<br>
+        <span id="bs-weak-improve">+5%p</span>만 회복해도 <b id="bs-weak-score-up">+12점</b> 올라가요.
+        <div class="bs-mini-card">
+          <span class="bs-mini-card-ico">🚨</span>
+          <span class="bs-mini-card-text">월 약 <b id="bs-monthly-gap">___만원</b> 회복 가능한 격차</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 권유 -->
+  <div class="bs-bubble-group bs-pending" id="bubble-4" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        매일 옆에서 이 흐름을 같이 봐드릴까요? ⚡<br>
+        대시보드에서 매일 모닝톡으로 보고하고,<br>
+        액션 1건씩 코칭해드려요.<br>
+        <span style="font-size:12px;color:var(--bs-muted);font-weight:600;">무료 체험 · 30일 자동 보존 · 언제든 해지</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 초기 CTA 옵션 -->
+  <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
+    <a class="bs-cta-option" href="/dashboard-preview" id="bs-cta-dashboard-1">
+      <span>네, 대시보드 체험할게요</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
+    <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-detail-trigger">
+      <span>진단 자세히 먼저 볼게요</span>
+      <span class="bs-cta-arrow">▼</span>
+    </button>
+  </div>
+
+  <!-- 타이핑 인디케이터 -->
+  <div class="bs-typing-row" id="bs-typing">
+    <div class="bs-mini-avatar">👤</div>
+    <div class="bs-typing-bubble">
+      <span class="bs-typing-dot"></span>
+      <span class="bs-typing-dot"></span>
+      <span class="bs-typing-dot"></span>
+    </div>
+  </div>
+
+  <!-- ⭐ 진단 자세히 — 추가 버블 시퀀스 -->
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-1" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        좋아요, 차근차근 알려드릴게요.<br>
+        운영지표 4종을 하나씩 살펴볼게요. 📊
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-2" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
+        평균 대비 <em id="bs-kpi-cs-delta">+14%p ↑</em>. 첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요.
+        <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
+          <span class="bs-kpi-mini-name">상담 성공률</span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"></span>
+          <span class="bs-kpi-mini-val" id="bs-kpi-cs-val">80</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-3" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
+        가장 큰 회복 영역이에요. 첫 방문 고객의 2회차 전환이 끊기는 패턴이고요.<br>
+        <em>+5%p만 회복해도 +12점</em> 올라갑니다.
+        <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
+          <span class="bs-kpi-mini-name">재방문율</span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"></span>
+          <span class="bs-kpi-mini-val" id="bs-kpi-rv-val">65</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-4" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        🔵 <b>셋째·넷째 — 매출 구조 <span id="bs-kpi-rs">75</span>점 / 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
+        단건 시술 + 회원권 균형은 좋아요.<br>
+        매일 입력 빈도만 더 늘면 한 단계 더 올라갑니다.
+        <div class="bs-kpi-mini flat">
+          <span class="bs-kpi-mini-name">매출 구조</span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#C9856E;"></span>
+          <span class="bs-kpi-mini-val" id="bs-kpi-rs-val">75</span>
+        </div>
+        <div class="bs-kpi-mini flat" style="margin-top:6px;">
+          <span class="bs-kpi-mini-name">데이터 관리</span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#C9856E;"></span>
+          <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-5" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        <b>강점은 지키고, 재방문 한 축만 보강하면<br>상위 35% 진입 가능</b>합니다.<br><br>
+        매일 옆에서 봐드리는 게 가장 빠른 방법인데,<br>
+        부담 없이 30일 무료 체험 어떠세요? ⚡
+      </div>
+    </div>
+  </div>
+
+  <!-- 자세히 끝 새 CTA -->
+  <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
+    <a class="bs-cta-option" href="/dashboard-preview" id="bs-cta-dashboard-2">
+      <span>지금 체험해볼게요</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
+    <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-kakao-trigger">
+      <span>나중에 다시 볼게요(카톡 채널 추가)</span>
+      <span class="bs-cta-arrow">💬</span>
+    </button>
+  </div>
+
+  <div class="bs-foot">
+    ※ 본 진단은 입력하신 정보 기반 산정 결과입니다.<br>
+    문의 안내 — 카카오 채널 @뷰티스코어 · 평일 9~18시 KST
+  </div>
+
+</main>
 </div>
 
 <script>
 (function(){
   'use strict';
-  var urlParams = new URLSearchParams(window.location.search);
 
-  /* ═══ 토큰 처리 (v2.6.2 동등 stub) ═══ */
-  (function bsHandleToken(){
-    var token = urlParams.get('token') || '';
-    if (!token) return;
-    try { sessionStorage.setItem('bs_session_token_v1', token); } catch (e) {}
-    try {
-      var clean = location.search.replace(/[?&]token=[^&]+(?=&|$)/, '').replace(/^&/, '?').replace(/^\?$/, '');
-      history.replaceState(null, '', location.pathname + clean + location.hash);
-    } catch (e) {}
-  })();
+  /* ═══ URL params + mock fallback ═══ */
+  var p = new URLSearchParams(window.location.search);
+  function pq(k, fb) { var v = p.get(k); return (v && v.trim() !== '') ? v.trim() : fb; }
 
-  /* ═══ v2.0.4 patch: 매장 유형 + 강점/약점 KPI 매핑 ═══
-     짝 박제: 의사결정/뷰티스코어_result_강점약점카피_2026-05-07_v0.1.md */
+  var DATA = {
+    recordId:    pq('recordId', 'demo'),
+    store:       pq('store', '윤혜뷰티'),
+    period:      pq('period', '운영 3년차'),
+    score:       pq('score', '63'),
+    grade:       pq('grade', 'C+ 등급'),
+    rank:        pq('rank', '상위 50%'),
+    scoreDelta:  pq('scoreDelta', '평균 67점 -4점'),
+    /* 4 운영지표 점수 (rv·cs·rs·dm) */
+    rv:          parseInt(pq('rv', '65'), 10),
+    cs:          parseInt(pq('cs', '80'), 10),
+    rs:          parseInt(pq('rs', '75'), 10),
+    dm:          parseInt(pq('dm', '65'), 10),
+    /* 강점·약점 */
+    strKpi:      pq('strKpi', 'cs'),
+    weakKpi:     pq('weakKpi', 'rv'),
+    strDelta:    pq('strDelta', '+14%p'),
+    weakImprove: pq('weakImprove', '+5%p'),
+    weakScoreUp: pq('weakScoreUp', '+12점'),
+    monthlyGap:  pq('monthlyGap', '___만원')
+  };
 
-  /* 운영형태 × 매장규모 → 매장 유형 카피 (20 조합) */
-  function bsGetStoreType(operType, size) {
-    if (!operType && !size) return '';
-    if (operType === '복합 관리' && size === '10인 이상') return '대형 종합 매장';
-    if (operType === '기타(부속)') {
-      if (size === '1인샵') return '1인 운영 매장';
-      if (size === '2-4인') return '소규모 매장';
-      if (size === '5-9인') return '여러 직원과 운영하시는 매장';
-      if (size === '10인 이상') return '대형 매장';
-      return '';
+  var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' };
+
+  /* ═══ DOM 데이터 주입 ═══ */
+  function setText(id, val) { var el = document.getElementById(id); if (el && val != null) el.textContent = val; }
+  function applyData() {
+    setText('bs-store-name', DATA.store);
+    setText('bs-period', DATA.period);
+    setText('bs-score', DATA.score);
+    setText('bs-grade', DATA.grade);
+    setText('bs-rank', DATA.rank);
+    setText('bs-score-delta', DATA.scoreDelta);
+    setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
+    setText('bs-strength-name-2', KPI_NAME[DATA.strKpi] || '상담 성공률');
+    setText('bs-strength-delta', DATA.strDelta);
+    setText('bs-weak-name', KPI_NAME[DATA.weakKpi] || '재방문율');
+    setText('bs-weak-improve', DATA.weakImprove);
+    setText('bs-weak-score-up', DATA.weakScoreUp);
+    setText('bs-monthly-gap', DATA.monthlyGap);
+    /* 4 운영지표 점수 + 미니 바 */
+    setText('bs-kpi-cs', DATA.cs); setText('bs-kpi-cs-val', DATA.cs);
+    setText('bs-kpi-rv', DATA.rv); setText('bs-kpi-rv-val', DATA.rv);
+    setText('bs-kpi-rs', DATA.rs); setText('bs-kpi-rs-val', DATA.rs);
+    setText('bs-kpi-dm', DATA.dm); setText('bs-kpi-dm-val', DATA.dm);
+    /* 미니 바 width 적용 */
+    setBarWidth('bs-kpi-mini-cs', DATA.cs);
+    setBarWidth('bs-kpi-mini-rv', DATA.rv);
+    /* 도넛 — score 기반 stroke-dasharray 계산 */
+    var donutLen = 263.89;
+    var fg = document.getElementById('bs-donut-fg');
+    if (fg) {
+      var pct = Math.min(100, Math.max(0, parseInt(DATA.score, 10) || 0));
+      fg.setAttribute('stroke-dasharray', (donutLen * pct / 100).toFixed(1) + ' ' + donutLen);
     }
-    var sizeMap = { '1인샵': '1인', '2-4인': '소규모', '5-9인': '여러 직원과 운영하시는', '10인 이상': '대형' };
-    var typeMap = {
-      '페이스 관리': '페이스 관리 전문',
-      '바디 관리': '바디 관리 전문',
-      '두피 관리': '두피 관리 전문',
-      '복합 관리': '복합 관리'
-    };
-    var sizeStr = sizeMap[size] || '';
-    var typeStr = typeMap[operType] || '';
-    if (!sizeStr || !typeStr) return '';
-    return sizeStr + ' ' + typeStr + ' 매장';
+  }
+  function setBarWidth(parentId, val) {
+    var el = document.getElementById(parentId);
+    if (!el) return;
+    var bar = el.querySelector('.bs-kpi-mini-bar');
+    if (bar) bar.style.setProperty('--bs-kpi-w', (val || 0) + '%');
   }
 
-  /* 강점 KPI 코드 → C 톤 카피 (대표님 5/7 명시) */
-  var STRENGTH_COPY = {
-    rv: '재방문 단골이 자산인 매장',
-    cs: '상담 전환력이 강한 매장',
-    rs: '매출 구성이 안정적인 매장',
-    dm: '고객 이력 관리 잘하는 매장'
-  };
+  /* ═══ 시퀀스 ═══ */
+  var SEEN_KEY = 'bs_result_seen_' + DATA.recordId;
+  var INITIAL_SEQUENCE = [
+    { type: 'typing', wait: 500 },
+    { type: 'bubble', id: 'bubble-1', wait: 900 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-score', wait: 1300 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-2', wait: 1500 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-3', wait: 1500 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-4', wait: 1500 },
+    { type: 'cta', id: 'bs-cta-initial', wait: 700 }
+  ];
+  var DETAIL_SEQUENCE = [
+    { type: 'typing', wait: 600 },
+    { type: 'bubble', id: 'bubble-detail-1', wait: 900 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-detail-2', wait: 1300 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-detail-3', wait: 1500 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-detail-4', wait: 1500 },
+    { type: 'typing', wait: 250 },
+    { type: 'bubble', id: 'bubble-detail-5', wait: 1700 },
+    { type: 'cta', id: 'bs-cta-detail', wait: 700 }
+  ];
+  var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-3','bubble-4','bs-cta-initial'];
+  var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-5','bs-cta-detail'];
+  var pendingTimeouts = [];
+  var detailShown = false;
+  var initialSequenceActive = false;
 
-  /* 약점 KPI 코드 → 긍정 프레임 카피 (대표님 5/7 명시) */
-  var WEAKNESS_COPY = {
-    rv: '재방문 고객을 더 늘릴 기회가 있어요',
-    cs: '상담은 결제로 전환시킬 수 있는 기회를 만들어보세요',
-    rs: '매출 구성에 균형이 필요해요',
-    dm: '매일 입력하시면 분석이 더 정밀해져요'
-  };
-
-  /* ═══ 데이터 로딩 — 우선순위: postMessage > URL params > mock ═══ */
-  function bsLoadDataFromUrl(){
-    if (!urlParams.get('score') && !urlParams.get('store')) return null;
-    var operType = urlParams.get('op') || '';
-    var size     = urlParams.get('size') || '';
-    var strKpi   = urlParams.get('strKpi') || '';
-    var weakKpi  = urlParams.get('weakKpi') || '';
-    return {
-      store_name: urlParams.get('store') || '지영',
-      store_type: bsGetStoreType(operType, size),
-      score: parseInt(urlParams.get('score') || 75),
-      grade: urlParams.get('grade') || 'B',
-      position_text: urlParams.get('rank') || '상위 38%',
-      delta_industry: urlParams.get('di') || '+12%',
-      weakness_1: urlParams.get('weak') || '재방문율(32%)',
-      weakness_copy: WEAKNESS_COPY[weakKpi] || null,
-      impact_money: urlParams.get('im') || '120만원',
-      strength: urlParams.get('str') || '상담 성공률',
-      strength_delta: urlParams.get('strD') || '+14%p',
-      strength_copy: STRENGTH_COPY[strKpi] || null,
-      ai_core: urlParams.get('aiCore') || null,
-      ai_watch: urlParams.get('aiWatch') || null,
-      ai_action: urlParams.get('aiAction') || null,
-      ai_flow: urlParams.get('aiFlow') || null
-    };
-  }
-
-  function setText(id, val){
-    if (val === null || val === undefined || val === '') return;
+  function showTyping() { var el = document.getElementById('bs-typing'); if (el) el.classList.add('show'); scrollToBottom(); }
+  function hideTyping() { var el = document.getElementById('bs-typing'); if (el) el.classList.remove('show'); }
+  function showBubble(id) {
     var el = document.getElementById(id);
-    if (el) el.textContent = val;
-  }
-
-  function bsApply(d){
-    if (!d) return;
-    setText('bs-store-name', d.store_name);
-    /* v2.0.4: 매장 유형 (op + size 조합 → 카피) */
-    if (d.store_type) {
-      setText('bs-store-type', d.store_type);
-    }
-    setText('bs-store-position', d.position_text);
-    setText('bs-score', d.score);
-    setText('bs-grade', (d.grade ? d.grade + ' 등급' : ''));
-    setText('bs-position-mean', d.position_text);
-    setText('bs-delta-industry', d.delta_industry);
-    setText('bs-weakness-1', d.weakness_1);
-    setText('bs-impact-money', d.impact_money);
-    setText('bs-strength', d.strength);
-    setText('bs-strength-delta', d.strength_delta);
-    /* v2.0.4: 강점 카드 카피 (KPI 코드 → C 톤 카피) */
-    if (d.strength_copy) {
-      setText('bs-strength-h', d.strength_copy);
-    }
-    if (d.ai_core)   setText('bs-ai-core', d.ai_core);
-    if (d.ai_watch)  setText('bs-ai-watch', d.ai_watch);
-    if (d.ai_action) setText('bs-ai-action', d.ai_action);
-    if (d.ai_flow)   setText('bs-ai-flow', d.ai_flow);
-
-    /* 도넛 채우기 (총 둘레 263.89 = 2π × 42) */
-    var score = parseInt(d.score) || 0;
-    var dash = Math.max(0, Math.min(100, score)) / 100 * 263.89;
-    var donut = document.getElementById('bs-donut-fg');
-    if (donut){
-      setTimeout(function(){
-        donut.setAttribute('stroke-dasharray', dash + ' 263.89');
-      }, 200);
-    }
-
-    /* 부모에 높이 송신 (iframe auto-resize) */
-    sendHeight();
-  }
-
-  /* ═══ 분석 자세히 보기 — 접기·펴기 ═══ */
-  (function bsDetailToggle(){
-    var btn = document.getElementById('bs-detail-toggle');
-    if (!btn) return;
-    btn.addEventListener('click', function(){
-      btn.classList.toggle('open');
-      setTimeout(sendHeight, 250);
+    if (!el) return;
+    el.style.display = '';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        el.classList.add('show');
+        scrollToBottom();
+        setTimeout(postHeight, 450);
+      });
     });
-  })();
+  }
+  function showAllImmediate(ids) {
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = '';
+      el.classList.add('show');
+    });
+    setTimeout(postHeight, 100);
+  }
+  function scrollToBottom() {
+    setTimeout(function(){
+      window.scrollTo({ top: document.body.scrollHeight + 200, behavior: 'smooth' });
+    }, 80);
+  }
+  function clearPending() { pendingTimeouts.forEach(function(t){ clearTimeout(t); }); pendingTimeouts = []; }
+  function showSkipBtn() { var el = document.getElementById('bs-skip'); if (el) el.classList.add('show'); }
+  function hideSkipBtn() { var el = document.getElementById('bs-skip'); if (el) el.classList.remove('show'); }
 
-  /* ═══ Hook 메인 CTA — 단일 (대시보드 체험만) ═══ */
-  (function bsHookLink(){
-    var recordId = urlParams.get('recordId') || '';
-    var rid = recordId ? '?recordId=' + encodeURIComponent(recordId) : '';
-    var BASE = 'https://app.beautyscore.co.kr';
-    var hook = document.getElementById('bs-hook-cta');
-    if (hook) hook.href = BASE + '/dashboard-preview' + rid;
-  })();
+  function runSequence(sequence, onComplete) {
+    var totalDelay = 0;
+    sequence.forEach(function(step){
+      totalDelay += step.wait;
+      var t = setTimeout(function(){
+        if (step.type === 'typing') showTyping();
+        else if (step.type === 'bubble') { hideTyping(); showBubble(step.id); }
+        else if (step.type === 'cta') showBubble(step.id);
+      }, totalDelay);
+      pendingTimeouts.push(t);
+    });
+    var doneT = setTimeout(function(){
+      hideTyping(); hideSkipBtn();
+      if (typeof onComplete === 'function') onComplete();
+    }, totalDelay + 200);
+    pendingTimeouts.push(doneT);
+  }
 
-  /* ═══ postMessage — 부모(Softr)와 양방향 통신 ═══ */
-  function sendHeight(){
+  function skipAll() {
+    clearPending(); hideTyping(); hideSkipBtn();
+    if (initialSequenceActive) {
+      showAllImmediate(initialBubbles);
+      initialSequenceActive = false;
+      try { localStorage.setItem(SEEN_KEY, '1'); } catch(e){}
+    }
+    if (detailShown) showAllImmediate(detailBubbles);
+    scrollToBottom();
+  }
+
+  function startInitialSequence() {
+    initialSequenceActive = true;
+    showSkipBtn();
+    runSequence(INITIAL_SEQUENCE, function(){
+      initialSequenceActive = false;
+      try { localStorage.setItem(SEEN_KEY, '1'); } catch(e){}
+    });
+  }
+
+  function startDetailSequence() {
+    if (detailShown) return;
+    detailShown = true;
+    var initialCta = document.getElementById('bs-cta-initial');
+    if (initialCta) {
+      initialCta.style.transition = 'opacity .35s ease, transform .35s ease';
+      initialCta.style.opacity = '0';
+      initialCta.style.transform = 'translateY(-6px)';
+      setTimeout(function(){ initialCta.style.display = 'none'; postHeight(); }, 380);
+    }
+    showSkipBtn();
+    runSequence(DETAIL_SEQUENCE);
+  }
+
+  /* ═══ 카톡 채널 추가 + 종료 ═══ */
+  function kakaoFollowAndExit() {
+    window.open('http://pf.kakao.com/_SXpxhX/friend', '_blank', 'noopener');
     try {
-      var h = document.body.scrollHeight;
-      window.parent.postMessage({ type: 'BS_HEIGHT', height: h }, '*');
+      var t = document.createElement('div');
+      t.style.cssText = 'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#16213E;color:#fff;padding:14px 22px;border-radius:14px;font-size:13.5px;font-weight:700;letter-spacing:-.2px;box-shadow:0 8px 24px rgba(22,33,62,.25);z-index:300;max-width:90%;text-align:center;font-family:"Pretendard Variable",sans-serif;line-height:1.5;';
+      t.innerHTML = '카톡 채널 추가 후<br>다음에 또 만나요 ✨';
+      document.body.appendChild(t);
+    } catch(e){}
+    setTimeout(function(){
+      /* iframe 안이면 부모 redirect, 아니면 자기 redirect */
+      try {
+        if (window.top !== window.self) {
+          window.top.location.href = 'https://beautyscore.co.kr';
+          return;
+        }
+      } catch(e){}
+      location.href = 'https://beautyscore.co.kr';
+    }, 1800);
+  }
+
+  /* ═══ postMessage BS_HEIGHT (Softr wrapper iframe 동기) ═══ */
+  function postHeight() {
+    try {
+      var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'BS_HEIGHT', height: h }, '*');
+      }
     } catch(e){}
   }
-  window.addEventListener('message', function(e){
-    if (!e.data || e.data.type !== 'BS_DATA') return;
-    bsApply(e.data.fields || e.data);
-  });
-  window.addEventListener('load', function(){
-    setTimeout(sendHeight, 300);
-    setTimeout(sendHeight, 1000);
-  });
-  window.addEventListener('resize', sendHeight);
 
-  /* ═══ 데이터 적용 실행 (URL params 우선, 없으면 mock) ═══ */
-  var data = bsLoadDataFromUrl();
-  if (data) {
-    bsApply(data);
-  } else {
-    bsApply({
-      store_name: '지영',
-      score: 75,
-      grade: 'B',
-      position_text: '상위 38%',
-      delta_industry: '+12%',
-      weakness_1: '재방문율(32%)',
-      impact_money: '120만원',
-      strength: '상담 성공률',
-      strength_delta: '+14%p'
-    });
+  /* ═══ 초기화 ═══ */
+  function init() {
+    applyData();
+    var seen = false;
+    try { seen = (localStorage.getItem(SEEN_KEY) === '1'); } catch(e){}
+    if (seen) {
+      showAllImmediate(initialBubbles);
+    } else {
+      startInitialSequence();
+    }
+    /* 트리거 */
+    var detailBtn = document.getElementById('bs-detail-trigger');
+    if (detailBtn) detailBtn.addEventListener('click', startDetailSequence);
+    var skipBtn = document.getElementById('bs-skip-btn');
+    if (skipBtn) skipBtn.addEventListener('click', skipAll);
+    var kakaoBtn = document.getElementById('bs-kakao-trigger');
+    if (kakaoBtn) kakaoBtn.addEventListener('click', kakaoFollowAndExit);
+    /* iframe 높이 동기 */
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+    setTimeout(postHeight, 200);
+    setTimeout(postHeight, 1000);
   }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  /* ═══ expose (디버그) ═══ */
+  window.bsResetSeen = function(){ try { localStorage.removeItem(SEEN_KEY); } catch(e){} location.reload(); };
 })();
 </script>
+
 </body>
 </html>
