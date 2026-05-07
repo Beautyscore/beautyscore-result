@@ -326,7 +326,7 @@ html, body {
 #bs-wrap .bs-kpi-mini-bar {
   flex: 1 !important; height: 6px !important; border-radius: 3px !important;
   background: rgba(22,33,62,.08) !important;
-  overflow: hidden !important; position: relative !important;
+  overflow: visible !important; position: relative !important;
 }
 #bs-wrap .bs-kpi-mini-bar::after {
   content: ''; position: absolute !important;
@@ -337,6 +337,44 @@ html, body {
   transition: width 1s cubic-bezier(.4,0,.2,1) !important;
 }
 #bs-wrap .bs-pending.show .bs-kpi-mini-bar::after { width: var(--bs-kpi-w, 0%) !important; }
+/* v2.0.5 patch — 벤치마크 평균 마커 (세로 점선) */
+#bs-wrap .bs-kpi-mini-bar::before {
+  content: ''; position: absolute !important;
+  top: -3px !important; bottom: -3px !important;
+  left: var(--bs-kpi-avg, 50%) !important;
+  width: 2px !important;
+  background: var(--bs-navy) !important;
+  border-radius: 1px !important;
+  z-index: 2 !important;
+  opacity: .85 !important;
+}
+#bs-wrap .bs-kpi-mini-avg-label {
+  display: block !important;
+  font-size: 9px !important; font-weight: 700 !important;
+  color: var(--bs-muted) !important;
+  margin-top: 4px !important;
+  letter-spacing: -.2px !important;
+}
+#bs-wrap .bs-kpi-mini-bar-wrap {
+  flex: 1 !important;
+  display: flex !important; flex-direction: column !important;
+  gap: 0 !important;
+}
+/* v2.0.5 patch — 평균선 범례 */
+#bs-wrap .bs-bar-legend {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  margin-top: 10px !important; padding: 6px 10px !important;
+  background: rgba(22,33,62,.05) !important;
+  border-radius: 8px !important;
+  font-size: 11px !important; color: var(--bs-muted) !important;
+  font-weight: 600 !important;
+}
+#bs-wrap .bs-bar-legend-marker {
+  display: inline-block !important;
+  width: 2px !important; height: 14px !important;
+  background: var(--bs-navy) !important;
+  border-radius: 1px !important;
+}
 #bs-wrap .bs-kpi-mini-val {
   font-weight: 900 !important; color: var(--bs-navy) !important;
   font-size: 14px !important; flex-shrink: 0 !important;
@@ -405,15 +443,14 @@ html, body {
             <div class="bs-score-grade"><span class="bs-score-grade-label">산정등급</span> <span id="bs-grade">C+</span></div>
             <div class="bs-score-rank">
               <div class="bs-score-rank-hint">
-                <b>비슷한 매장끼리 비교</b>한 결과예요<br>
-                <span class="bs-score-rank-hint-sub">(운영형태·매장규모·운영기간이 같은 매장 그룹)</span>
+                <b>유사 매장 비교 결과</b>
               </div>
               <div class="bs-score-rank-line"><b id="bs-rank">상위 50%</b></div>
               <div class="bs-score-rank-line" id="bs-store-type-line">다양한 프로그램으로 운영하는 다인 매장</div>
               <div class="bs-score-rank-line" id="bs-store-strength-line">매출 구조가 안정적이에요</div>
               <div class="bs-score-rank-delta-hint">
-                <span id="bs-score-delta">비교 그룹 평균 67점 대비 -4점</span><br>
-                <span class="bs-score-delta-explain">(비슷한 매장 평균보다 4점 낮음)</span>
+                <span id="bs-score-delta">평균 67점 대비 -4점</span><br>
+                <span class="bs-score-delta-explain" id="bs-score-delta-explain">(비슷한 매장 평균보다 4점 낮음)</span>
               </div>
             </div>
           </div>
@@ -470,7 +507,7 @@ html, body {
         매일 옆에서 이 흐름을 같이 봐드릴까요? ⚡<br>
         대시보드에서 매일 모닝톡으로 보고하고,<br>
         액션 1건씩 코칭해드려요.<br>
-        <span style="font-size:12px;color:var(--bs-muted);font-weight:600;">무료 체험 · 30일 자동 보존 · 언제든 해지</span>
+        <span style="font-size:12px;color:var(--bs-muted);font-weight:600;">무료 체험 · 30일 데이터 보존 후 자동 폐기 · 언제든 해지</span>
       </div>
     </div>
   </div>
@@ -504,6 +541,10 @@ html, body {
       <div class="bs-bubble">
         좋아요, 차근차근 알려드릴게요.<br>
         운영지표 4종을 하나씩 살펴볼게요. 📊
+        <div class="bs-bar-legend">
+          <span class="bs-bar-legend-marker"></span>
+          <span class="bs-bar-legend-text">세로 점선 = 유사 매장 평균</span>
+        </div>
       </div>
     </div>
   </div>
@@ -513,7 +554,7 @@ html, body {
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        평균 대비 <em id="bs-kpi-cs-delta">+14% ↑</em>.<br>
+        평균 대비 <em id="bs-kpi-cs-delta">+14% 높음</em><br>
         첫 상담의 신뢰 형성과 시술 권유가<br>
         잘 맞춰져 있어요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
@@ -546,15 +587,25 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
-        🔵 <b>셋째·넷째 — 매출 구조 <span id="bs-kpi-rs">75</span>점 / 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
-        단건 시술 + 회원권 균형은 좋아요.<br>
-        매일 입력 빈도만 더 늘면 한 단계 더 올라갑니다.
-        <div class="bs-kpi-mini flat">
+        🔵 <b>셋째 — 매출 구조 <span id="bs-kpi-rs">75</span>점</b><br>
+        단건 시술 + 회원권 균형이 좋아요.
+        <div class="bs-kpi-mini flat" id="bs-kpi-mini-rs">
           <span class="bs-kpi-mini-name">매출 구조</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#C9856E;"></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rs-val">75</span>
         </div>
-        <div class="bs-kpi-mini flat" style="margin-top:6px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-bubble-group bs-pending" id="bubble-detail-4b" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        🔵 <b>넷째 — 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
+        매일 입력 빈도만 더 늘면<br>
+        한 단계 더 올라갑니다.
+        <div class="bs-kpi-mini flat" id="bs-kpi-mini-dm">
           <span class="bs-kpi-mini-name">데이터 관리</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#C9856E;"></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
@@ -618,7 +669,7 @@ html, body {
     score:       pq('score', '63'),
     grade:       pq('grade', 'C+'),  /* v2.0.5 patch — "등급" 라벨 분리 */
     rank:        pq('rank', '상위 50%'),
-    scoreDelta:  pq('scoreDelta', '평균 67점 대비 -4점'),  /* v2.0.5 patch — 비교 기준 명시 */
+    avgScore:    parseInt(pqA(['avgScore','avg'], '67'), 10),  /* v2.0.5 patch — 평균 점수 (delta 자동 계산용) */
     storeType:   pq('storeType', '다양한 프로그램으로 운영하는 다인 매장'),  /* v2.0.5 신규 */
     storeStrength: pq('storeStrength', '매출 구조가 안정적이에요'),  /* v2.0.5 신규 */
     /* 4 운영지표 점수 — v2_0_4 wrapper 변수명(cn/st/fr) alias 호환 */
@@ -626,6 +677,11 @@ html, body {
     cs:          parseInt(pqA(['cs','cn'], '80'), 10),
     rs:          parseInt(pqA(['rs','st'], '75'), 10),
     dm:          parseInt(pqA(['dm','fr'], '65'), 10),
+    /* v2.0.5 patch — 비교 그룹 평균 (벤치마크 평균선 표시용) */
+    avgRv:       parseInt(pq('avgRv', '70'), 10),
+    avgCs:       parseInt(pq('avgCs', '72'), 10),
+    avgRs:       parseInt(pq('avgRs', '68'), 10),
+    avgDm:       parseInt(pq('avgDm', '70'), 10),
     /* 강점·약점 */
     strKpi:      pq('strKpi', 'cs'),
     weakKpi:     pq('weakKpi', 'rv'),
@@ -645,7 +701,15 @@ html, body {
     setText('bs-score', DATA.score);
     setText('bs-grade', DATA.grade);
     setText('bs-rank', DATA.rank);
-    setText('bs-score-delta', DATA.scoreDelta);
+    /* v2.0.5 patch — delta 자동 계산 (score - avgScore) */
+    var scoreNum = parseInt(DATA.score, 10) || 0;
+    var avgNum = DATA.avgScore || 67;
+    var deltaNum = scoreNum - avgNum;
+    var deltaSign = deltaNum > 0 ? '+' : '';
+    setText('bs-score-delta', '평균 ' + avgNum + '점 대비 ' + deltaSign + deltaNum + '점');
+    var deltaAbs = Math.abs(deltaNum);
+    var deltaWord = deltaNum > 0 ? '높음' : (deltaNum < 0 ? '낮음' : '동일');
+    setText('bs-score-delta-explain', deltaNum === 0 ? '(비슷한 매장 평균과 동일)' : '(비슷한 매장 평균보다 ' + deltaAbs + '점 ' + deltaWord + ')');
     setText('bs-store-type-line', DATA.storeType);  /* v2.0.5 patch */
     setText('bs-store-strength-line', DATA.storeStrength);  /* v2.0.5 patch */
     setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
@@ -660,9 +724,11 @@ html, body {
     setText('bs-kpi-rv', DATA.rv); setText('bs-kpi-rv-val', DATA.rv);
     setText('bs-kpi-rs', DATA.rs); setText('bs-kpi-rs-val', DATA.rs);
     setText('bs-kpi-dm', DATA.dm); setText('bs-kpi-dm-val', DATA.dm);
-    /* 미니 바 width 적용 */
-    setBarWidth('bs-kpi-mini-cs', DATA.cs);
-    setBarWidth('bs-kpi-mini-rv', DATA.rv);
+    /* 미니 바 width + 평균 마커 적용 (v2.0.5 patch) */
+    setBarWidth('bs-kpi-mini-cs', DATA.cs, DATA.avgCs);
+    setBarWidth('bs-kpi-mini-rv', DATA.rv, DATA.avgRv);
+    setBarWidth('bs-kpi-mini-rs', DATA.rs, DATA.avgRs);
+    setBarWidth('bs-kpi-mini-dm', DATA.dm, DATA.avgDm);
     /* 도넛 — score 기반 stroke-dasharray 계산 */
     var donutLen = 263.89;
     var fg = document.getElementById('bs-donut-fg');
@@ -694,11 +760,14 @@ html, body {
       });
     });
   }
-  function setBarWidth(parentId, val) {
+  function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
     if (!el) return;
     var bar = el.querySelector('.bs-kpi-mini-bar');
-    if (bar) bar.style.setProperty('--bs-kpi-w', (val || 0) + '%');
+    if (bar) {
+      bar.style.setProperty('--bs-kpi-w', (val || 0) + '%');
+      if (avg != null) bar.style.setProperty('--bs-kpi-avg', (avg || 0) + '%');
+    }
   }
 
   /* ═══ 시퀀스 ═══ */
@@ -729,11 +798,13 @@ html, body {
     { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-detail-4', wait: 4200 },
     { type: 'typing', wait: 1000 },
+    { type: 'bubble', id: 'bubble-detail-4b', wait: 4200 },
+    { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-detail-5', wait: 4600 },
     { type: 'cta', id: 'bs-cta-detail', wait: 1800 }
   ];
   var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-2b','bubble-3','bubble-4','bs-cta-initial'];
-  var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-5','bs-cta-detail'];
+  var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-4b','bubble-detail-5','bs-cta-detail'];
   var pendingTimeouts = [];
   var detailShown = false;
   var initialSequenceActive = false;
