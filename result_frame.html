@@ -191,11 +191,35 @@ html, body {
   font-size: 12px !important; font-weight: 900 !important;
   padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
 }
+#bs-wrap .bs-bubble-score .bs-score-grade-label {
+  font-size: 10px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,.85) !important;
+  margin-right: 4px !important; letter-spacing: -.2px !important;
+}
 #bs-wrap .bs-bubble-score .bs-score-rank {
   font-size: 13px !important; font-weight: 700 !important;
-  color: rgba(255,255,255,.92) !important; line-height: 1.5 !important;
+  color: rgba(255,255,255,.92) !important; line-height: 1.6 !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank b { color: var(--bs-nude) !important; font-weight: 900 !important; }
+#bs-wrap .bs-bubble-score .bs-score-rank-hint {
+  font-size: 11px !important; color: rgba(255,255,255,.7) !important;
+  font-weight: 600 !important; margin-bottom: 4px !important;
+  word-break: keep-all !important; line-height: 1.5 !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-rank-line {
+  margin-bottom: 2px !important;
+  word-break: keep-all !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-rank-delta-hint {
+  font-size: 12px !important; color: rgba(255,255,255,.85) !important;
+  margin-top: 6px !important; padding-top: 6px !important;
+  border-top: 1px solid rgba(255,255,255,.15) !important;
+  line-height: 1.5 !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-delta-explain {
+  font-size: 10px !important; color: rgba(255,255,255,.7) !important;
+  font-weight: 600 !important;
+}
 
 #bs-wrap .bs-bubble-group { margin-bottom: 18px !important; }
 #bs-wrap .bs-bubble-group .bs-bubble-wrap { margin-bottom: 6px !important; }
@@ -350,9 +374,12 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
-        <b id="bs-store-name">윤혜뷰티</b> 원장님, 안녕하세요. 첫 진단 보고드릴게요. 🎯<br>
-        <b id="bs-period">운영 3년차</b>에 데이터를 보고 운영하시는 👍<br>
-        매장 운영 점수를 해봤어요!
+        <b id="bs-store-name">윤혜뷰티</b> 원장님, 안녕하세요.<br>
+        첫 진단 보고드릴게요. 🎯<br>
+        <br>
+        <b id="bs-period">운영 3년차</b>에 데이터를 보고 운영하시는 매장 👍<br>
+        <br>
+        매장 운영 점수를 아래와 같이 정리했어요!
       </div>
     </div>
   </div>
@@ -375,8 +402,20 @@ html, body {
             </div>
           </div>
           <div class="bs-score-info">
-            <div class="bs-score-grade" id="bs-grade">C+ 등급</div>
-            <div class="bs-score-rank">동일 카테고리<br><b id="bs-rank">상위 50%</b> · <span id="bs-score-delta">평균 67점 -4점</span></div>
+            <div class="bs-score-grade"><span class="bs-score-grade-label">산정등급</span> <span id="bs-grade">C+</span></div>
+            <div class="bs-score-rank">
+              <div class="bs-score-rank-hint">
+                <b>비슷한 매장끼리 비교</b>한 결과예요<br>
+                <span class="bs-score-rank-hint-sub">(운영형태·매장규모·운영기간이 같은 매장 그룹)</span>
+              </div>
+              <div class="bs-score-rank-line"><b id="bs-rank">상위 50%</b></div>
+              <div class="bs-score-rank-line" id="bs-store-type-line">다양한 프로그램으로 운영하는 다인 매장</div>
+              <div class="bs-score-rank-line" id="bs-store-strength-line">매출 구조가 안정적이에요</div>
+              <div class="bs-score-rank-delta-hint">
+                <span id="bs-score-delta">비교 그룹 평균 67점 대비 -4점</span><br>
+                <span class="bs-score-delta-explain">(비슷한 매장 평균보다 4점 낮음)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -392,9 +431,18 @@ html, body {
         <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">✨</span>
-          <span class="bs-mini-card-text"><span id="bs-strength-name-2">상담 성공률</span> <b id="bs-strength-delta">+14%p</b> · 평균보다 높음</span>
+          <span class="bs-mini-card-text"><span id="bs-strength-name-2">상담 성공률</span> <b id="bs-strength-delta">+14%</b><br>평균보다 높음</span>
         </div>
-        <div style="margin-top:10px;">이건 잘 유지하시면서<br>다음 영역만 보강하면 됩니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 강점 유지 메시지 (별도 버블) -->
+  <div class="bs-bubble-group bs-pending" id="bubble-2b" style="display:none">
+    <div class="bs-bubble-wrap">
+      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-bubble">
+        이건 잘 유지하시면서<br>다음 영역만 보강하면 됩니다.
       </div>
     </div>
   </div>
@@ -405,7 +453,7 @@ html, body {
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
         가장 큰 기회는 <em id="bs-weak-name">재방문율</em>입니다.<br>
-        <span id="bs-weak-improve">+5%p</span>만 회복해도 <b id="bs-weak-score-up">+12점</b> 올라가요.
+        <span id="bs-weak-improve">+5%</span>만 회복해도 <b id="bs-weak-score-up">+12점</b> 올라가요.
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">🔍</span>
           <span class="bs-mini-card-text">매월 얼마나 회복 가능한지<br>대시보드에서 직접 확인하실 수 있어요</span>
@@ -434,7 +482,7 @@ html, body {
       <span class="bs-cta-arrow">→</span>
     </a>
     <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-detail-trigger">
-      <span>진단 자세히 먼저 볼게요</span>
+      <span>진단 상세내용 확인하기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
   </div>
@@ -465,7 +513,7 @@ html, body {
       <div class="bs-mini-avatar">👤</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        평균 대비 <em id="bs-kpi-cs-delta">+14%p ↑</em>.<br>
+        평균 대비 <em id="bs-kpi-cs-delta">+14% ↑</em>.<br>
         첫 상담의 신뢰 형성과 시술 권유가<br>
         잘 맞춰져 있어요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
@@ -484,7 +532,7 @@ html, body {
         🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
         가장 큰 회복 영역이에요.<br>
         첫 방문 고객의 2회차 전환이 끊기는 패턴이고요.<br>
-        <em>+5%p만 회복해도 +12점</em> 올라갑니다.
+        <em>+5%만 회복해도 +12점</em> 올라갑니다.
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
           <span class="bs-kpi-mini-name">재방문율</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"></span>
@@ -568,9 +616,11 @@ html, body {
     store:       pq('store', '윤혜뷰티'),
     period:      pq('period', '운영 3년차'),
     score:       pq('score', '63'),
-    grade:       pq('grade', 'C+ 등급'),
+    grade:       pq('grade', 'C+'),  /* v2.0.5 patch — "등급" 라벨 분리 */
     rank:        pq('rank', '상위 50%'),
-    scoreDelta:  pq('scoreDelta', '평균 67점 -4점'),
+    scoreDelta:  pq('scoreDelta', '평균 67점 대비 -4점'),  /* v2.0.5 patch — 비교 기준 명시 */
+    storeType:   pq('storeType', '다양한 프로그램으로 운영하는 다인 매장'),  /* v2.0.5 신규 */
+    storeStrength: pq('storeStrength', '매출 구조가 안정적이에요'),  /* v2.0.5 신규 */
     /* 4 운영지표 점수 — v2_0_4 wrapper 변수명(cn/st/fr) alias 호환 */
     rv:          parseInt(pq('rv', '65'), 10),
     cs:          parseInt(pqA(['cs','cn'], '80'), 10),
@@ -579,8 +629,8 @@ html, body {
     /* 강점·약점 */
     strKpi:      pq('strKpi', 'cs'),
     weakKpi:     pq('weakKpi', 'rv'),
-    strDelta:    pqA(['strDelta','strD'], '+14%p'),
-    weakImprove: pq('weakImprove', '+5%p'),
+    strDelta:    pqA(['strDelta','strD'], '+14%'),
+    weakImprove: pq('weakImprove', '+5%'),
     weakScoreUp: pq('weakScoreUp', '+12점'),
     monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
@@ -596,6 +646,8 @@ html, body {
     setText('bs-grade', DATA.grade);
     setText('bs-rank', DATA.rank);
     setText('bs-score-delta', DATA.scoreDelta);
+    setText('bs-store-type-line', DATA.storeType);  /* v2.0.5 patch */
+    setText('bs-store-strength-line', DATA.storeStrength);  /* v2.0.5 patch */
     setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-name-2', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-delta', DATA.strDelta);
@@ -660,6 +712,8 @@ html, body {
     { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-2', wait: 4200 },
     { type: 'typing', wait: 1000 },
+    { type: 'bubble', id: 'bubble-2b', wait: 3000 },
+    { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-3', wait: 4200 },
     { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-4', wait: 4200 },
@@ -678,7 +732,7 @@ html, body {
     { type: 'bubble', id: 'bubble-detail-5', wait: 4600 },
     { type: 'cta', id: 'bs-cta-detail', wait: 1800 }
   ];
-  var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-3','bubble-4','bs-cta-initial'];
+  var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-2b','bubble-3','bubble-4','bs-cta-initial'];
   var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-5','bs-cta-detail'];
   var pendingTimeouts = [];
   var detailShown = false;
