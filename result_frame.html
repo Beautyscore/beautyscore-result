@@ -8,8 +8,26 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.6 (2026-05-08 KIRA, 7건 patch 누적 박제)
+  뷰티스코어 result-frame v2.0.7 (2026-05-09 KIRA, 카피·컬러·룰 11건 patch 누적)
   ═══════════════════════════════════════════════════════════════
+  v2.0.7 patch (대표님 5/9 명시):
+    ⭐ ① 룰 박제 — `+` 표기 금지 (긍정 표현·% 앞 모두 적용, CLAUDE.md §5.3-1)
+       "+14%" → "14%" / "+12점" → "12점" / "+5%" → "5%"
+    ⭐ ② bubble-2 미니카드 단순화 — "상담 성공률 +14% 평균보다 높음" → "비교축 대비 14% 높음"
+       (위 강점 라인에 "상담 성공률" 이미 언급되어 중복 제거)
+    ⭐ ③ bubble-3 회복 강조 — "재방문율" → "재방문율의 회복" / "5%만 회복하면 종합 점수가 12점 올라가요"
+       + 미니카드 "뷰티스코어가 매월 회복 추적 + 매일 한 가지 액션 챙김"
+    ⭐ ④ CTA "진단 상세내용 확인하기" → "핵심 운영지표 확인하기"
+    ⭐ ⑤ bubble-detail-2 "평균 대비 +14% 높음" → "비교축 대비 14% 높음"
+    ⭐ ⑥ bubble-detail-3 "재방문율은 회복할 한 가지 영역" 회복 재언급 + "5%만 회복하면 종합 점수 12점"
+    ⭐ ⑦ bubble-detail-4 매출 구성 → 🟢 + good 컬러 + 칭찬 톤 ↑ + "매출 구조"→"매출 구성" 한글 표준 정합
+    ⭐ ⑧ bubble-detail-4b 데이터 관리 → 🟣 + info 컬러 (셋째와 분리) + 베네핏 톤 ("추세 정확·다음 액션 명확")
+    ⭐ ⑨ 미니바 가로 통일 — bs-kpi-mini-name min-width 78px + bs-kpi-mini-val min-width 28px (4 카드 트랙 폭 일치)
+    ⭐ ⑩ 강점/약점 절대 점수 보정 (B안) — 약점이라도 70 이상이면 warn→flat / 강점이라도 70 미만이면 good→flat
+       (80점이 약점으로 분류돼도 시각상 후져 보이지 않게)
+    ⭐ ⑪ bubble-detail-5 결제 카피 — "월 29,900원 · 매일 진단 + 14일 도장 챌린지"
+       → "연간 결제 시 월 26,910원 · 원장님 매장을 매일 같이 챙겨드릴게요"
+  ───────────────────────────────────────────────────────────────
   v2.0.6 patch (대표님 5/8 명시 7건):
     ⭐ ① typing 인디케이터 동적 위치 — 카카오톡식, 항상 마지막 메시지 하단에서 등장
     ⭐ ② 폰트 일괄 ~10% 확대 (헤더·버블·점수·미니카드·CTA·KPI·푸터) + KPI 박스 padding/gap 여유
@@ -334,9 +352,11 @@ html, body {
 #bs-wrap .bs-kpi-mini.good { border-left-color: var(--bs-ok) !important; background: rgba(46,125,94,.05) !important; }
 #bs-wrap .bs-kpi-mini.warn { border-left-color: var(--bs-warn) !important; background: rgba(179,96,21,.05) !important; }
 #bs-wrap .bs-kpi-mini.flat { border-left-color: var(--bs-rose-dk) !important; background: rgba(201,133,110,.06) !important; }
+#bs-wrap .bs-kpi-mini.info { border-left-color: var(--bs-navy2) !important; background: rgba(36,49,82,.05) !important; }  /* v2.0.7 — 데이터 관리 톤 분리 (셋째와 색상 차별) */
 #bs-wrap .bs-kpi-mini-name {
   font-weight: 800 !important; color: var(--bs-navy) !important;
   flex-shrink: 0 !important; font-size: 14px !important;
+  min-width: 78px !important;  /* v2.0.7 — 4 카드 트랙 폭 통일 (이름 글자 수 차이 무시) */
 }
 #bs-wrap .bs-kpi-mini-bar {
   flex: 1 !important; height: 6px !important; border-radius: 3px !important;
@@ -394,6 +414,7 @@ html, body {
   font-weight: 900 !important; color: var(--bs-navy) !important;
   font-size: 15.5px !important; flex-shrink: 0 !important;
   letter-spacing: -.04em !important;
+  min-width: 28px !important; text-align: right !important;  /* v2.0.7 — 점수 자릿수 통일 */
 }
 
 /* Foot */
@@ -483,7 +504,7 @@ html, body {
         <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">✨</span>
-          <span class="bs-mini-card-text"><span id="bs-strength-name-2">상담 성공률</span> <b id="bs-strength-delta">+14%</b><br>평균보다 높음</span>
+          <span class="bs-mini-card-text">비교축 대비 <b id="bs-strength-delta">14%</b> 높음</span>
         </div>
       </div>
     </div>
@@ -504,11 +525,12 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        가장 큰 기회는 <em id="bs-weak-name">재방문율</em>입니다.<br>
-        <span id="bs-weak-improve">+5%</span>만 회복해도 <b id="bs-weak-score-up">+12점</b> 올라가요.
+        가장 큰 기회는 <em id="bs-weak-name">재방문율</em>의 회복입니다.<br>
+        <span id="bs-weak-improve">5%</span>만 회복하면<br>
+        종합 점수가 <b id="bs-weak-score-up">12점</b> 올라가요.
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">🔍</span>
-          <span class="bs-mini-card-text">매월 얼마나 회복 가능한지<br>대시보드에서 직접 확인하실 수 있어요</span>
+          <span class="bs-mini-card-text">뷰티스코어가 재방문율 회복을<br>매월 추적해드리고, 매일 한 가지<br>액션을 함께 챙겨드릴게요</span>
         </div>
       </div>
     </div>
@@ -531,7 +553,7 @@ html, body {
   <!-- 초기 CTA 옵션 (v2.0.6 — 진단 상세 → 흐름 → 대시보드 퍼널) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
     <button class="bs-cta-option" type="button" id="bs-detail-trigger">
-      <span>진단 상세내용 확인하기</span>
+      <span>핵심 운영지표 확인하기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
@@ -570,7 +592,7 @@ html, body {
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        평균 대비 <em id="bs-kpi-cs-delta">+14% 높음</em><br>
+        비교축 대비 <em id="bs-kpi-cs-delta">14% 높음</em><br>
         첫 상담의 신뢰 형성과 시술 권유가<br>
         잘 맞춰져 있어요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
@@ -587,9 +609,9 @@ html, body {
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
-        가장 큰 회복 영역이에요.<br>
-        첫 방문 고객의 2회차 전환이 끊기는 패턴이고요.<br>
-        <em>+5%만 회복해도 +12점</em> 올라갑니다.
+        재방문율은 회복할 한 가지 영역이에요.<br>
+        첫 방문 고객의 2회차 전환이 끊기는 패턴인데,<br>
+        <em>5%만 회복하면 종합 점수 12점</em> 올라갑니다.
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
           <span class="bs-kpi-mini-name">재방문율</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"></span>
@@ -603,11 +625,13 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🔵 <b>셋째 — 매출 구조 <span id="bs-kpi-rs">75</span>점</b><br>
-        단건 시술 + 회원권 균형이 좋아요.
-        <div class="bs-kpi-mini flat" id="bs-kpi-mini-rs">
-          <span class="bs-kpi-mini-name">매출 구조</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#C9856E;"></span>
+        🟢 <b>셋째 — 매출 구성 <span id="bs-kpi-rs">75</span>점</b><br>
+        단건 시술과 회원권 균형이<br>
+        매우 잘 잡혀 있어요.<br>
+        이 구조 그대로 유지하시면 돼요.
+        <div class="bs-kpi-mini good" id="bs-kpi-mini-rs">
+          <span class="bs-kpi-mini-name">매출 구성</span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#2E7D5E;"></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rs-val">75</span>
         </div>
       </div>
@@ -618,12 +642,13 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🔵 <b>넷째 — 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
-        매일 입력 빈도만 더 늘면<br>
-        한 단계 더 올라갑니다.
-        <div class="bs-kpi-mini flat" id="bs-kpi-mini-dm">
+        🟣 <b>넷째 — 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
+        매일 입력 빈도가 늘면<br>
+        매장 추세가 정확해지고<br>
+        다음 액션이 명확해져요.
+        <div class="bs-kpi-mini info" id="bs-kpi-mini-dm">
           <span class="bs-kpi-mini-name">데이터 관리</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#C9856E;"></span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
         </div>
       </div>
@@ -642,7 +667,7 @@ html, body {
         확인하실 수 있는<br>
         <b>BASIC 플랜</b>으로<br>
         시작해보시는 건 어떠세요?<br>
-        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">월 29,900원 · 매일 진단 + 14일 도장 챌린지</span>
+        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">연간 결제 시 월 26,910원 · 원장님 매장을 매일 같이 챙겨드릴게요</span>
       </div>
     </div>
   </div>
@@ -812,6 +837,32 @@ html, body {
     setBarWidth('bs-kpi-mini-rv', DATA.rv, DATA.avgRv);
     setBarWidth('bs-kpi-mini-rs', DATA.rs, DATA.avgRs);
     setBarWidth('bs-kpi-mini-dm', DATA.dm, DATA.avgDm);
+
+    /* v2.0.7 patch — 강점/약점 색상 절대 점수 보정 (B안)
+       - 약점 분류라도 절대 점수 70 이상이면 warn → flat (80점이 약점으로 분류돼도 시각상 후져 보이지 않게)
+       - 강점 분류라도 절대 점수 70 미만이면 good → flat */
+    var weakKpi = DATA.weakKpi;
+    var weakScore = DATA[weakKpi];
+    if (typeof weakScore === 'number' && weakScore >= 70) {
+      var weakMini = document.getElementById('bs-kpi-mini-' + weakKpi);
+      if (weakMini && weakMini.classList.contains('warn')) {
+        weakMini.classList.remove('warn');
+        weakMini.classList.add('flat');
+        var weakBar = weakMini.querySelector('.bs-kpi-mini-bar');
+        if (weakBar) weakBar.style.setProperty('--bs-kpi-c', '#C9856E');
+      }
+    }
+    var strKpi = DATA.strKpi;
+    var strScore = DATA[strKpi];
+    if (typeof strScore === 'number' && strScore < 70) {
+      var strMini = document.getElementById('bs-kpi-mini-' + strKpi);
+      if (strMini && strMini.classList.contains('good')) {
+        strMini.classList.remove('good');
+        strMini.classList.add('flat');
+        var strBar = strMini.querySelector('.bs-kpi-mini-bar');
+        if (strBar) strBar.style.setProperty('--bs-kpi-c', '#C9856E');
+      }
+    }
     /* 도넛 — score 기반 stroke-dasharray 계산 */
     var donutLen = 263.89;
     var fg = document.getElementById('bs-donut-fg');
