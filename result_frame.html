@@ -417,7 +417,7 @@ html, body {
         <b id="bs-store-name">윤혜뷰티</b> 원장님, 안녕하세요.<br>
         첫 진단 보고드릴게요. 🎯<br>
         <br>
-        <b id="bs-period">운영 3년차</b>에 데이터를 보고 운영하시는 매장 👍<br>
+        <span id="bs-period-prefix"><b id="bs-period">운영 3년차</b>에 </span>데이터를 보고 운영하시는 매장 👍<br>
         <br>
         매장 운영 점수를 아래와 같이 정리했어요!
       </div>
@@ -673,13 +673,13 @@ html, body {
   var DATA = {
     recordId:    pq('recordId', 'demo'),
     store:       pq('store', '윤혜뷰티'),
-    period:      pq('period', '운영 3년차'),
+    period:      pq('period', ''),  /* v2.0.6 patch — 단정적 연차 표현 차단 (1~3년 범위 입력 등 모호 시 표시 X) */
     score:       pq('score', '63'),
     grade:       pq('grade', 'C+'),  /* v2.0.5 patch — "등급" 라벨 분리 */
     rank:        pq('rank', '상위 50%'),
     avgScore:    parseInt(pqA(['avgScore','avg'], ''), 10),  /* v2.0.6 patch — URL param 없으면 자기 점수 fallback (delta 0) */
-    storeType:   pq('storeType', '다양한 프로그램으로 운영하는 다인 매장'),  /* v2.0.5 신규 */
-    storeStrength: pq('storeStrength', '매출 구조가 안정적이에요'),  /* v2.0.5 신규 */
+    storeType:   pq('storeType', ''),  /* v2.0.6 patch — wrapper 누락 시 hide (rank 풀 텍스트와 중복 방지) */
+    storeStrength: pq('storeStrength', ''),  /* v2.0.6 patch */
     /* 4 운영지표 점수 — v2_0_4 wrapper 변수명(cn/st/fr) alias 호환 */
     rv:          parseInt(pq('rv', '65'), 10),
     cs:          parseInt(pqA(['cs','cn'], '80'), 10),
@@ -724,14 +724,48 @@ html, body {
     return score;  /* fallback — 시각 중립 (마커 = 점수 동일 위치) */
   }
 
+  /* v2.0.6 patch — rank 풀 텍스트에서 "상위 N%" 추출 + 마침표 단위 매장유형·강점 분리
+     예: "상위 50% 다양한 프로그램으로 팀과 함께 운영하시는 매장. 매출 구조가 안정적이에요"
+       → rank: "상위 50%", extras: ["다양한 프로그램으로 팀과 함께 운영하시는 매장", "매출 구조가 안정적이에요"] */
+  function parseRankAndExtra(rawRank) {
+    if (!rawRank) return { rank: '상위 -', extras: [] };
+    var raw = String(rawRank).trim();
+    var m = raw.match(/^(상위\s*\d+(\.\d+)?\s*%)/);
+    if (!m) return { rank: raw, extras: [] };
+    var rank = m[1].replace(/\s+/g, ' ').trim();
+    var rest = raw.slice(m[0].length).trim();
+    var sentences = rest.split(/\s*\.\s*/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+    return { rank: rank, extras: sentences };
+  }
+  /* v2.0.6 patch — 빈 값이면 라인 자체 숨김 (rank/storeType/storeStrength 중복 방지) */
+  function setLineOrHide(id, val) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (val != null && String(val).trim() !== '') {
+      el.textContent = String(val).trim();
+      el.style.display = '';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
   /* ═══ DOM 데이터 주입 ═══ */
   function setText(id, val) { var el = document.getElementById(id); if (el && val != null) el.textContent = val; }
   function applyData() {
     setText('bs-store-name', DATA.store);
-    setText('bs-period', DATA.period);
+    /* v2.0.6 patch — period 빈 값이면 "[운영 N년차]에 " 영역 자체 숨김 (단정 표현 차단) */
+    var periodPrefix = document.getElementById('bs-period-prefix');
+    if (DATA.period && String(DATA.period).trim() !== '') {
+      setText('bs-period', DATA.period);
+      if (periodPrefix) periodPrefix.style.display = '';
+    } else {
+      if (periodPrefix) periodPrefix.style.display = 'none';
+    }
     setText('bs-score', DATA.score);
     setText('bs-grade', DATA.grade);
-    setText('bs-rank', DATA.rank);
+    /* v2.0.6 patch — rank 풀 텍스트 분리 (상위 N% + 매장유형 + 강점) */
+    var parsedRank = parseRankAndExtra(DATA.rank);
+    setText('bs-rank', parsedRank.rank);
     /* v2.0.6 patch — delta 자동 계산 (URL param 없으면 자기 점수 fallback = delta 0 = 평균과 동일 표시) */
     var scoreNum = parseInt(DATA.score, 10) || 0;
     var avgNum = (typeof DATA.avgScore === 'number' && !isNaN(DATA.avgScore)) ? DATA.avgScore : scoreNum;
@@ -741,8 +775,9 @@ html, body {
     var deltaAbs = Math.abs(deltaNum);
     var deltaWord = deltaNum > 0 ? '높음' : (deltaNum < 0 ? '낮음' : '동일');
     setText('bs-score-delta-explain', deltaNum === 0 ? '(비슷한 매장 평균과 동일)' : '(비슷한 매장 평균보다 ' + deltaAbs + '점 ' + deltaWord + ')');
-    setText('bs-store-type-line', DATA.storeType);  /* v2.0.5 patch */
-    setText('bs-store-strength-line', DATA.storeStrength);  /* v2.0.5 patch */
+    /* v2.0.6 patch — rank에서 분리한 매장유형·강점 우선, 없으면 wrapper params, 둘 다 없으면 hide */
+    setLineOrHide('bs-store-type-line', parsedRank.extras[0] || DATA.storeType);
+    setLineOrHide('bs-store-strength-line', parsedRank.extras[1] || DATA.storeStrength);
     setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-name-2', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-delta', DATA.strDelta);
