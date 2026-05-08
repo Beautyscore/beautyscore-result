@@ -506,10 +506,11 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        매일 옆에서 이 흐름을 같이 봐드릴까요? ⚡<br>
+        매일 옆에서 이 흐름을 같이 봐드릴까요?<br>
+        <br>
         대시보드에서 매일 모닝톡으로 보고하고,<br>
         액션 1건씩 코칭해드려요.<br>
-        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:4px;">무료 체험 · 30일 데이터 보존 후 자동 폐기 · 언제든 해지</span>
+        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:4px;">무료 체험 · 30일 데이터 보존 후 자동 폐기</span>
       </div>
     </div>
   </div>
@@ -676,7 +677,7 @@ html, body {
     score:       pq('score', '63'),
     grade:       pq('grade', 'C+'),  /* v2.0.5 patch — "등급" 라벨 분리 */
     rank:        pq('rank', '상위 50%'),
-    avgScore:    parseInt(pqA(['avgScore','avg'], '67'), 10),  /* v2.0.5 patch — 평균 점수 (delta 자동 계산용) */
+    avgScore:    parseInt(pqA(['avgScore','avg'], ''), 10),  /* v2.0.6 patch — URL param 없으면 자기 점수 fallback (delta 0) */
     storeType:   pq('storeType', '다양한 프로그램으로 운영하는 다인 매장'),  /* v2.0.5 신규 */
     storeStrength: pq('storeStrength', '매출 구조가 안정적이에요'),  /* v2.0.5 신규 */
     /* 4 운영지표 점수 — v2_0_4 wrapper 변수명(cn/st/fr) alias 호환 */
@@ -684,11 +685,11 @@ html, body {
     cs:          parseInt(pqA(['cs','cn'], '80'), 10),
     rs:          parseInt(pqA(['rs','st'], '75'), 10),
     dm:          parseInt(pqA(['dm','fr'], '65'), 10),
-    /* v2.0.5 patch — 비교 그룹 평균 (벤치마크 평균선 표시용) */
-    avgRv:       parseInt(pq('avgRv', '70'), 10),
-    avgCs:       parseInt(pq('avgCs', '72'), 10),
-    avgRs:       parseInt(pq('avgRs', '68'), 10),
-    avgDm:       parseInt(pq('avgDm', '70'), 10),
+    /* v2.0.6 patch — 비교 그룹 평균 (URL param 우선, 없으면 strDelta·weakImprove로 자동 역산) */
+    avgRv:       parseInt(pq('avgRv', ''), 10),
+    avgCs:       parseInt(pq('avgCs', ''), 10),
+    avgRs:       parseInt(pq('avgRs', ''), 10),
+    avgDm:       parseInt(pq('avgDm', ''), 10),
     /* 강점·약점 */
     strKpi:      pq('strKpi', 'cs'),
     weakKpi:     pq('weakKpi', 'rv'),
@@ -700,6 +701,29 @@ html, body {
 
   var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' };
 
+  /* v2.0.6 patch — 평균값 자동 역산 (URL param 누락 시 카피·시각 정합 보장)
+     "+14%" / "+14" / "14" 모두 14로 파싱 */
+  function parseDeltaPercent(s) {
+    if (s == null) return null;
+    var m = String(s).match(/[-+]?\d+(\.\d+)?/);
+    return m ? parseFloat(m[0]) : null;
+  }
+  function resolveAvg(kpi) {
+    var avgKey = 'avg' + kpi.charAt(0).toUpperCase() + kpi.slice(1);
+    var v = DATA[avgKey];
+    if (typeof v === 'number' && !isNaN(v)) return v;  /* URL param 우선 */
+    var score = DATA[kpi];
+    if (DATA.strKpi === kpi) {
+      var d = parseDeltaPercent(DATA.strDelta);
+      if (d != null) return Math.max(0, Math.min(100, score - d));
+    }
+    if (DATA.weakKpi === kpi) {
+      var w = parseDeltaPercent(DATA.weakImprove);
+      if (w != null) return Math.max(0, Math.min(100, score + w));
+    }
+    return score;  /* fallback — 시각 중립 (마커 = 점수 동일 위치) */
+  }
+
   /* ═══ DOM 데이터 주입 ═══ */
   function setText(id, val) { var el = document.getElementById(id); if (el && val != null) el.textContent = val; }
   function applyData() {
@@ -708,9 +732,9 @@ html, body {
     setText('bs-score', DATA.score);
     setText('bs-grade', DATA.grade);
     setText('bs-rank', DATA.rank);
-    /* v2.0.5 patch — delta 자동 계산 (score - avgScore) */
+    /* v2.0.6 patch — delta 자동 계산 (URL param 없으면 자기 점수 fallback = delta 0 = 평균과 동일 표시) */
     var scoreNum = parseInt(DATA.score, 10) || 0;
-    var avgNum = DATA.avgScore || 67;
+    var avgNum = (typeof DATA.avgScore === 'number' && !isNaN(DATA.avgScore)) ? DATA.avgScore : scoreNum;
     var deltaNum = scoreNum - avgNum;
     var deltaSign = deltaNum > 0 ? '+' : '';
     setText('bs-score-delta', '평균 ' + avgNum + '점 대비 ' + deltaSign + deltaNum + '점');
@@ -731,7 +755,11 @@ html, body {
     setText('bs-kpi-rv', DATA.rv); setText('bs-kpi-rv-val', DATA.rv);
     setText('bs-kpi-rs', DATA.rs); setText('bs-kpi-rs-val', DATA.rs);
     setText('bs-kpi-dm', DATA.dm); setText('bs-kpi-dm-val', DATA.dm);
-    /* 미니 바 width + 평균 마커 적용 (v2.0.5 patch) */
+    /* 미니 바 width + 평균 마커 적용 (v2.0.6 patch — URL param 없으면 strDelta·weakImprove로 자동 역산) */
+    DATA.avgCs = resolveAvg('cs');
+    DATA.avgRv = resolveAvg('rv');
+    DATA.avgRs = resolveAvg('rs');
+    DATA.avgDm = resolveAvg('dm');
     setBarWidth('bs-kpi-mini-cs', DATA.cs, DATA.avgCs);
     setBarWidth('bs-kpi-mini-rv', DATA.rv, DATA.avgRv);
     setBarWidth('bs-kpi-mini-rs', DATA.rs, DATA.avgRs);
