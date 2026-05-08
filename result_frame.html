@@ -8,9 +8,20 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.5 (2026-05-08 KIRA, Coach Conversation 라이브 박제)
+  뷰티스코어 result-frame v2.0.6 (2026-05-08 KIRA, 7건 patch 누적 박제)
   ═══════════════════════════════════════════════════════════════
-  v2.0.5 (대표님 5/8 명시):
+  v2.0.6 patch (대표님 5/8 명시 7건):
+    ⭐ ① typing 인디케이터 동적 위치 — 카카오톡식, 항상 마지막 메시지 하단에서 등장
+    ⭐ ② 폰트 일괄 ~10% 확대 (헤더·버블·점수·미니카드·CTA·KPI·푸터) + KPI 박스 padding/gap 여유
+    ⭐ ③ CTA 순서·역할 교환 — primary "진단 상세내용 확인하기" → secondary "대시보드 먼저 체험할게요" (퍼널 흐름)
+    ⭐ ④ 헤더 호칭 "진단 코치" → "원장님 전용비서" + 아바타 👤 → 👩‍💼 (14곳) + 사이즈 28px·20px (원형 거의 꽉)
+    ⭐ ⑤ iOS Safari iframe scroll 점프 fix — window.scrollTo() → element.scrollIntoView({block:'nearest'})
+    ⭐ ⑥ KPI 평균 마커 자동 역산 (avgCs/avgRv/avgRs/avgDm URL param 누락 시 strDelta·weakImprove로 fallback)
+       + 종합 점수 avgScore 동일 처리 (param 없으면 자기 점수 = delta 0)
+    ⭐ ⑦ rank 풀 텍스트 분리 (parseRankAndExtra) + period 빈 처리 (단정 표현 차단) + storeType/Strength 중복 제거
+       + bubble-4 카피 (번개⚡ 제거 + 빈 줄 + "언제든 해지" 삭제) + bubble-detail-5 줄바꿈 정합
+  ───────────────────────────────────────────────────────────────
+  v2.0.5 (대표님 5/8 명시 — Coach Conversation 라이브):
     ⭐ 시안 C 채택 — 진단 코치 채팅 톡 시퀀스
        (시안 D B+C 하이브리드 폐기, 시안 C v2 베이스)
     ⭐ 카피 변경 8건:
@@ -40,7 +51,9 @@
   배포:
     GitHub repo: Beautyscore/beautyscore-result
     GitHub Pages: https://beautyscore.github.io/beautyscore-result/result_frame.html
-    Softr wrapper: result_v2_0_4.html (iframe URL 그대로 사용 가능)
+    Softr wrapper: result_v2_0_5.html (iframe URL 그대로 사용 가능 — wrapper rename 별건)
+    짝 박제: 의사결정/뷰티스코어_result_데이터필드_5_13_KIRA_DB_2026-05-08_v0.1.md
+    Safety net: parseRankAndExtra·setLineOrHide·resolveAvg·parseDeltaPercent
 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
