@@ -84,7 +84,8 @@ html, body {
   background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-rose-dk) 100%) !important;
   color: var(--bs-white) !important;
   display: flex !important; align-items: center !important; justify-content: center !important;
-  font-size: 18px !important; flex-shrink: 0 !important; position: relative !important;
+  font-size: 28px !important; line-height: 1 !important; overflow: hidden !important;
+  flex-shrink: 0 !important; position: relative !important;
 }
 #bs-wrap .bs-h-avatar::after {
   content: ''; position: absolute !important; bottom: 1px !important; right: 1px !important;
@@ -92,11 +93,11 @@ html, body {
   background: var(--bs-ok) !important; border: 2px solid var(--bs-white) !important;
 }
 #bs-wrap .bs-h-info { flex: 1 !important; min-width: 0 !important; }
-#bs-wrap .bs-h-name { font-size: 15px !important; font-weight: 800 !important; color: var(--bs-navy) !important; letter-spacing: -.2px !important; line-height: 1.3 !important; }
-#bs-wrap .bs-h-status { font-size: 11px !important; color: var(--bs-ok) !important; font-weight: 700 !important; letter-spacing: -.1px !important; margin-top: 2px !important; }
+#bs-wrap .bs-h-name { font-size: 16.5px !important; font-weight: 800 !important; color: var(--bs-navy) !important; letter-spacing: -.2px !important; line-height: 1.3 !important; }
+#bs-wrap .bs-h-status { font-size: 12px !important; color: var(--bs-ok) !important; font-weight: 700 !important; letter-spacing: -.1px !important; margin-top: 2px !important; }
 #bs-wrap .bs-h-status::before { content: '●'; margin-right: 4px; }
 #bs-wrap .bs-h-tag {
-  font-size: 10px !important; font-weight: 800 !important;
+  font-size: 11px !important; font-weight: 800 !important;
   color: var(--bs-rose) !important; background: var(--bs-cream2) !important;
   padding: 4px 10px !important; border-radius: 10px !important; letter-spacing: .04em !important;
 }
@@ -131,7 +132,7 @@ html, body {
 @media(min-width:768px){ #bs-wrap .bs-main { max-width: 580px !important; padding: 32px 24px 100px !important; } }
 
 #bs-wrap .bs-time {
-  text-align: center !important; font-size: 11px !important;
+  text-align: center !important; font-size: 12px !important;
   color: var(--bs-muted) !important; font-weight: 600 !important;
   margin-bottom: 18px !important;
 }
@@ -146,14 +147,15 @@ html, body {
   background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-rose-dk) 100%) !important;
   color: var(--bs-white) !important;
   display: flex !important; align-items: center !important; justify-content: center !important;
-  font-size: 13px !important; flex-shrink: 0 !important;
+  font-size: 20px !important; line-height: 1 !important; overflow: hidden !important;
+  flex-shrink: 0 !important;
 }
 #bs-wrap .bs-bubble {
   background: var(--bs-white) !important;
   border: 1px solid var(--bs-bd) !important;
   border-radius: 18px !important; border-bottom-left-radius: 6px !important;
-  padding: 14px 16px !important;
-  font-size: 14.5px !important; color: var(--bs-text) !important;
+  padding: 16px 18px !important;
+  font-size: 16px !important; color: var(--bs-text) !important;
   line-height: 1.65 !important; letter-spacing: -.1px !important;
   max-width: calc(100% - 40px) !important;
   box-shadow: var(--bs-sh-sm) !important;
@@ -182,27 +184,27 @@ html, body {
   display: flex !important; flex-direction: column !important;
   align-items: center !important; justify-content: center !important; line-height: 1 !important;
 }
-#bs-wrap .bs-bubble-score .bs-mini-d-num { font-size: 22px !important; font-weight: 900 !important; color: var(--bs-white) !important; letter-spacing: -.04em !important; }
-#bs-wrap .bs-bubble-score .bs-mini-d-lbl { font-size: 9px !important; color: rgba(255,255,255,.7) !important; font-weight: 700 !important; margin-top: 2px !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-num { font-size: 24px !important; font-weight: 900 !important; color: var(--bs-white) !important; letter-spacing: -.04em !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-lbl { font-size: 10px !important; color: rgba(255,255,255,.7) !important; font-weight: 700 !important; margin-top: 2px !important; }
 #bs-wrap .bs-bubble-score .bs-score-info { flex: 1 !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade {
   display: inline-block !important;
   background: var(--bs-rose) !important; color: var(--bs-white) !important;
-  font-size: 12px !important; font-weight: 900 !important;
+  font-size: 13px !important; font-weight: 900 !important;
   padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-grade-label {
-  font-size: 10px !important; font-weight: 700 !important;
+  font-size: 11px !important; font-weight: 700 !important;
   color: rgba(255,255,255,.85) !important;
   margin-right: 4px !important; letter-spacing: -.2px !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank {
-  font-size: 13px !important; font-weight: 700 !important;
+  font-size: 14.5px !important; font-weight: 700 !important;
   color: rgba(255,255,255,.92) !important; line-height: 1.6 !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank b { color: var(--bs-nude) !important; font-weight: 900 !important; }
 #bs-wrap .bs-bubble-score .bs-score-rank-hint {
-  font-size: 11px !important; color: rgba(255,255,255,.7) !important;
+  font-size: 12px !important; color: rgba(255,255,255,.7) !important;
   font-weight: 600 !important; margin-bottom: 4px !important;
   word-break: keep-all !important; line-height: 1.5 !important;
 }
@@ -211,13 +213,13 @@ html, body {
   word-break: keep-all !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank-delta-hint {
-  font-size: 12px !important; color: rgba(255,255,255,.85) !important;
+  font-size: 13px !important; color: rgba(255,255,255,.85) !important;
   margin-top: 6px !important; padding-top: 6px !important;
   border-top: 1px solid rgba(255,255,255,.15) !important;
   line-height: 1.5 !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-delta-explain {
-  font-size: 10px !important; color: rgba(255,255,255,.7) !important;
+  font-size: 11px !important; color: rgba(255,255,255,.7) !important;
   font-weight: 600 !important;
 }
 
@@ -235,8 +237,8 @@ html, body {
 #bs-wrap .bs-cta-option {
   background: var(--bs-rose) !important; color: var(--bs-white) !important;
   border: none !important; border-radius: 14px !important;
-  padding: 14px 20px !important;
-  font-size: 14.5px !important; font-weight: 800 !important;
+  padding: 16px 22px !important;
+  font-size: 16px !important; font-weight: 800 !important;
   text-align: center !important; cursor: pointer !important; font-family: inherit !important;
   letter-spacing: -.2px !important;
   box-shadow: 0 4px 14px rgba(201,133,110,.30) !important;
@@ -256,15 +258,15 @@ html, body {
 
 /* 미니 카드 */
 #bs-wrap .bs-mini-card {
-  display: flex !important; align-items: center !important; gap: 8px !important;
-  padding: 8px 10px !important;
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  padding: 10px 12px !important;
   background: var(--bs-cream) !important;
   border-radius: 10px !important;
-  margin-top: 8px !important;
-  font-size: 13px !important;
+  margin-top: 10px !important;
+  font-size: 14.5px !important;
 }
-#bs-wrap .bs-mini-card-ico { font-size: 16px !important; flex-shrink: 0 !important; }
-#bs-wrap .bs-mini-card-text { flex: 1 !important; line-height: 1.4 !important; font-weight: 600 !important; }
+#bs-wrap .bs-mini-card-ico { font-size: 18px !important; flex-shrink: 0 !important; }
+#bs-wrap .bs-mini-card-text { flex: 1 !important; line-height: 1.5 !important; font-weight: 600 !important; }
 #bs-wrap .bs-mini-card-text b { color: var(--bs-navy) !important; font-weight: 800 !important; }
 
 /* 타이핑 인디케이터 */
@@ -306,13 +308,13 @@ html, body {
   transform: translateY(0) !important;
 }
 
-/* 4 운영지표 미니 인포 */
+/* 4 운영지표 미니 인포 (v2.0.6 — 여유 확보) */
 #bs-wrap .bs-kpi-mini {
-  display: flex !important; align-items: center !important; gap: 8px !important;
-  padding: 10px 12px !important;
+  display: flex !important; align-items: center !important; gap: 12px !important;
+  padding: 14px 16px !important;
   background: var(--bs-cream) !important;
-  border-radius: 10px !important;
-  margin-top: 10px !important;
+  border-radius: 12px !important;
+  margin-top: 14px !important;
   font-size: 13px !important;
   border-left: 3px solid var(--bs-bd) !important;
 }
@@ -321,7 +323,7 @@ html, body {
 #bs-wrap .bs-kpi-mini.flat { border-left-color: var(--bs-rose-dk) !important; background: rgba(201,133,110,.06) !important; }
 #bs-wrap .bs-kpi-mini-name {
   font-weight: 800 !important; color: var(--bs-navy) !important;
-  flex-shrink: 0 !important; font-size: 12.5px !important;
+  flex-shrink: 0 !important; font-size: 14px !important;
 }
 #bs-wrap .bs-kpi-mini-bar {
   flex: 1 !important; height: 6px !important; border-radius: 3px !important;
@@ -366,7 +368,7 @@ html, body {
   margin-top: 10px !important; padding: 6px 10px !important;
   background: rgba(22,33,62,.05) !important;
   border-radius: 8px !important;
-  font-size: 11px !important; color: var(--bs-muted) !important;
+  font-size: 12px !important; color: var(--bs-muted) !important;
   font-weight: 600 !important;
 }
 #bs-wrap .bs-bar-legend-marker {
@@ -377,12 +379,12 @@ html, body {
 }
 #bs-wrap .bs-kpi-mini-val {
   font-weight: 900 !important; color: var(--bs-navy) !important;
-  font-size: 14px !important; flex-shrink: 0 !important;
+  font-size: 15.5px !important; flex-shrink: 0 !important;
   letter-spacing: -.04em !important;
 }
 
 /* Foot */
-#bs-wrap .bs-foot { text-align: center !important; padding: 24px 14px 0 !important; font-size: 11px !important; color: var(--bs-muted) !important; line-height: 1.7 !important; }
+#bs-wrap .bs-foot { text-align: center !important; padding: 24px 14px 0 !important; font-size: 12px !important; color: var(--bs-muted) !important; line-height: 1.7 !important; }
 </style>
 </head>
 <body>
@@ -390,9 +392,9 @@ html, body {
 <div id="bs-wrap">
 
 <header class="bs-hdr">
-  <div class="bs-h-avatar">👤</div>
+  <div class="bs-h-avatar">👩‍💼</div>
   <div class="bs-h-info">
-    <div class="bs-h-name">진단 코치</div>
+    <div class="bs-h-name">원장님 전용비서</div>
     <div class="bs-h-status">매장 분석 완료</div>
   </div>
   <div class="bs-h-tag">진단 완료</div>
@@ -405,12 +407,12 @@ html, body {
 
 <main class="bs-main">
 
-  <div class="bs-time" id="bs-time">진단 코치 보고</div>
+  <div class="bs-time" id="bs-time">원장님 전용비서 · 첫 진단 보고</div>
 
   <!-- ⭐ 자동 시퀀스 — 5개 버블 (default hidden) -->
   <div class="bs-bubble-group bs-pending" id="bubble-1" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         <b id="bs-store-name">윤혜뷰티</b> 원장님, 안녕하세요.<br>
         첫 진단 보고드릴게요. 🎯<br>
@@ -425,7 +427,7 @@ html, body {
   <!-- 점수 (Hero 버블) -->
   <div class="bs-bubble-group bs-pending" id="bubble-score" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble bs-bubble-score">
         <div class="bs-score-row">
           <div class="bs-mini-donut">
@@ -462,7 +464,7 @@ html, body {
   <!-- 강점 -->
   <div class="bs-bubble-group bs-pending" id="bubble-2" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         먼저 강점부터요. 💎<br>
         <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
@@ -477,7 +479,7 @@ html, body {
   <!-- 강점 유지 메시지 (별도 버블) -->
   <div class="bs-bubble-group bs-pending" id="bubble-2b" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         이건 잘 유지하시면서<br>다음 영역만 보강하면 됩니다.
       </div>
@@ -487,7 +489,7 @@ html, body {
   <!-- 가장 큰 기회 -->
   <div class="bs-bubble-group bs-pending" id="bubble-3" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         가장 큰 기회는 <em id="bs-weak-name">재방문율</em>입니다.<br>
         <span id="bs-weak-improve">+5%</span>만 회복해도 <b id="bs-weak-score-up">+12점</b> 올라가요.
@@ -502,31 +504,31 @@ html, body {
   <!-- 권유 -->
   <div class="bs-bubble-group bs-pending" id="bubble-4" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         매일 옆에서 이 흐름을 같이 봐드릴까요? ⚡<br>
         대시보드에서 매일 모닝톡으로 보고하고,<br>
         액션 1건씩 코칭해드려요.<br>
-        <span style="font-size:12px;color:var(--bs-muted);font-weight:600;">무료 체험 · 30일 데이터 보존 후 자동 폐기 · 언제든 해지</span>
+        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:4px;">무료 체험 · 30일 데이터 보존 후 자동 폐기 · 언제든 해지</span>
       </div>
     </div>
   </div>
 
-  <!-- 초기 CTA 옵션 -->
+  <!-- 초기 CTA 옵션 (v2.0.6 — 진단 상세 → 흐름 → 대시보드 퍼널) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
-      <span>네, 대시보드 체험할게요</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
-    <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-detail-trigger">
+    <button class="bs-cta-option" type="button" id="bs-detail-trigger">
       <span>진단 상세내용 확인하기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
+    <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
+      <span>대시보드 먼저 체험할게요</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
   </div>
 
   <!-- 타이핑 인디케이터 -->
   <div class="bs-typing-row" id="bs-typing">
-    <div class="bs-mini-avatar">👤</div>
+    <div class="bs-mini-avatar">👩‍💼</div>
     <div class="bs-typing-bubble">
       <span class="bs-typing-dot"></span>
       <span class="bs-typing-dot"></span>
@@ -537,7 +539,7 @@ html, body {
   <!-- ⭐ 진단 자세히 — 추가 버블 시퀀스 -->
   <div class="bs-bubble-group bs-pending" id="bubble-detail-1" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         좋아요, 차근차근 알려드릴게요.<br>
         운영지표 4종을 하나씩 살펴볼게요. 📊
@@ -551,7 +553,7 @@ html, body {
 
   <div class="bs-bubble-group bs-pending" id="bubble-detail-2" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
         평균 대비 <em id="bs-kpi-cs-delta">+14% 높음</em><br>
@@ -568,7 +570,7 @@ html, body {
 
   <div class="bs-bubble-group bs-pending" id="bubble-detail-3" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
         가장 큰 회복 영역이에요.<br>
@@ -585,7 +587,7 @@ html, body {
 
   <div class="bs-bubble-group bs-pending" id="bubble-detail-4" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🔵 <b>셋째 — 매출 구조 <span id="bs-kpi-rs">75</span>점</b><br>
         단건 시술 + 회원권 균형이 좋아요.
@@ -600,7 +602,7 @@ html, body {
 
   <div class="bs-bubble-group bs-pending" id="bubble-detail-4b" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🔵 <b>넷째 — 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
         매일 입력 빈도만 더 늘면<br>
@@ -616,12 +618,17 @@ html, body {
 
   <div class="bs-bubble-group bs-pending" id="bubble-detail-5" style="display:none">
     <div class="bs-bubble-wrap">
-      <div class="bs-mini-avatar">👤</div>
+      <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <b>강점은 지키고, 재방문 한 축만 보강하면<br>상위 35% 진입 가능</b>합니다.<br><br>
-        매일 매장 변화를 확인하실 수 있는<br>
-        <b>BASIC 플랜</b>으로 시작해보시는 건 어떠세요?<br>
-        <span style="font-size:12.5px;color:var(--bs-muted);font-weight:600;">월 29,900원 · 매일 진단 + 14일 도장 챌린지</span>
+        <b>강점은 지키고,</b><br>
+        <b>재방문 한 축만 보강하면</b><br>
+        <b>상위 35% 진입 가능합니다.</b><br>
+        <br>
+        매일 매장 변화를<br>
+        확인하실 수 있는<br>
+        <b>BASIC 플랜</b>으로<br>
+        시작해보시는 건 어떠세요?<br>
+        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">월 29,900원 · 매일 진단 + 14일 도장 챌린지</span>
       </div>
     </div>
   </div>
@@ -809,7 +816,26 @@ html, body {
   var detailShown = false;
   var initialSequenceActive = false;
 
-  function showTyping() { var el = document.getElementById('bs-typing'); if (el) el.classList.add('show'); scrollToBottom(); }
+  function showTyping() {
+    var el = document.getElementById('bs-typing');
+    if (!el) return;
+    /* v2.0.6 patch — 카카오톡식: 항상 마지막 visible 버블 바로 다음 자리로 이동 */
+    var visible = document.querySelectorAll('#bs-wrap .bs-bubble-group.show, #bs-wrap .bs-cta-bubble.show');
+    var anchor = null;
+    for (var i = visible.length - 1; i >= 0; i--) {
+      if (visible[i].offsetParent !== null) { anchor = visible[i]; break; }
+    }
+    if (anchor && anchor.parentNode && anchor.nextSibling !== el) {
+      anchor.parentNode.insertBefore(el, anchor.nextSibling);
+    } else if (!anchor) {
+      var time = document.getElementById('bs-time');
+      if (time && time.nextSibling !== el) {
+        time.parentNode.insertBefore(el, time.nextSibling);
+      }
+    }
+    el.classList.add('show');
+    scrollToBottom();
+  }
   function hideTyping() { var el = document.getElementById('bs-typing'); if (el) el.classList.remove('show'); }
   function showBubble(id) {
     var el = document.getElementById(id);
