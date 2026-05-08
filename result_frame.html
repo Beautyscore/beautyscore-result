@@ -834,7 +834,7 @@ html, body {
       }
     }
     el.classList.add('show');
-    scrollToBottom();
+    scrollIntoIfNeeded(el);
   }
   function hideTyping() { var el = document.getElementById('bs-typing'); if (el) el.classList.remove('show'); }
   function showBubble(id) {
@@ -844,7 +844,7 @@ html, body {
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         el.classList.add('show');
-        scrollToBottom();
+        scrollIntoIfNeeded(el);
         setTimeout(postHeight, 450);
       });
     });
@@ -858,10 +858,24 @@ html, body {
     });
     setTimeout(postHeight, 100);
   }
+  /* v2.0.6 patch — iOS Safari iframe scroll propagation 이슈 회피
+     window.scrollTo() 대신 element.scrollIntoView({block:'nearest'}) 사용
+     → 이미 viewport 안이면 noop, 밖이면 가까운 가장자리로 부드러운 정렬
+     → iPhone에서 화면이 끝으로 점프하던 현상 해결 */
+  function scrollIntoIfNeeded(el) {
+    if (!el || typeof el.scrollIntoView !== 'function') return;
+    try {
+      el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    } catch(e) {
+      try { el.scrollIntoView(false); } catch(e2){}
+    }
+  }
   function scrollToBottom() {
-    setTimeout(function(){
-      window.scrollTo({ top: document.body.scrollHeight + 200, behavior: 'smooth' });
-    }, 80);
+    /* Skip 버튼 등에서 호출 — 마지막 visible element 기준 정렬 */
+    var visible = document.querySelectorAll('#bs-wrap .bs-bubble-group.show, #bs-wrap .bs-cta-bubble.show');
+    for (var i = visible.length - 1; i >= 0; i--) {
+      if (visible[i].offsetParent !== null) { scrollIntoIfNeeded(visible[i]); return; }
+    }
   }
   function clearPending() { pendingTimeouts.forEach(function(t){ clearTimeout(t); }); pendingTimeouts = []; }
   function showSkipBtn() { var el = document.getElementById('bs-skip'); if (el) el.classList.add('show'); }
