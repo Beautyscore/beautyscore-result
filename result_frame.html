@@ -737,6 +737,51 @@ html, body {
     monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
 
+  /* ⭐ v2.0.8 patch (5/9 KIRA) — Worker /api/diagnosis/fetch 통합 (T15+ 실데이터 연동)
+     ═══════════════════════════════════════════════════════════════
+     - 우선순위: Worker fetch (실데이터) > URL params > mock fallback
+     - Worker 미가동 시 URL params·mock fallback 그대로 동작 (하위 호환)
+     - 5/15 KIRA-OPS Worker 엔드포인트 박제 의존 (현재 placeholder) */
+  var WORKER_FETCH_URL = 'https://form.beautyscore.co.kr/api/diagnosis/fetch';
+
+  function bsFetchT15(recordId) {
+    if (!recordId || recordId === 'demo') return Promise.resolve(null);
+    var url = WORKER_FETCH_URL + '?recordId=' + encodeURIComponent(recordId);
+    return fetch(url, { method: 'GET', headers: {'Accept': 'application/json'} })
+      .then(function(res){
+        if (res.status === 200) return res.json();
+        if (res.status === 404) return { _pending: true };  /* Make P-2 산출 대기 */
+        return null;
+      })
+      .catch(function(err){
+        console.warn('[BS Result] fetch failed, fallback to URL params', err);
+        return null;
+      });
+  }
+
+  function bsApplyT15Data(d) {
+    if (!d || d._pending) return;  /* pending 시 URL params 유지 */
+    /* T15+ 응답 → DATA 갱신 */
+    if (d.score != null)        DATA.score = String(d.score);
+    if (d.grade)                DATA.grade = d.grade;
+    if (d.rank)                 DATA.rank = d.rank;
+    if (d.avgScore != null)     DATA.avgScore = d.avgScore;
+    if (d.store)                DATA.store = d.store;
+    if (d.metrics) {
+      if (d.metrics.재방문율 != null)   DATA.rv = d.metrics.재방문율;
+      if (d.metrics.상담성공률 != null) DATA.cs = d.metrics.상담성공률;
+      if (d.metrics.매출구성 != null)   DATA.rs = d.metrics.매출구성;
+      if (d.metrics.데이터관리 != null) DATA.dm = d.metrics.데이터관리;
+    }
+    if (d.strKpi)              DATA.strKpi = d.strKpi;
+    if (d.weakKpi)             DATA.weakKpi = d.weakKpi;
+    if (d.strDelta)            DATA.strDelta = d.strDelta;
+    if (d.weakImprove)         DATA.weakImprove = d.weakImprove;
+    if (d.weakScoreUp)         DATA.weakScoreUp = d.weakScoreUp;
+    if (d.monthlyGap)          DATA.monthlyGap = d.monthlyGap;
+    console.info('[BS Result v2.0.8] T15+ applied', DATA);
+  }
+
   var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' };
 
   /* v2.0.6 patch — 평균값 자동 역산 (URL param 누락 시 카피·시각 정합 보장)
@@ -1091,8 +1136,19 @@ html, body {
     } catch(e){}
   }
 
-  /* ═══ 초기화 ═══ */
+  /* ═══ 초기화 ═══
+     ⭐ v2.0.8 patch (5/9 KIRA) — Worker fetch 우선, mock fallback 보장 */
   function init() {
+    /* 1. Worker /api/diagnosis/fetch 시도 (recordId 있으면) */
+    bsFetchT15(DATA.recordId).then(function(t15Data){
+      bsApplyT15Data(t15Data);
+      bootSequence();
+    }).catch(function(){
+      bootSequence();  /* fetch 실패해도 mock fallback으로 진행 */
+    });
+  }
+
+  function bootSequence() {
     applyData();
     var seen = false;
     try { seen = (localStorage.getItem(SEEN_KEY) === '1'); } catch(e){}
