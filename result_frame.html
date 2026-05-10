@@ -300,8 +300,8 @@ html, body {
   padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
   transition: background-color .25s ease !important;
 }
-/* 5등급 컬러 (imweb 기준 5/11 박제 — 점수 기반 배경 컬러 자동 적용 by JS) */
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #A78BFA !important; }
+/* 5등급 컬러 (imweb 기준 5/11 박제 최종 — S 금색🏆·A 초록·B 파랑·C 노랑·D 빨강) */
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #D4AF37 !important; box-shadow: 0 2px 8px rgba(212,175,55,.30) !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; }
@@ -1070,7 +1070,8 @@ html, body {
     }
     setText('bs-score', DATA.score);
     setText('bs-grade', DATA.grade);
-    /* 5등급 컬러 적용 (imweb 기준 5/11 박제 — 점수 기반 배경 컬러 자동) */
+    /* 5등급 컬러 + S 트로피 (imweb 기준 5/11 박제 최종 — 점수 기반 자동 적용)
+       S(90+) 금색 #D4AF37 + 🏆 prefix · A(75+) 초록 · B(55+) 파랑 · C(35+) 노랑 · D(<35) 빨강 */
     var gradeBadge = document.getElementById('bs-grade');
     if (gradeBadge) {
       var gScore = parseInt(DATA.score, 10) || 0;
@@ -1081,6 +1082,10 @@ html, body {
               :                'grade-d';
       gradeBadge.classList.remove('grade-s','grade-a','grade-b','grade-c','grade-d');
       gradeBadge.classList.add(gCls);
+      /* S 등급이면 텍스트 앞에 🏆 트로피 (시각 차별화 — "1등 매장" 정체성) */
+      if (gCls === 'grade-s' && DATA.grade && DATA.grade.indexOf('🏆') === -1) {
+        gradeBadge.textContent = '🏆 ' + DATA.grade;
+      }
     }
     /* v2.0.6 patch — rank 풀 텍스트 분리 (상위 N% + 매장유형 + 강점) */
     var parsedRank = parseRankAndExtra(DATA.rank);
