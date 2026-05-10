@@ -8,8 +8,83 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.7 (2026-05-09 KIRA, 카피·컬러·룰 11건 patch 누적)
+  뷰티스코어 result-frame v2.0.11 (KIRA, "평균" 라벨 + segment-aware 비교 카피)
   ═══════════════════════════════════════════════════════════════
+  v2.0.11 patch (대표님 명시 — 결함 2건):
+    ⭐ ⑫ 4 막대 평균 마커 위에 "평균" 작은 라벨 추가
+       — span.bs-kpi-mini-avg-label position:absolute · left:var(--bs-kpi-avg) · bottom:100%
+       — font-size:9px · color:#000 · font-weight:700 · letter-spacing:-.3px
+       — bs-kpi-mini padding-top 22px 확보 (라벨 위 여유 공간)
+       — 4 KPI 막대 모두 동일 패턴 (cs·rv·rs·dm) → 시각 일관성
+    ⭐ ⑬ "비교축 대비" 폐기 → segment-aware 비교 라벨로 교체
+       — 결함: "비교축" 추상 표현 → 어떤 매장과 비교했는지 불명확 + 자연어 X (대표님 룰)
+       — 신규: buildCompareLabel() 우선순위 3단
+         1) Worker-supplied benchmarkCompareLabel (예: "유사 1인샵·페이스 매장 평균 대비")
+         2) benchmarkSegment + 템플릿 (segment="1인샵·페이스" → "유사 1인샵·페이스 매장 평균 대비")
+         3) mock fallback "유사 매장 평균 대비"
+       — 적용 위치: 강점 미니카드 (bs-strength-compare-label) + 첫째 운영지표 (bs-kpi-cs-compare-label)
+       — bsApplyT15Data 신규 수신: benchmark.compareLabel · benchmark.segment 둘 다 지원
+  ───────────────────────────────────────────────────────────────
+  v2.0.10 patch (대표님 명시 — 스크린샷 기반 결함 3건):
+    ⭐ ⑨ 평균 마커 위치 거의 동일 결함 fix (mock 모드)
+       — 결함: resolveAvg() 최종 fallback이 score → 마커 = 막대 끝 → 4 마커 좁은 범위 몰림
+       — 신규: MOCK_AVG per-KPI default (cs:60·rv:55·rs:65·dm:50, 산업 평균 추정)
+       — fallback 체인 4단: URL/T15 → strDelta 역산 → MOCK_AVG → score (최후)
+       — 효과: T8 실데이터 미연동 상태에서도 4 마커 자연 분산 (50~65 범위)
+    ⭐ ⑩ 막대 평균 마커 "세로 점선" 선언과 다르게 실선 결함 fix
+       — 결함: ::before가 background: solid var(--bs-navy) → 점선 X
+       — 신규: repeating-linear-gradient(3px #000 + 3px transparent) 패턴 → 명확한 점선
+       — 색상: navy → 검정 #000 (4 KPI bar fill 색상과 명확 구분, brand-neutral)
+    ⭐ ⑪ "좋아요" 버블 legend marker도 점선 정합
+       — bs-bar-legend-marker도 동일 repeating-linear-gradient 패턴 적용
+       — 4 KPI 막대 + legend가 같은 시각 언어 (검정 점선) 사용 → 일관성
+  ───────────────────────────────────────────────────────────────
+  v2.0.9 patch (대표님 명시 — 스크린샷 기반 결함 2건):
+    ⭐ ⑦ 막대 overflow root-cause fix
+       — 결함: v2.0.8 patch ⑤ 트랙 폭 170px 고정이 좁은 모바일(≤340px)에서 버블 max-width 초과 → bs-kpi-mini(332px)가 버블 밖으로 튀어나감
+       — 신규: 막대를 flex:1 가변 복귀 + 4 KPI 상세 버블 (#bubble-detail-2/3/4/4b) 강제 full-width
+       — 효과: 4 카드 버블 폭 동일 → 막대 트랙 폭 자연 정합 + 좁은 화면 overflow 0
+       — bs-kpi-mini width:100% + box-sizing:border-box (부모 버블 가득)
+    ⭐ ⑧ 벤치마크 정합 (T8 101개 실데이터 기반 strDelta 동적 산출)
+       — 결함: strDelta '+14%' mock fallback이 모든 사용자에게 동일 → 캡쳐 시 "가짜" 인상
+       — 신규: bsApplyT15Data에서 d.benchmark 수신 시 avgCs/avgRv/avgRs/avgDm 적용
+       — recomputeDeltasFromBenchmark() — (사용자 점수 − T8 segment 평균) 실수치 산출
+       — weakImprove: 평균까지 회복 목표 (max 5%) · weakScoreUp: 회복 × 1.6 (가중치 환산)
+       — % 앞 + 표기 금지 룰 정합 (CLAUDE.md §5.3-1) — "14% 높음" 라벨 방향 표현
+    ───────────────────────────────────────────────────────
+    🔴 KIRA-OPS Worker 의존 (5/13 박제 작업) — 본 patch 효과 발현 조건:
+       /api/diagnosis/fetch 응답에 benchmark 필드 추가:
+         {
+           benchmark: {
+             avgCs: <T8 segment 상담 성공률 평균>,
+             avgRv: <T8 segment 재방문율 평균>,
+             avgRs: <T8 segment 매출 구성 평균>,
+             avgDm: <T8 segment 데이터 관리 평균>,
+             avgScore: <T8 segment 종합 점수 평균>,
+             n: <매칭 매장 수>,
+             segment: "1인샵·페이스·3년차"
+           }
+         }
+       segment 매칭: T1 입력값(매장규모·전문분야·운영기간) → T8 record 필터 → 평균 산출
+       Worker 미가동 시 URL params·mock fallback 그대로 동작 (하위 호환)
+  ───────────────────────────────────────────────────────────────
+  v2.0.8 patch (대표님 명시):
+    ⭐ ① 초기 CTA primary "핵심 운영지표 확인하기" → "핵심 운영 지표 상세히보기"
+    ⭐ ② 초기 CTA secondary "대시보드 먼저 체험할게요" → "서비스 대시보드 체험하기"
+    ⭐ ③ 자세히 끝 CTA primary "지금 체험해볼게요" (→ /dashboard-preview)
+       → "결제하고 서비스 시작하기" (→ /pricing) + iframe-top redirect 핸들러 분리
+    ⭐ ④ 자세히 끝 CTA secondary "나중에 다시 볼게요(카톡 채널 추가)"
+       → "나중에 다시볼게요" (괄호 제거, 클릭 시 카톡 채널 redirect 동작 그대로 유지)
+    ⭐ id 변경: bs-cta-dashboard-2 → bs-cta-pricing (JS forEach 분리)
+    ⭐ ⑤ KPI 미니바 트랙 폭 절대 고정 (170px / 모바일 ≤360px 140px)
+       — 기존 flex:1로 인한 4 카드 트랙 폭 차이 (버블 텍스트 길이 차이가 막대 폭에 전이) fix
+       — 시각 비교 정합 회복 (UX 표준: 동일 척도 카드 간 트랙 폭 일치)
+    ⭐ ⑥ strKpi/weakKpi 동적 산출 — 점수 기반 자동 선정
+       — 기존 결함: pq('strKpi','cs') 기본값 'cs' 하드코딩 → 모든 매장 강점이 "상담 성공률"로만 노출
+       — 신규: deriveStrengthWeakness() 4 점수(cs/rv/rs/dm) 정렬 → 최고점=strKpi · 최저점=weakKpi
+       — URL param·T15 fetch에서 명시적으로 들어오면 해당 값 존중 (하위 호환 유지)
+       — bsApplyT15Data에서도 strKpi/weakKpi 누락 시 재산출
+  ───────────────────────────────────────────────────────────────
   v2.0.7 patch (대표님 5/9 명시):
     ⭐ ① 룰 박제 — `+` 표기 금지 (긍정 표현·% 앞 모두 적용, CLAUDE.md §5.3-1)
        "+14%" → "14%" / "+12점" → "12점" / "+5%" → "5%"
@@ -342,12 +417,30 @@ html, body {
 /* 4 운영지표 미니 인포 (v2.0.6 — 여유 확보) */
 #bs-wrap .bs-kpi-mini {
   display: flex !important; align-items: center !important; gap: 12px !important;
-  padding: 14px 16px !important;
+  padding: 22px 16px 14px !important;  /* v2.0.11 — top 22px ("평균" 라벨 marker 위 여유 공간) */
+  width: 100% !important;  /* v2.0.9 — 부모 버블 가득 채움 (막대 트랙 정합 위해 필수) */
+  box-sizing: border-box !important;
   background: var(--bs-cream) !important;
   border-radius: 12px !important;
   margin-top: 14px !important;
   font-size: 13px !important;
   border-left: 3px solid var(--bs-bd) !important;
+}
+/* v2.0.11 — 평균 마커 위 "평균" 라벨 (4 KPI 막대 동일 패턴, --bs-kpi-avg 위치 동적 추적) */
+#bs-wrap .bs-kpi-mini-avg-label {
+  position: absolute !important;
+  left: var(--bs-kpi-avg, 50%) !important;
+  bottom: 100% !important;
+  margin-bottom: 6px !important;
+  transform: translateX(-50%) !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+  letter-spacing: -.3px !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+  opacity: .85 !important;
 }
 #bs-wrap .bs-kpi-mini.good { border-left-color: var(--bs-ok) !important; background: rgba(46,125,94,.05) !important; }
 #bs-wrap .bs-kpi-mini.warn { border-left-color: var(--bs-warn) !important; background: rgba(179,96,21,.05) !important; }
@@ -359,9 +452,19 @@ html, body {
   min-width: 78px !important;  /* v2.0.7 — 4 카드 트랙 폭 통일 (이름 글자 수 차이 무시) */
 }
 #bs-wrap .bs-kpi-mini-bar {
-  flex: 1 !important; height: 6px !important; border-radius: 3px !important;
+  flex: 1 1 0 !important; min-width: 0 !important;  /* v2.0.9 — 가변 폭 복귀 (4 버블 모두 full-width라 트랙 폭 자연 정합 + overflow 방지) */
+  height: 6px !important; border-radius: 3px !important;
   background: rgba(22,33,62,.08) !important;
   overflow: visible !important; position: relative !important;
+}
+/* v2.0.9 — 4 KPI 상세 버블 강제 full-width (텍스트 길이로 인한 버블 폭 차이 → 막대 트랙 폭 차이 root cause fix) */
+#bs-wrap #bubble-detail-2 .bs-bubble,
+#bs-wrap #bubble-detail-3 .bs-bubble,
+#bs-wrap #bubble-detail-4 .bs-bubble,
+#bs-wrap #bubble-detail-4b .bs-bubble {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 36px) !important;  /* avatar 28px + 8px gap */
 }
 #bs-wrap .bs-kpi-mini-bar::after {
   content: ''; position: absolute !important;
@@ -372,16 +475,23 @@ html, body {
   transition: width 1s cubic-bezier(.4,0,.2,1) !important;
 }
 #bs-wrap .bs-pending.show .bs-kpi-mini-bar::after { width: var(--bs-kpi-w, 0%) !important; }
-/* v2.0.5 patch — 벤치마크 평균 마커 (세로 점선) */
+/* v2.0.10 patch — 벤치마크 평균 마커 (세로 검정 점선, repeating-linear-gradient 패턴)
+   기존 결함: background: solid navy → "세로 점선"이라 선언했지만 실제는 실선 노출
+   신규: 3px 검정 + 3px 투명 반복 → 명확한 점선 패턴 + brand-neutral 검정 */
 #bs-wrap .bs-kpi-mini-bar::before {
   content: ''; position: absolute !important;
-  top: -3px !important; bottom: -3px !important;
+  top: -4px !important; bottom: -4px !important;
   left: var(--bs-kpi-avg, 50%) !important;
   width: 2px !important;
-  background: var(--bs-navy) !important;
-  border-radius: 1px !important;
+  background: repeating-linear-gradient(
+    to bottom,
+    #000 0px, #000 3px,
+    transparent 3px, transparent 6px
+  ) !important;
+  border-radius: 0 !important;
   z-index: 2 !important;
-  opacity: .85 !important;
+  opacity: .9 !important;
+  transform: translateX(-1px) !important;  /* 2px 폭 가운데 정렬 */
 }
 #bs-wrap .bs-kpi-mini-avg-label {
   display: block !important;
@@ -407,8 +517,13 @@ html, body {
 #bs-wrap .bs-bar-legend-marker {
   display: inline-block !important;
   width: 2px !important; height: 14px !important;
-  background: var(--bs-navy) !important;
-  border-radius: 1px !important;
+  /* v2.0.10 — "좋아요" 버블 legend marker도 검정 점선 패턴 정합 (4 KPI 막대와 동일 시각 언어) */
+  background: repeating-linear-gradient(
+    to bottom,
+    #000 0px, #000 3px,
+    transparent 3px, transparent 6px
+  ) !important;
+  border-radius: 0 !important;
 }
 #bs-wrap .bs-kpi-mini-val {
   font-weight: 900 !important; color: var(--bs-navy) !important;
@@ -504,7 +619,7 @@ html, body {
         <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">✨</span>
-          <span class="bs-mini-card-text">비교축 대비 <b id="bs-strength-delta">14%</b> 높음</span>
+          <span class="bs-mini-card-text"><span id="bs-strength-compare-label">유사 매장 평균 대비</span> <b id="bs-strength-delta">14%</b> 높음</span>
         </div>
       </div>
     </div>
@@ -550,14 +665,14 @@ html, body {
     </div>
   </div>
 
-  <!-- 초기 CTA 옵션 (v2.0.6 — 진단 상세 → 흐름 → 대시보드 퍼널) -->
+  <!-- 초기 CTA 옵션 (v2.0.8 — CTA 카피 정정) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
     <button class="bs-cta-option" type="button" id="bs-detail-trigger">
-      <span>핵심 운영지표 확인하기</span>
+      <span>핵심 운영 지표 상세히보기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
-      <span>대시보드 먼저 체험할게요</span>
+      <span>서비스 대시보드 체험하기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
   </div>
@@ -592,12 +707,12 @@ html, body {
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        비교축 대비 <em id="bs-kpi-cs-delta">14% 높음</em><br>
+        <span id="bs-kpi-cs-compare-label">유사 매장 평균 대비</span> <em id="bs-kpi-cs-delta">14% 높음</em><br>
         첫 상담의 신뢰 형성과 시술 권유가<br>
         잘 맞춰져 있어요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
           <span class="bs-kpi-mini-name">상담 성공률</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"></span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-cs-val">80</span>
         </div>
       </div>
@@ -614,7 +729,7 @@ html, body {
         <em>5%만 회복하면 종합 점수 12점</em> 올라갑니다.
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
           <span class="bs-kpi-mini-name">재방문율</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"></span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rv-val">65</span>
         </div>
       </div>
@@ -631,7 +746,7 @@ html, body {
         이 구조 그대로 유지하시면 돼요.
         <div class="bs-kpi-mini good" id="bs-kpi-mini-rs">
           <span class="bs-kpi-mini-name">매출 구성</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#2E7D5E;"></span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rs-val">75</span>
         </div>
       </div>
@@ -648,7 +763,7 @@ html, body {
         다음 액션이 명확해져요.
         <div class="bs-kpi-mini info" id="bs-kpi-mini-dm">
           <span class="bs-kpi-mini-name">데이터 관리</span>
-          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"></span>
+          <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
         </div>
       </div>
@@ -672,14 +787,14 @@ html, body {
     </div>
   </div>
 
-  <!-- 자세히 끝 새 CTA -->
+  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정: /pricing 결제 직진 + 카톡 채널 redirect) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-2">
-      <span>지금 체험해볼게요</span>
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/pricing" target="_top" id="bs-cta-pricing">
+      <span>결제하고 서비스 시작하기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
     <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-kakao-trigger">
-      <span>나중에 다시 볼게요(카톡 채널 추가)</span>
+      <span>나중에 다시볼게요</span>
       <span class="bs-cta-arrow">💬</span>
     </button>
   </div>
@@ -728,14 +843,37 @@ html, body {
     avgCs:       parseInt(pq('avgCs', ''), 10),
     avgRs:       parseInt(pq('avgRs', ''), 10),
     avgDm:       parseInt(pq('avgDm', ''), 10),
-    /* 강점·약점 */
-    strKpi:      pq('strKpi', 'cs'),
-    weakKpi:     pq('weakKpi', 'rv'),
+    /* 강점·약점 — URL param 우선, 없으면 아래 deriveStrengthWeakness()에서 점수 기반 동적 산출 */
+    strKpi:      pq('strKpi', ''),
+    weakKpi:     pq('weakKpi', ''),
     strDelta:    pqA(['strDelta','strD'], '+14%'),
     weakImprove: pq('weakImprove', '+5%'),
     weakScoreUp: pq('weakScoreUp', '+12점'),
     monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
+
+  /* v2.0.8 patch — 강점·약점 동적 산출 (URL param·T15 데이터 미존재 시 점수 기반 자동 선정)
+     ───────────────────────────────────────────────────────
+     - strKpi 기본 'cs' 하드코딩 결함 fix (모든 매장 강점이 상담 성공률로만 노출되던 버그)
+     - 4 운영지표 점수 중 최고점 → strKpi, 최저점 → weakKpi
+     - 동점 시 cs > rv > rs > dm 순 우선 (운영 우선순위 기준)
+     - URL param·T15 fetch에서 명시적으로 들어오면 그 값을 그대로 존중 */
+  function deriveStrengthWeakness() {
+    var KPI_VALID = { cs: 1, rv: 1, rs: 1, dm: 1 };
+    var kpis = ['cs', 'rv', 'rs', 'dm'];
+    var sorted = kpis.slice().sort(function(a, b) {
+      var diff = (DATA[b] || 0) - (DATA[a] || 0);
+      if (diff !== 0) return diff;
+      return kpis.indexOf(a) - kpis.indexOf(b);  /* tie-break: 운영 우선순위 cs > rv > rs > dm */
+    });
+    if (!DATA.strKpi || !KPI_VALID[DATA.strKpi])  DATA.strKpi  = sorted[0];
+    if (!DATA.weakKpi || !KPI_VALID[DATA.weakKpi]) DATA.weakKpi = sorted[sorted.length - 1];
+    /* 동일 KPI가 강점·약점 양쪽으로 잡히는 edge case (4 점수 모두 동일) → 차순위로 분리 */
+    if (DATA.strKpi === DATA.weakKpi) {
+      DATA.weakKpi = (sorted[1] && sorted[1] !== DATA.strKpi) ? sorted[1] : sorted[sorted.length - 2] || sorted[0];
+    }
+  }
+  deriveStrengthWeakness();
 
   /* ⭐ v2.0.8 patch (5/9 KIRA) — Worker /api/diagnosis/fetch 통합 (T15+ 실데이터 연동)
      ═══════════════════════════════════════════════════════════════
@@ -773,16 +911,81 @@ html, body {
       if (d.metrics.매출구성 != null)   DATA.rs = d.metrics.매출구성;
       if (d.metrics.데이터관리 != null) DATA.dm = d.metrics.데이터관리;
     }
+    /* v2.0.9 — T8 벤치마크 평균 수신 (KIRA-OPS Worker /api/diagnosis/fetch 5/13 의존)
+       응답 스키마: benchmark: { avgCs, avgRv, avgRs, avgDm, avgScore, n, segment }
+       segment 예: "1인샵·페이스·운영3년차" (T8 매칭 group key) */
+    if (d.benchmark) {
+      if (d.benchmark.avgCs != null)    DATA.avgCs = d.benchmark.avgCs;
+      if (d.benchmark.avgRv != null)    DATA.avgRv = d.benchmark.avgRv;
+      if (d.benchmark.avgRs != null)    DATA.avgRs = d.benchmark.avgRs;
+      if (d.benchmark.avgDm != null)    DATA.avgDm = d.benchmark.avgDm;
+      if (d.benchmark.avgScore != null) DATA.avgScore = d.benchmark.avgScore;
+      DATA.benchmarkN = d.benchmark.n || null;
+      DATA.benchmarkSegment = d.benchmark.segment || null;
+      /* v2.0.11 — Worker가 완성형 비교 라벨 직접 공급 시 우선 사용 (예: "유사 1인샵·페이스 매장 평균 대비") */
+      DATA.benchmarkCompareLabel = d.benchmark.compareLabel || null;
+    }
     if (d.strKpi)              DATA.strKpi = d.strKpi;
     if (d.weakKpi)             DATA.weakKpi = d.weakKpi;
     if (d.strDelta)            DATA.strDelta = d.strDelta;
     if (d.weakImprove)         DATA.weakImprove = d.weakImprove;
     if (d.weakScoreUp)         DATA.weakScoreUp = d.weakScoreUp;
     if (d.monthlyGap)          DATA.monthlyGap = d.monthlyGap;
-    console.info('[BS Result v2.0.8] T15+ applied', DATA);
+    /* v2.0.8 — T15 metrics 갱신 후 strKpi/weakKpi 미존재 시 새 점수 기반 재산출 */
+    if (!d.strKpi || !d.weakKpi) deriveStrengthWeakness();
+    /* v2.0.9 — 벤치마크 평균 수신 + Worker 측 strDelta 미산출 시 실수치 재산출 */
+    if (d.benchmark && (!d.strDelta || !d.weakImprove)) recomputeDeltasFromBenchmark();
+    console.info('[BS Result v2.0.9] T15+ applied', DATA);
+  }
+
+  /* v2.0.9 patch — 벤치마크 평균 기반 strDelta·weakImprove·weakScoreUp 동적 재산출
+     ───────────────────────────────────────────────────────
+     - 기존 결함: strDelta '+14%' mock fallback이 모든 사용자에게 동일 노출 → "가짜" 인상
+     - 신규: T8 segment 평균 수신 시 (사용자 점수 − 평균) 실수치 산출
+     - 룰 정합: % 앞 + 표기 금지 (CLAUDE.md §5.3-1) → "14% 높음" 표기는 라벨 "높음/낮음"으로 방향 표현
+     - weakScoreUp: 약점 회복 × 매장규모 가중치 (Make P-2 v1.2 매트릭스 1인샵 0.4 기준 단순화)
+     - 강점이지만 평균 미만일 때 (모든 KPI가 평균 이하) → label "비교축 대비" 유지·delta 절대값 사용 */
+  function recomputeDeltasFromBenchmark() {
+    var capKey = function(k) { return 'avg' + k.charAt(0).toUpperCase() + k.slice(1); };
+    var formatPct = function(v) {
+      var rounded = Math.round(Math.abs(v) * 10) / 10;
+      var s = rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1);
+      return s + '%';
+    };
+    var strKpi = DATA.strKpi;
+    var weakKpi = DATA.weakKpi;
+    var strScore = DATA[strKpi];
+    var weakScore = DATA[weakKpi];
+    var strAvg = DATA[capKey(strKpi)];
+    var weakAvg = DATA[capKey(weakKpi)];
+    if (typeof strAvg === 'number' && typeof strScore === 'number') {
+      DATA.strDelta = formatPct(strScore - strAvg);
+    }
+    if (typeof weakAvg === 'number' && typeof weakScore === 'number') {
+      var gap = Math.max(0, weakAvg - weakScore);
+      var recover = gap > 0 ? Math.min(gap, 5) : 0;  /* 회복 목표 — 평균까지 또는 최대 5% */
+      DATA.weakImprove = formatPct(recover);
+      /* 종합 점수 상승 추정: 회복 % × 0.4 (1인샵 가중치 max) × 4 (KPI 4종) ≈ 회복 % × 1.6
+         100점 만점 환산 → 0~12점 범위 */
+      var su = Math.round(recover * 1.6);
+      DATA.weakScoreUp = Math.max(0, su) + '점';
+    }
   }
 
   var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' };
+
+  /* v2.0.11 — segment-aware 비교 라벨 빌더
+     ───────────────────────────────────────────────
+     기존 결함: "비교축 대비" 추상 표현 → 어떤 매장과 비교했는지 불명확 + 자연어 X
+     신규 우선순위:
+       1. Worker-supplied benchmarkCompareLabel (예: "유사 1인샵·페이스 매장 평균 대비")
+       2. benchmarkSegment + 템플릿 (예: segment="1인샵·페이스" → "유사 1인샵·페이스 매장 평균 대비")
+       3. mock fallback: "유사 매장 평균 대비" (T8 segment 매칭 정보 없는 상태에서 안전 generic) */
+  function buildCompareLabel() {
+    if (DATA.benchmarkCompareLabel) return DATA.benchmarkCompareLabel;
+    if (DATA.benchmarkSegment) return '유사 ' + DATA.benchmarkSegment + ' 매장 평균 대비';
+    return '유사 매장 평균 대비';
+  }
 
   /* v2.0.6 patch — 평균값 자동 역산 (URL param 누락 시 카피·시각 정합 보장)
      "+14%" / "+14" / "14" 모두 14로 파싱 */
@@ -791,20 +994,34 @@ html, body {
     var m = String(s).match(/[-+]?\d+(\.\d+)?/);
     return m ? parseFloat(m[0]) : null;
   }
+  /* v2.0.10 — per-KPI 산업 평균 mock default
+     ───────────────────────────────────────────────
+     기존 결함: resolveAvg() 최종 fallback이 score (마커 = 점수 끝, 시각 중립) →
+       4 KPI 중 strKpi·weakKpi만 strDelta/weakImprove로 역산, 나머지 2종은 마커 = 막대 끝
+       → 4 마커가 좁은 범위(60~75)에 몰려 "거의 동일한 위치"로 보임 (스크린샷 결함)
+     신규: T8 segment 평균이 없을 때 산업 평균 추정치 default 사용 → 4 마커 자연 분산
+     산업 평균 추정 근거 (베타 비공개·매장 200명 도달 후 T8 실평균 반영 예정):
+       - cs(상담 성공률) 60: 상담→결제 전환 업계 평균 55~65
+       - rv(재방문율) 55: 1·2회차 전환 평균 50~60
+       - rs(매출 구성) 65: 단건·회원권 균형 평균 60~70
+       - dm(데이터 관리) 50: 매일 입력 빈도 낮은 매장 다수 (50대 원장 디지털 격차) */
+  var MOCK_AVG = { cs: 60, rv: 55, rs: 65, dm: 50 };
+
   function resolveAvg(kpi) {
     var avgKey = 'avg' + kpi.charAt(0).toUpperCase() + kpi.slice(1);
     var v = DATA[avgKey];
-    if (typeof v === 'number' && !isNaN(v)) return v;  /* URL param 우선 */
+    if (typeof v === 'number' && !isNaN(v)) return v;  /* 1순위: URL param·T15 benchmark */
     var score = DATA[kpi];
     if (DATA.strKpi === kpi) {
       var d = parseDeltaPercent(DATA.strDelta);
-      if (d != null) return Math.max(0, Math.min(100, score - d));
+      if (d != null) return Math.max(0, Math.min(100, score - d));  /* 2순위: strDelta 역산 */
     }
     if (DATA.weakKpi === kpi) {
       var w = parseDeltaPercent(DATA.weakImprove);
-      if (w != null) return Math.max(0, Math.min(100, score + w));
+      if (w != null) return Math.max(0, Math.min(100, score + w));  /* 2순위: weakImprove 역산 */
     }
-    return score;  /* fallback — 시각 중립 (마커 = 점수 동일 위치) */
+    if (MOCK_AVG[kpi] != null) return MOCK_AVG[kpi];  /* 3순위: 산업 평균 mock (4 마커 자연 분산) */
+    return score;  /* 최후 fallback — 시각 중립 */
   }
 
   /* v2.0.6 patch — rank 풀 텍스트에서 "상위 N%" 추출 + 마침표 단위 매장유형·강점 분리
@@ -864,6 +1081,10 @@ html, body {
     setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-name-2', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-delta', DATA.strDelta);
+    /* v2.0.11 — segment-aware 비교 라벨 ("비교축 대비" 폐기) */
+    var compareLabel = buildCompareLabel();
+    setText('bs-strength-compare-label', compareLabel);
+    setText('bs-kpi-cs-compare-label', compareLabel);
     setText('bs-weak-name', KPI_NAME[DATA.weakKpi] || '재방문율');
     setText('bs-weak-improve', DATA.weakImprove);
     setText('bs-weak-score-up', DATA.weakScoreUp);
@@ -920,7 +1141,7 @@ html, body {
     if (DATA.recordId && DATA.recordId !== 'demo') {
       dashUrl += '?recordId=' + encodeURIComponent(DATA.recordId);
     }
-    ['bs-cta-dashboard-1','bs-cta-dashboard-2'].forEach(function(id){
+    ['bs-cta-dashboard-1'].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       el.setAttribute('href', dashUrl);
@@ -938,6 +1159,22 @@ html, body {
         }
       });
     });
+    /* v2.0.8 — 결제 CTA (/pricing 직진) iframe-top redirect 핸들러 */
+    var pricingEl = document.getElementById('bs-cta-pricing');
+    if (pricingEl) {
+      var pricingUrl = 'https://app.beautyscore.co.kr/pricing';
+      pricingEl.addEventListener('click', function(e){
+        try {
+          if (window.top !== window.self) {
+            e.preventDefault();
+            window.top.location.href = pricingUrl;
+          }
+        } catch(err) {
+          e.preventDefault();
+          window.location.href = pricingUrl;
+        }
+      });
+    }
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
