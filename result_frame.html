@@ -298,7 +298,14 @@ html, body {
   background: var(--bs-rose) !important; color: var(--bs-white) !important;
   font-size: 13px !important; font-weight: 900 !important;
   padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
+  transition: background-color .25s ease !important;
 }
+/* 5등급 컬러 (imweb 기준 5/11 박제 — 점수 기반 배경 컬러 자동 적용 by JS) */
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #A78BFA !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade-label {
   font-size: 11px !important; font-weight: 700 !important;
   color: rgba(255,255,255,.85) !important;
@@ -1063,6 +1070,18 @@ html, body {
     }
     setText('bs-score', DATA.score);
     setText('bs-grade', DATA.grade);
+    /* 5등급 컬러 적용 (imweb 기준 5/11 박제 — 점수 기반 배경 컬러 자동) */
+    var gradeBadge = document.getElementById('bs-grade');
+    if (gradeBadge) {
+      var gScore = parseInt(DATA.score, 10) || 0;
+      var gCls = gScore >= 90 ? 'grade-s'
+              : gScore >= 75 ? 'grade-a'
+              : gScore >= 55 ? 'grade-b'
+              : gScore >= 35 ? 'grade-c'
+              :                'grade-d';
+      gradeBadge.classList.remove('grade-s','grade-a','grade-b','grade-c','grade-d');
+      gradeBadge.classList.add(gCls);
+    }
     /* v2.0.6 patch — rank 풀 텍스트 분리 (상위 N% + 매장유형 + 강점) */
     var parsedRank = parseRankAndExtra(DATA.rank);
     setText('bs-rank', parsedRank.rank);
