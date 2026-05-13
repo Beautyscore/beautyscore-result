@@ -30,6 +30,28 @@
        — 결함: reorderKpiBubbles 후 본문 순번 mismatch (점수 내림차순 재배열 시 "셋째"가 2번째 위치 등)
        — patch: bubble-detail-2~4b "🟢 첫째 — 상담 성공률" → "🟢 상담 성공률" 등 4건
        — 메모리 룰 정합: 60대 원장님 UI 4원칙 (최소화·간결) + 컬러 아이콘으로 의미 전달 충분
+    ⭐ ㉔·㉕·㉖ Engineer × Copywriter 인터랙션 패턴 5 fix (대표님 페르소나 검수 5/13):
+       ───────────────────────────────────────────────────────
+       Architecture (Silicon Valley SaaS pattern):
+         - Copywriter Layer: KPI_COPY_LIBRARY (12) + WEAK_RECOVERY_COPY (4) + SCORE_DELTA_COPY (4) — contract
+         - Engineer Layer: getDeltaTone, pickKpiCopy, getScoreDeltaCopy — pure functions
+         - Application Layer: applyDynamicCopies, applyScoreDelta, applyWeakRecoveryCopy — DOM 적용
+       ───────────────────────────────────────────────────────
+       Fix A (㉔ applyScoreDelta): 평균 vs 점수 차이 0점·±2점 케이스 카피 분기
+         — 결함: "평균 63점 대비 0점" → "평범, 결제 불필요" 결제 동기 ✗
+         — patch: 0점 차이 → "동종 매장 평균과 비슷한 수준이에요 (한 단계 더 끌어올릴 여지)"
+       Fix B (㉔ applyDynamicCopies upgrade): HANA 12 카피 클라이언트 포팅
+         — 결함: Worker 미배포 시 모든 매장 FALLBACK 4 카피 동일 → "하드카피" 신뢰 ✗
+         — patch: pickKpiCopy(kpi, score, avg) — 점수 분기로 카피 다양화 (Worker 배포 후 dynamicData 우선)
+       Fix C (㉕ applyWeakRecoveryCopy): dm 가치 차별화
+         — 결함: "데이터 관리 5% 회복하면 12점" → 원장 납득 ✗
+         — patch: WEAK_RECOVERY_COPY.dm = "매일 입력만 늘리시면 분석 정확도가 올라가서..."
+       Fix D (㉒ applyKpiIcons 단순화): 절대 70 보정 제거
+         — 결함: 65점 + 평균 58점 = +12% 인데 절대 70 보정으로 🟣 → 사용자 혼란
+         — patch: 단순 delta 분기 (±10%) — 사용자 직관 정합 / mini-bar 보정은 유지
+       Fix E (㉖ bubble-detail-5 흐름 재구성): monthlyGap 맥락 명시
+         — 결함: "지금 매월 ___만원 사라지고 있어요" → 갑작스러움, 맥락 부족
+         — patch: "예약 취소·노쇼로 인한 손실이 매월 ___만원에 달해요. 이 손실이 회복할 첫 한 가지예요."
     ⭐ ㉒ 본문 이모지 (🟢/🟡/🟣) 동적 매핑 (ultrathink 사전 결함 fix ❺)
        — 결함: v2.0.7 ⑩ B안 절대 점수 보정이 mini-bar만 적용, 본문 이모지는 하드코딩
        — patch: applyKpiIcons() — 점수 vs 평균 +10%·-10% × 절대 점수 70 보정 3중 분기
@@ -825,9 +847,10 @@ html, body {
         <b><span id="bs-weak-kpi-name">재방문</span> 한 축만 보강하면</b><br>
         <b><span id="bs-next-rank">상위 35%</span> 진입 가능합니다.</b><br>
         <br>
-        <span style="display:block;padding:10px 12px;background:rgba(226,75,74,.08);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.5;word-break:keep-all;">
-          지금 매월 <b><span id="bs-monthly-gap">___만원</span></b>의 매출이<br>
-          사라지고 있어요.
+        <span id="bs-monthly-gap-block" style="display:block;padding:12px 14px;background:rgba(226,75,74,.08);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.6;word-break:keep-all;">
+          <span id="bs-monthly-gap-context">예약 취소·노쇼로 인한 손실</span>이<br>
+          매월 <b><span id="bs-monthly-gap">___만원</span></b>에 달해요.<br>
+          <span style="color:var(--bs-muted);font-size:13px;">이 손실이 회복할 첫 한 가지예요.</span>
         </span>
         <br>
         매일 매장 변화를<br>
@@ -898,9 +921,10 @@ html, body {
     /* 강점·약점 — URL param 우선, 없으면 아래 deriveStrengthWeakness()에서 점수 기반 동적 산출 */
     strKpi:      pq('strKpi', ''),
     weakKpi:     pq('weakKpi', ''),
-    strDelta:    pqA(['strDelta','strD'], '+14%'),
-    weakImprove: pq('weakImprove', '+5%'),
-    weakScoreUp: pq('weakScoreUp', '+12점'),
+    /* v2.0.12 ㉗ — "+" 표기 제거 (CLAUDE.md §5.3-1 메모리 룰: 긍정 표현·% 앞 + 금지) */
+    strDelta:    pqA(['strDelta','strD'], '14%'),
+    weakImprove: pq('weakImprove', '5%'),
+    weakScoreUp: pq('weakScoreUp', '12점'),
     monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
 
@@ -989,15 +1013,17 @@ html, body {
     if (!d.strKpi || !d.weakKpi) deriveStrengthWeakness();
     /* v2.0.9 — 벤치마크 평균 수신 + Worker 측 strDelta 미산출 시 실수치 재산출 */
     if (d.benchmark && (!d.strDelta || !d.weakImprove)) recomputeDeltasFromBenchmark();
-    /* v2.0.12 — 실시간 데이터 연동 7 함수 통합 호출 */
-    reorderKpiBubbles();   // ⑭ DOM 점수 내림차순
-    applyDynamicCopies();  // ⑮ bubble-detail-2~4b 본문 카피
-    applyWeakKpiCopy();    // ⑯ bubble-detail-5 weakKpi 동적
-    applyNextRank();       // ⑰ bubble-detail-5 nextRank 동적
-    applyMonthlyGap();     // ⑱ monthlyGap 동적
-    applyCompareLabel();   // ⑲ compareLabel 통합 (v2.0.11 ⑬ 확장)
-    applyKpiIcons();       // ㉒ 본문 이모지 동적 (ultrathink ❺)
-    applyStrongKpiCopy();  // ㉓ strKpi 명시 (ultrathink ❻)
+    /* v2.0.12 — 실시간 데이터 연동 9 함수 통합 호출 (Engineer × Copywriter contract) */
+    reorderKpiBubbles();      // ⑭ DOM 점수 내림차순
+    applyDynamicCopies();     // ⑮ HANA 12 카피 (pickKpiCopy pure function · Fix B)
+    applyWeakKpiCopy();       // ⑯ bubble-detail-5 weakKpi 동적
+    applyNextRank();          // ⑰ bubble-detail-5 nextRank 동적
+    applyMonthlyGap();        // ⑱ monthlyGap 동적
+    applyCompareLabel();      // ⑲ compareLabel 통합 (v2.0.11 ⑬ 확장)
+    applyKpiIcons();          // ㉒ 본문 이모지 단순 delta 분기 (Fix D)
+    applyStrongKpiCopy();     // ㉓ strKpi 명시
+    applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A · 0점 케이스)
+    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치)
     console.info('[BS Result v2.0.12] T15+ applied', DATA);
   }
 
@@ -1030,21 +1056,165 @@ html, body {
     });
   }
 
-  /* v2.0.12 ⑮ — bubble-detail-2~4b 본문 카피 동적 매핑
-     ───────────────────────────────────────────────────────
-     - Worker v0.6 dynamicData.copies (T_result_동적연동 lookup) 사용
-     - FALLBACK_COPIES safety net: Worker 미배포·null 응답 시 안전 카피 */
-  var FALLBACK_COPIES = {
-    cs: '첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요',
-    rv: '첫 방문 고객의 2회차 전환이 끊기는 패턴이 보여요',
-    rs: '단건 시술과 회원권 균형이 잘 잡혀 있어요',
-    dm: '매일 입력 빈도를 늘리면 추세가 정확해져요'
+  /* ═══════════════════════════════════════════════════════════════
+     v2.0.12 ⑮·㉔ — Engineer × Copywriter 인터랙션 패턴 (HANA 12 카피 클라이언트 포팅)
+     ═══════════════════════════════════════════════════════════════
+     Architecture:
+       - Copywriter Layer (KPI_COPY_LIBRARY): HANA 12 카피 contract — 카피만 박제, 로직 분리
+       - Engineer Layer (pickKpiCopy, getDeltaTone): pure function 분기, null safety, edge case
+       - Application Layer (applyDynamicCopies): contract 호출, DOM 적용
+     ───────────────────────────────────────────────────────────────
+     Edge cases (Engineer 명세):
+       1. avg=0 또는 누락 (Worker pending): neutral tone fallback
+       2. score === avg (safety net): neutral tone 명시
+       3. delta ±10% boundary: strong / neutral / weak 3 분기
+       4. dm 가치 차별화: 점수 영향 X, 분석 정확도 ↑ 베네핏 (WEAK_RECOVERY_COPY)
+     ───────────────────────────────────────────────────────────────
+     Copy contract (Copywriter — HANA 라이브러리 v0.1 박제 그대로):
+       - 단정형 회피·회복 가능성 시사 (CLAUDE.md §5.3-1)
+       - 50~60대 원장님 가독성 (MINA 7항목)
+       - 영문 약어·"%p"·"+%" 금지 (메모리 룰)
+       - 인과 관계 명시 + 사용자 언어
+  ═══════════════════════════════════════════════════════════════ */
+
+  /* Copywriter Layer — HANA KPI 카피 라이브러리 v0.1 (12 카피, 4 KPI × 강·중·약) */
+  var KPI_COPY_LIBRARY = {
+    cs: {
+      strong:  '첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요',
+      neutral: '상담 성공률이 평균 수준이에요. 한 단계 더 끌어올릴 여지가 있어요',
+      weak:    '첫 상담에서 결제로 이어지는 흐름을 점검해보면 좋아요'
+    },
+    rv: {
+      strong:  '한 번 오신 고객이 다시 찾아주시는 비율이 안정적이에요',
+      neutral: '재방문 흐름이 평균 수준이에요. 2회차 케어 패턴을 다듬을 수 있어요',
+      weak:    '첫 방문 고객의 2회차 전환이 끊기는 패턴이 보여요'
+    },
+    rs: {
+      strong:  '단건 시술과 회원권 균형이 잘 잡혀 있어요',
+      neutral: '매출 구성이 평균 수준이에요. 회원권 비중을 조금 더 늘릴 수 있어요',
+      weak:    '단건 의존도가 높아 매출 흐름이 흔들릴 수 있어요'
+    },
+    dm: {
+      strong:  '매일 입력이 안정적으로 이어져 추세 분석이 정확해요',
+      neutral: '입력 빈도가 평균 수준이에요. 매일 입력하시면 추세가 더 또렷해져요',
+      weak:    '매일 입력 빈도를 늘리면 추세 분석이 정확해져요'
+    }
   };
+
+  /* Copywriter Layer — KPI별 약점 회복 카피 (Fix C: dm 가치 차별화)
+     ───────────────────────────────────────────────────────
+     - cs/rv/rs: 점수 % 회복 → 종합 점수 영향 (직접 가치)
+     - dm: 매일 입력 → 분석 정확도 ↑ → 다른 운영지표 정확도 (간접 가치) */
+  var WEAK_RECOVERY_COPY = {
+    cs: { action: '회복하시면', benefit: '종합 점수가', kpiName: '상담 성공률' },
+    rv: { action: '회복하시면', benefit: '종합 점수가', kpiName: '재방문율' },
+    rs: { action: '다듬으시면', benefit: '종합 점수가', kpiName: '매출 구성' },
+    dm: {
+      action: '매일 입력만 늘리시면',
+      benefit: '분석 정확도가 올라가서 다른 운영지표도 더 또렷해져요',
+      kpiName: '데이터 관리',
+      isAlternative: true  // 점수 % 표현 X, 베네핏형
+    }
+  };
+
+  /* Engineer Layer — Pure Functions */
+
+  /* getDeltaTone(score, avg) — 점수 vs 평균 분기
+     return: 'strong' | 'neutral' | 'weak' | 'no-avg' */
+  function getDeltaTone(score, avg) {
+    var s = Number(score) || 0;
+    var a = Number(avg) || 0;
+    if (a <= 0) return 'no-avg';
+    if (s === a) return 'neutral';            // safety net (avg=score fallback)
+    var pct = ((s - a) / a) * 100;
+    if (Math.abs(pct) <= 2) return 'neutral'; // 평균 수준 (±2점 이내)
+    if (pct >= 10) return 'strong';
+    if (pct <= -10) return 'weak';
+    return 'neutral';
+  }
+
+  /* pickKpiCopy(kpi, score, avg) — KPI별 동적 카피 lookup */
+  function pickKpiCopy(kpi, score, avg) {
+    var lib = KPI_COPY_LIBRARY[kpi];
+    if (!lib) return '';
+    var tone = getDeltaTone(score, avg);
+    if (tone === 'no-avg') return lib.neutral;   // Worker pending fallback
+    return lib[tone];
+  }
+
+  /* Copywriter Layer — 종합 점수 delta 카피 매트릭스 (Fix A: 평균 0점 케이스)
+     ───────────────────────────────────────────────────────
+     사용자 페르소나 (50대 1인샵 원장 7년차) 시선:
+     - "평균 63점 대비 0점" → "평범, 결제 불필요" 인지 → 결제 동기 ✗
+     - 차이 0점·±2점 케이스에 "비슷한 수준" + "한 단계 더" 표현으로 결제 동기 유지
+     - 양수: 우월감 강조 / 음수: 회복 가능성 코칭 톤 */
+  var SCORE_DELTA_COPY = {
+    'no-avg':  { main: '동종 매장 평균 데이터 산출 중',                  explain: '곧 비교 데이터를 보여드릴게요' },
+    neutral_0: { main: '동종 매장 평균과 비슷한 수준이에요',              explain: '한 단계 더 끌어올릴 여지가 충분해요' },
+    above:     { main: '동종 매장 평균보다 {abs}점 우수해요',              explain: '안정적으로 잘 운영되고 계세요' },
+    below:     { main: '동종 매장 평균 대비 {abs}점 회복할 여지가 있어요', explain: '한 가지 영역만 보강하면 회복 가능해요' }
+  };
+
+  /* Engineer Layer — Score delta 카피 산출 (Fix A) */
+  function getScoreDeltaCopy(score, avg) {
+    var s = Number(score) || 0;
+    var a = Number(avg) || 0;
+    if (a <= 0) return SCORE_DELTA_COPY['no-avg'];
+    var delta = s - a;
+    if (Math.abs(delta) <= 2) return SCORE_DELTA_COPY.neutral_0;
+    var template = delta > 0 ? SCORE_DELTA_COPY.above : SCORE_DELTA_COPY.below;
+    var abs = Math.abs(delta);
+    return {
+      main:    template.main.replace('{abs}', abs),
+      explain: template.explain
+    };
+  }
+
+  /* Application Layer — Fix A: bs-score-delta + bs-score-delta-explain 동적 매핑 */
+  function applyScoreDelta() {
+    var mainEl    = document.getElementById('bs-score-delta');
+    var explainEl = document.getElementById('bs-score-delta-explain');
+    if (!mainEl && !explainEl) return;
+    var copy = getScoreDeltaCopy(DATA.score, DATA.avgScore);
+    if (mainEl)    mainEl.textContent    = copy.main;
+    if (explainEl) explainEl.textContent = '(' + copy.explain + ')';
+  }
+
+  /* Application Layer — Fix C: 약점 회복 카피 분기 (dm 가치 차별화)
+     ───────────────────────────────────────────────────────
+     - bubble-3 (line 694~696): "재방문율의 회복 / 5% / 12점" 영역
+     - weakKpi='dm'일 때 다른 패턴 (점수 % → 매일 입력 + 분석 정확도) */
+  function applyWeakRecoveryCopy() {
+    var weakKpi = DATA.weakKpi || 'rv';
+    var recovery = WEAK_RECOVERY_COPY[weakKpi] || WEAK_RECOVERY_COPY.rv;
+    var nameEl    = document.getElementById('bs-weak-name');
+    var improveEl = document.getElementById('bs-weak-improve');
+    var scoreUpEl = document.getElementById('bs-weak-score-up');
+    if (nameEl) nameEl.textContent = recovery.kpiName;
+    if (recovery.isAlternative) {
+      /* dm 케이스: 점수 % 표현 비활성 → 베네핏 카피로 치환
+         "매일 입력만 늘리시면 / 분석 정확도가 올라가서 다른 운영지표도 더 또렷해져요" */
+      if (improveEl) improveEl.textContent = recovery.action;
+      if (scoreUpEl) {
+        scoreUpEl.textContent = recovery.benefit;
+        scoreUpEl.style.fontWeight = 'normal';
+      }
+    } else {
+      /* cs/rv/rs: 기존 패턴 유지 (DATA.weakImprove·DATA.weakScoreUp 동적) */
+      if (improveEl && DATA.weakImprove) improveEl.textContent = DATA.weakImprove + ' ' + recovery.action;
+      if (scoreUpEl && DATA.weakScoreUp) scoreUpEl.textContent = recovery.benefit + ' ' + DATA.weakScoreUp + ' 올라가요';
+    }
+  }
+
+  /* Application Layer — Fix B: applyDynamicCopies 업그레이드 (Engineer × Copywriter) */
   function applyDynamicCopies() {
+    var KPI_AVG_KEY = { cs: 'avgCs', rv: 'avgRv', rs: 'avgRs', dm: 'avgDm' };
     ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
       var el = document.getElementById('bs-kpi-' + kpi + '-copy');
       if (!el) return;
-      var copy = (DATA.dynamicData && DATA.dynamicData.copies && DATA.dynamicData.copies[kpi]) || FALLBACK_COPIES[kpi];
+      /* 우선순위: Worker dynamicData.copies (Make D-v2 v2.1 lookup) > 클라이언트 fallback (HANA 12 카피) */
+      var copy = (DATA.dynamicData && DATA.dynamicData.copies && DATA.dynamicData.copies[kpi])
+              || pickKpiCopy(kpi, DATA[kpi], DATA[KPI_AVG_KEY[kpi]]);
       el.textContent = copy;
     });
   }
@@ -1089,26 +1259,23 @@ html, body {
     Array.prototype.forEach.call(els, function(el){ el.textContent = label; });
   }
 
-  /* v2.0.12 ㉒ — 본문 이모지 (🟢/🟡/🟣) 동적 매핑 (ultrathink 사전 결함 fix ❺)
+  /* v2.0.12 ㉒ — 본문 이모지 동적 매핑 (ultrathink fix ❺ + Fix D 단순화)
      ───────────────────────────────────────────────────────
-     - v2.0.7 ⑩ B안 절대 점수 보정 패턴 본문 이모지에도 확장 적용
-     - 분기:
-       · 점수 vs 평균 +10% 이상 + 절대 점수 70 이상 → 🟢 (강점)
-       · 점수 vs 평균 -10% 이상 + 절대 점수 70 미만 → 🟡 (약점·회복)
-       · 그 외 → 🟣 (중립·flat)
-     - mini-bar 컬러 클래스 (good/warn/info)와 시각 일관성 유지 */
+     - Fix D (5/13 사용자 검수): 절대 점수 70 보정 제거 — 사용자 직관 정합
+     - 결함 시나리오: 65점 + 평균 58점 = +12% 인데 절대 70 보정으로 🟣 (혼란) → 🟢 (직관)
+     - 분기 단순화 (Engineer × Copywriter contract):
+       · delta >= +10% → 🟢 (평균 대비 우위, 강점)
+       · delta <= -10% → 🟡 (평균 대비 열위, 회복 필요)
+       · 그 외       → 🟣 (평균 수준, 안정)
+     - mini-bar 컬러 (.bs-kpi-mini.good/.warn/.info)는 v2.0.7 ⑩ B안 절대 보정 유지 (시각 일관성)
+       — 본문 이모지는 사용자 직관 우선, mini-bar는 시각 흐름 우선 (역할 분리) */
   function applyKpiIcons() {
     var KPI_AVG_KEY = { cs: 'avgCs', rv: 'avgRv', rs: 'avgRs', dm: 'avgDm' };
     ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
       var el = document.getElementById('bs-kpi-' + kpi + '-icon');
       if (!el) return;
-      var score = Number(DATA[kpi]) || 0;
-      var avg   = Number(DATA[KPI_AVG_KEY[kpi]]) || 0;
-      var delta = avg > 0 ? ((score - avg) / avg) * 100 : 0;
-      var icon;
-      if (delta >= 10 && score >= 70)       icon = '🟢';  // 강점 (평균 대비 + 절대 점수 보정)
-      else if (delta <= -10 && score < 70)  icon = '🟡';  // 약점 (평균 대비 + 절대 점수 보정)
-      else                                  icon = '🟣';  // 중립·flat
+      var tone = getDeltaTone(DATA[kpi], DATA[KPI_AVG_KEY[kpi]]);
+      var icon = tone === 'strong' ? '🟢' : tone === 'weak' ? '🟡' : '🟣';
       el.textContent = icon;
     });
   }
@@ -1216,10 +1383,22 @@ html, body {
   function parseRankAndExtra(rawRank) {
     if (!rawRank) return { rank: '상위 -', extras: [] };
     var raw = String(rawRank).trim();
-    var m = raw.match(/^(상위\s*\d+(\.\d+)?\s*%)/);
-    if (!m) return { rank: raw, extras: [] };
-    var rank = m[1].replace(/\s+/g, ' ').trim();
-    var rest = raw.slice(m[0].length).trim();
+    /* 5/13 patch — 5등급 라벨 모두 지원 (Critical 결함 fix)
+       기존 정규식 /^(상위\s*\d+...)/만 매칭 시 B/C/D 등급 매장유형·강점 라인 숨김 발생
+       신규: 첫 줄(\n 앞) = rank 라벨 / 나머지(\n 뒤) = 매장유형·강점 (마침표 split)
+       지원 라벨: "상위 10%"·"상위 25%"·"동종 평균 수준"·"재정비 필요 단계"·"구조 점검 필요"
+       단일 출처: 의사결정/뷰티스코어_5등급_컬러_cutoff_2026-05-11_v0.1.md + 점수정의_3축프레임_2026-05-13_v0.1.md */
+    var lines = raw.split(/\r?\n/);
+    var rank = lines[0].trim();
+    var rest = lines.slice(1).join('\n').trim();
+    /* 정규식 fallback — 첫 줄에 "상위 N% ..."가 한 줄로 들어온 경우 (개행 누락 데이터 호환) */
+    if (rest === '' && rank.length > 12) {
+      var m = rank.match(/^(상위\s*\d+(\.\d+)?\s*%)/);
+      if (m) {
+        rest = rank.slice(m[0].length).trim();
+        rank = m[1].replace(/\s+/g, ' ').trim();
+      }
+    }
     var sentences = rest.split(/\s*\.\s*/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
     return { rank: rank, extras: sentences };
   }
@@ -1393,6 +1572,22 @@ html, body {
         }
       });
     }
+
+    /* v2.0.12 ㉘ — 신규 9 함수 초기 로드 호출 (KIRA 자동 검증 결함 fix)
+       ───────────────────────────────────────────────────────
+       Engineer × Copywriter 인터랙션 패턴 — URL params만 있는 경우 (Worker 미배포 시)
+       bsApplyT15Data 미호출 → 신규 함수 미실행 결함 fix.
+       applyData() (초기 렌더링) + bsApplyT15Data() (Worker 응답 시) 양쪽 모두 호출되도록 정합 */
+    reorderKpiBubbles();      // ⑭ DOM 점수 내림차순
+    applyDynamicCopies();     // ⑮ HANA 12 카피 (pickKpiCopy)
+    applyWeakKpiCopy();       // ⑯ bubble-detail-5 weakKpi 동적
+    applyNextRank();          // ⑰ bubble-detail-5 nextRank 동적
+    applyMonthlyGap();        // ⑱ monthlyGap 동적
+    applyCompareLabel();      // ⑲ compareLabel 통합
+    applyKpiIcons();          // ㉒ 본문 이모지 단순 delta 분기
+    applyStrongKpiCopy();     // ㉓ strKpi 명시
+    applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A)
+    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치)
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
