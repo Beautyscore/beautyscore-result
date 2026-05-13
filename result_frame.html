@@ -412,6 +412,14 @@ html, body {
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; }
+/* 5/14 patch — 등급_라벨 노출 (Phase 3, Airtable 등급_라벨 lookup fldkBtnjJbo9tnAAq) */
+#bs-wrap .bs-bubble-score .bs-grade-label-full {
+  margin-top: 6px !important; padding: 6px 12px !important;
+  background: rgba(255,255,255,.12) !important; border-radius: 8px !important;
+  font-size: 13px !important; font-weight: 700 !important;
+  color: var(--bs-nude) !important; letter-spacing: -.2px !important;
+  word-break: keep-all !important; line-height: 1.4 !important;
+}
 #bs-wrap .bs-bubble-score .bs-score-grade-label {
   font-size: 11px !important; font-weight: 700 !important;
   color: rgba(255,255,255,.85) !important;
@@ -725,6 +733,8 @@ html, body {
           </div>
           <div class="bs-score-info">
             <div class="bs-score-grade"><span class="bs-score-grade-label">산정등급</span> <span id="bs-grade">C+</span></div>
+            <!-- 5/14 patch — 등급_라벨 노출 (Phase 3) -->
+            <div class="bs-grade-label-full" id="bs-grade-label-full" style="display:none"></div>
             <div class="bs-score-rank">
               <div class="bs-score-rank-hint">
                 <b>유사 매장 비교 결과</b>
@@ -968,6 +978,7 @@ html, body {
     period:      pq('period', ''),  /* v2.0.6 patch — 단정적 연차 표현 차단 (1~3년 범위 입력 등 모호 시 표시 X) */
     score:       pq('score', '63'),
     grade:       pq('grade', 'C+'),  /* v2.0.5 patch — "등급" 라벨 분리 */
+    gradeLabel:  pq('gradeLabel', ''),  /* 5/14 patch — Airtable 등급_라벨 lookup (Phase 3) */
     rank:        pq('rank', '상위 50%'),
     avgScore:    parseInt(pqA(['avgScore','avg'], ''), 10),  /* v2.0.6 patch — URL param 없으면 자기 점수 fallback (delta 0) */
     storeType:   pq('storeType', ''),  /* v2.0.6 patch — wrapper 누락 시 hide (rank 풀 텍스트와 중복 방지) */
@@ -1042,6 +1053,7 @@ html, body {
     /* T15+ 응답 → DATA 갱신 */
     if (d.score != null)        DATA.score = String(d.score);
     if (d.grade)                DATA.grade = d.grade;
+    if (d.gradeLabel)           DATA.gradeLabel = d.gradeLabel;  /* 5/14 patch — Airtable 등급_라벨 lookup */
     if (d.rank)                 DATA.rank = d.rank;
     if (d.avgScore != null)     DATA.avgScore = d.avgScore;
     if (d.store)                DATA.store = d.store;
@@ -1622,6 +1634,12 @@ html, body {
         gradeBadge.textContent = '🏆 ' + DATA.grade;
       }
     }
+    /* 5/14 patch — 등급_라벨 노출 (Phase 3·Airtable 등급_라벨 lookup) */
+    var gradeLabelEl = document.getElementById('bs-grade-label-full');
+    if (gradeLabelEl && DATA.gradeLabel && String(DATA.gradeLabel).trim() !== '') {
+      gradeLabelEl.textContent = DATA.gradeLabel;
+      gradeLabelEl.style.display = '';
+    }
     /* v2.0.6 patch — rank 풀 텍스트 분리 (상위 N% + 매장유형 + 강점) */
     var parsedRank = parseRankAndExtra(DATA.rank);
     setText('bs-rank', parsedRank.rank);
@@ -1707,6 +1725,7 @@ html, body {
     }
     if (DATA.score != null)  dashParams.push('score=' + encodeURIComponent(DATA.score));
     if (DATA.grade)          dashParams.push('grade=' + encodeURIComponent(DATA.grade));
+    if (DATA.gradeLabel)     dashParams.push('gradeLabel=' + encodeURIComponent(DATA.gradeLabel));  /* 5/14 patch — Phase 3 dashboard-preview에도 라벨 전달 */
     if (DATA.rank)           dashParams.push('rank=' + encodeURIComponent(DATA.rank));
     if (DATA.rv != null)     dashParams.push('rv=' + encodeURIComponent(DATA.rv));
     if (DATA.cs != null)     dashParams.push('cs=' + encodeURIComponent(DATA.cs));
