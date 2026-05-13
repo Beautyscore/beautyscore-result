@@ -1046,6 +1046,8 @@ html, body {
     applyStrongKpiCopy();     // ㉓ strKpi 명시
     applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A · 0점 케이스)
     applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치 + 중복 fix)
+    applyCsDelta();           // ㉚ bs-kpi-cs-delta 동적 매핑 (5/14 결함 fix)
+    applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
     console.info('[BS Result v2.0.12] T15+ applied', DATA);
   }
 
@@ -1302,6 +1304,51 @@ html, body {
              || '유사 매장 평균 대비';
     var els = document.querySelectorAll('[id$="-compare-label"]');
     Array.prototype.forEach.call(els, function(el){ el.textContent = label; });
+  }
+
+  /* v2.0.12 ㉚ — bs-kpi-cs-delta 동적 매핑 (5/14 라이브 검수 결함 fix)
+     ───────────────────────────────────────────────────────
+     - 결함: bs-kpi-cs-delta hardcoded "14% 높음" — cs 55점 + 평균 70점인데 "높음" 잘못 노출
+     - patch: cs 점수 vs avgCs delta 동적 산출 + "높음/낮음/비슷" 라벨 동적
+     - 룰 정합: % 앞 + 표기 금지 (CLAUDE.md §5.3-1) — 절대값 + 라벨로 방향 표현 */
+  function applyCsDelta() {
+    var el = document.getElementById('bs-kpi-cs-delta');
+    if (!el) return;
+    var score = Number(DATA.cs) || 0;
+    var avg = Number(DATA.avgCs) || 0;
+    if (avg <= 0) { el.textContent = ''; return; }  // no-avg 시 비표시
+    var pct = ((score - avg) / avg) * 100;
+    var absPct = Math.round(Math.abs(pct));
+    var label;
+    if (pct >= 10) label = absPct + '% 높음';
+    else if (pct <= -10) label = absPct + '% 낮음';
+    else label = '평균 수준';
+    el.textContent = label;
+  }
+
+  /* v2.0.12 ㉛ — mini-bar 4 class 동적 매핑 (5/14 라이브 검수 결함 fix)
+     ───────────────────────────────────────────────────────
+     - 결함: bubble-detail-2~4b mini-bar class hardcoded (cs=good·rv=warn·rs=good·dm=info)
+            → 점수와 무관, 평균 미만 매장(rs=50)에 good(green) 그대로 노출 → 사용자 직관 ✗
+     - patch: 4 KPI 모두 getDeltaTone 분기로 class + 바 컬러 동적
+     - v2.0.7 ⑩ 절대 70 보정 폐기 — 단순 delta 분기 (Fix D 이모지와 일관) */
+  function applyKpiMiniClass() {
+    var KPI_AVG_KEY = { cs: 'avgCs', rv: 'avgRv', rs: 'avgRs', dm: 'avgDm' };
+    var COLOR = { strong: '#2E7D5E', weak: '#B36015', neutral: '#243152' };
+    ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
+      var el = document.getElementById('bs-kpi-mini-' + kpi);
+      if (!el) return;
+      var tone = getDeltaTone(DATA[kpi], DATA[KPI_AVG_KEY[kpi]]);
+      el.classList.remove('good', 'warn', 'info', 'flat');
+      if (tone === 'strong')    el.classList.add('good');
+      else if (tone === 'weak') el.classList.add('warn');
+      else                      el.classList.add('info');  // neutral·no-avg
+      var bar = el.querySelector('.bs-kpi-mini-bar');
+      if (bar) {
+        var color = COLOR[tone] || COLOR.neutral;
+        bar.style.setProperty('--bs-kpi-c', color);
+      }
+    });
   }
 
   /* v2.0.12 ㉒ — 본문 이모지 동적 매핑 (ultrathink fix ❺ + Fix D 단순화)
@@ -1630,6 +1677,8 @@ html, body {
     applyStrongKpiCopy();     // ㉓ strKpi 명시
     applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A)
     applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C + Fix 3 중복 fix)
+    applyCsDelta();           // ㉚ bs-kpi-cs-delta 동적 매핑 (5/14 결함 fix)
+    applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
