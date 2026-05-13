@@ -8,7 +8,25 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 5건 patch)
+  뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 + 사용자 페르소나 검수 5/14)
+  ═══════════════════════════════════════════════════════════════
+  v2.0.12 patch ㉙ — 라이브 검증 결함 5건 fix (5/14 검수 후속):
+    1️⃣ "운영되고" → "운영하고" (SCORE_DELTA_COPY.above explain)
+    2️⃣ bubble-3 "가장 큰 기회는" → "가장 필요한 부분은" (60대 원장 일상어 톤)
+    3️⃣ applyWeakRecoveryCopy 카피 흐름 정합 (Critical)
+       — 결함: recovery.benefit + DATA.weakScoreUp + '올라가요' textContent set
+                → HTML "종합 점수가 [scoreUpEl] 올라가요" 구조와 중첩
+                → "종합 점수가 종합 점수가 12점 올라가요 올라가요" 중복 노출
+       — fix: element value만 set (improveEl="5%" / scoreUpEl="12점")
+       — dm 케이스: bubble-3 본문 전체 innerHTML 동적 교체 (점수 % 표현 비활성 → 베네핏 카피)
+    4️⃣ reorderKpiBubbles 호출 폐기 (B안)
+       — 결함: DOM reorder ↔ typing animation array (line 1383) 충돌 → 시각 흐름 깨짐
+       — B안: 본 채팅방 ⑮·⑯·㉒·㉓ 동적 매핑으로 강점·약점 충분 명시 (reorder 불필요)
+    5️⃣ applyMonthlyGap null-guard
+       — 결함: monthlyGap 없을 시 "___만원" 노출 → 사용자 신뢰 ↓
+       — fix: 숫자 없음·placeholder 패턴 시 bs-monthly-gap-block 박스 자체 hide
+  ═══════════════════════════════════════════════════════════════
+  v2.0.12 patch ㉔·㉕·㉖ (5/13 페르소나 검수): Engineer × Copywriter 5 Fix
   ═══════════════════════════════════════════════════════════════
   v2.0.12 patch (5/13 박제, 5/15 deploy 예정 — KIRA-FE 작업가이드 5건):
     ⭐ ⑭ bubble-detail-2~4b DOM reorder (점수 내림차순)
@@ -713,7 +731,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        가장 큰 기회는 <em id="bs-weak-name">재방문율</em>의 회복입니다.<br>
+        가장 필요한 부분은 <em id="bs-weak-name">재방문율</em>의 회복입니다.<br>
         <span id="bs-weak-improve">5%</span>만 회복하면<br>
         종합 점수가 <b id="bs-weak-score-up">12점</b> 올라가요.
         <div class="bs-mini-card">
@@ -1013,17 +1031,21 @@ html, body {
     if (!d.strKpi || !d.weakKpi) deriveStrengthWeakness();
     /* v2.0.9 — 벤치마크 평균 수신 + Worker 측 strDelta 미산출 시 실수치 재산출 */
     if (d.benchmark && (!d.strDelta || !d.weakImprove)) recomputeDeltasFromBenchmark();
-    /* v2.0.12 — 실시간 데이터 연동 9 함수 통합 호출 (Engineer × Copywriter contract) */
-    reorderKpiBubbles();      // ⑭ DOM 점수 내림차순
+    /* v2.0.12 — 실시간 데이터 연동 9 함수 통합 호출 (Engineer × Copywriter contract)
+       Fix 4 (B안 · 5/14 검수): reorderKpiBubbles 호출 폐기
+       — 결함: DOM reorder는 됐지만 typing animation array (line 1383)는 원래 순서
+       → 시각 흐름 깨짐 (재배열된 bubble이 위쪽에 떠버림)
+       — B안: 본 채팅방 ⑮·⑯·㉒·㉓ 동적 매핑으로 강점·약점 카피·이모지·이름 충분 명시 */
+    /* reorderKpiBubbles();    // ⑭ DOM 점수 내림차순 — Fix 4 B안 폐기 */
     applyDynamicCopies();     // ⑮ HANA 12 카피 (pickKpiCopy pure function · Fix B)
     applyWeakKpiCopy();       // ⑯ bubble-detail-5 weakKpi 동적
     applyNextRank();          // ⑰ bubble-detail-5 nextRank 동적
-    applyMonthlyGap();        // ⑱ monthlyGap 동적
+    applyMonthlyGap();        // ⑱ monthlyGap 동적 + null-guard (Fix 5)
     applyCompareLabel();      // ⑲ compareLabel 통합 (v2.0.11 ⑬ 확장)
     applyKpiIcons();          // ㉒ 본문 이모지 단순 delta 분기 (Fix D)
     applyStrongKpiCopy();     // ㉓ strKpi 명시
     applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A · 0점 케이스)
-    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치)
+    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치 + 중복 fix)
     console.info('[BS Result v2.0.12] T15+ applied', DATA);
   }
 
@@ -1151,7 +1173,7 @@ html, body {
   var SCORE_DELTA_COPY = {
     'no-avg':  { main: '동종 매장 평균 데이터 산출 중',                  explain: '곧 비교 데이터를 보여드릴게요' },
     neutral_0: { main: '동종 매장 평균과 비슷한 수준이에요',              explain: '한 단계 더 끌어올릴 여지가 충분해요' },
-    above:     { main: '동종 매장 평균보다 {abs}점 우수해요',              explain: '안정적으로 잘 운영되고 계세요' },
+    above:     { main: '동종 매장 평균보다 {abs}점 우수해요',              explain: '안정적으로 잘 운영하고 계세요' },
     below:     { main: '동종 매장 평균 대비 {abs}점 회복할 여지가 있어요', explain: '한 가지 영역만 보강하면 회복 가능해요' }
   };
 
@@ -1180,10 +1202,16 @@ html, body {
     if (explainEl) explainEl.textContent = '(' + copy.explain + ')';
   }
 
-  /* Application Layer — Fix C: 약점 회복 카피 분기 (dm 가치 차별화)
+  /* Application Layer — Fix C: 약점 회복 카피 분기 (dm 가치 차별화) — Fix 3 정합
      ───────────────────────────────────────────────────────
-     - bubble-3 (line 694~696): "재방문율의 회복 / 5% / 12점" 영역
-     - weakKpi='dm'일 때 다른 패턴 (점수 % → 매일 입력 + 분석 정확도) */
+     - bubble-3 line 694~696 HTML 흐름: "[bs-weak-name]의 회복입니다.<br>
+                                          [bs-weak-improve]만 회복하면<br>
+                                          종합 점수가 [bs-weak-score-up] 올라가요."
+     - cs/rv/rs: element value만 set (value="5%", "12점")
+                 → HTML 본문 "5%만 회복하면 / 종합 점수가 12점 올라가요" 정상
+     - dm 케이스: bubble-3 본문 전체 동적 교체 (HTML 흐름 자체가 dm에 부적합)
+     - 결함 fix (5/14 검수): recovery.benefit + DATA.weakScoreUp + '올라가요' set →
+                              "종합 점수가 종합 점수가 12점 올라가요 올라가요" 중복 노출 */
   function applyWeakRecoveryCopy() {
     var weakKpi = DATA.weakKpi || 'rv';
     var recovery = WEAK_RECOVERY_COPY[weakKpi] || WEAK_RECOVERY_COPY.rv;
@@ -1191,18 +1219,25 @@ html, body {
     var improveEl = document.getElementById('bs-weak-improve');
     var scoreUpEl = document.getElementById('bs-weak-score-up');
     if (nameEl) nameEl.textContent = recovery.kpiName;
+
     if (recovery.isAlternative) {
-      /* dm 케이스: 점수 % 표현 비활성 → 베네핏 카피로 치환
+      /* dm 케이스: bubble-3 본문 전체 동적 교체 (점수 % 표현 비활성 → 베네핏)
          "매일 입력만 늘리시면 / 분석 정확도가 올라가서 다른 운영지표도 더 또렷해져요" */
-      if (improveEl) improveEl.textContent = recovery.action;
-      if (scoreUpEl) {
-        scoreUpEl.textContent = recovery.benefit;
-        scoreUpEl.style.fontWeight = 'normal';
+      var bubble3 = document.querySelector('#bubble-3 .bs-bubble');
+      if (bubble3) {
+        bubble3.innerHTML =
+          '가장 필요한 부분은 <em>' + recovery.kpiName + '</em>이에요.<br>' +
+          '<b>' + recovery.action + '</b><br>' +
+          recovery.benefit +
+          '<div class="bs-mini-card">' +
+          '  <span class="bs-mini-card-ico">🔍</span>' +
+          '  <span class="bs-mini-card-text">뷰티스코어가 매일 입력 흐름을<br>매월 추적해드리고, 다음 액션을<br>함께 챙겨드릴게요</span>' +
+          '</div>';
       }
     } else {
-      /* cs/rv/rs: 기존 패턴 유지 (DATA.weakImprove·DATA.weakScoreUp 동적) */
-      if (improveEl && DATA.weakImprove) improveEl.textContent = DATA.weakImprove + ' ' + recovery.action;
-      if (scoreUpEl && DATA.weakScoreUp) scoreUpEl.textContent = recovery.benefit + ' ' + DATA.weakScoreUp + ' 올라가요';
+      /* cs/rv/rs: element value만 set (HTML 본문 흐름 유지) */
+      if (improveEl && DATA.weakImprove) improveEl.textContent = DATA.weakImprove;
+      if (scoreUpEl && DATA.weakScoreUp) scoreUpEl.textContent = DATA.weakScoreUp;
     }
   }
 
@@ -1238,12 +1273,22 @@ html, body {
     el.textContent = nextRank;
   }
 
-  /* v2.0.12 ⑱ — monthlyGap 동적 매핑 ("___만원" fallback fix) */
+  /* v2.0.12 ⑱ — monthlyGap 동적 매핑 + null-guard (Fix 5 · 5/14 검수)
+     ───────────────────────────────────────────────────────
+     - 결함: monthlyGap 데이터 없으면 "___만원" 노출 → 사용자 신뢰 ↓ ("기존 데이터 없는데...")
+     - patch: 데이터 없음·placeholder 패턴 시 bs-monthly-gap-block 박스 자체 hide
+     - 활성 조건: 숫자 포함 실값 (예: "62만원") — Worker v0.7 + Make D-v2 v2.1 deploy 후 자동 활성 */
   function applyMonthlyGap() {
     var el = document.getElementById('bs-monthly-gap');
-    if (!el) return;
-    var gap = (DATA.dynamicData && DATA.dynamicData.monthlyGap) || DATA.monthlyGap || '___만원';
-    el.textContent = gap;
+    var block = document.getElementById('bs-monthly-gap-block');
+    var gap = (DATA.dynamicData && DATA.dynamicData.monthlyGap) || DATA.monthlyGap;
+    /* null-guard: 데이터 없음 / placeholder / 숫자 없음 → 박스 hide */
+    if (!gap || gap === '___만원' || gap === '__만원' || !/\d/.test(String(gap))) {
+      if (block) block.style.display = 'none';
+      return;
+    }
+    if (el) el.textContent = gap;
+    if (block) block.style.display = '';
   }
 
   /* v2.0.12 ⑲ — compareLabel 통합 매핑 (v2.0.11 ⑬ 확장)
@@ -1573,21 +1618,18 @@ html, body {
       });
     }
 
-    /* v2.0.12 ㉘ — 신규 9 함수 초기 로드 호출 (KIRA 자동 검증 결함 fix)
-       ───────────────────────────────────────────────────────
-       Engineer × Copywriter 인터랙션 패턴 — URL params만 있는 경우 (Worker 미배포 시)
-       bsApplyT15Data 미호출 → 신규 함수 미실행 결함 fix.
-       applyData() (초기 렌더링) + bsApplyT15Data() (Worker 응답 시) 양쪽 모두 호출되도록 정합 */
-    reorderKpiBubbles();      // ⑭ DOM 점수 내림차순
+    /* v2.0.12 ㉘ — 신규 함수 초기 로드 호출 (KIRA 자동 검증 결함 fix)
+       Fix 4 (B안 · 5/14 검수): reorderKpiBubbles 폐기 → typing animation 흐름 보존 */
+    /* reorderKpiBubbles();    // ⑭ DOM 점수 내림차순 — Fix 4 B안 폐기 */
     applyDynamicCopies();     // ⑮ HANA 12 카피 (pickKpiCopy)
     applyWeakKpiCopy();       // ⑯ bubble-detail-5 weakKpi 동적
     applyNextRank();          // ⑰ bubble-detail-5 nextRank 동적
-    applyMonthlyGap();        // ⑱ monthlyGap 동적
+    applyMonthlyGap();        // ⑱ monthlyGap 동적 + null-guard (Fix 5)
     applyCompareLabel();      // ⑲ compareLabel 통합
     applyKpiIcons();          // ㉒ 본문 이모지 단순 delta 분기
     applyStrongKpiCopy();     // ㉓ strKpi 명시
     applyScoreDelta();        // ㉔ 종합 점수 평균 비교 카피 (Fix A)
-    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치)
+    applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C + Fix 3 중복 fix)
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
