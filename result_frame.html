@@ -10,6 +10,17 @@
 <!--
   뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 + 사용자 페르소나 검수 5/14)
   ═══════════════════════════════════════════════════════════════
+  v2.0.12 patch ㉞ — iframe BS_HEIGHT 재계산 강화 (5/14 QC 결함 fix):
+    🌟 결함: setTimeout(postHeight, 1000) 1회 후 → typing animation 4200·7200ms·detail bubble 노출 미반영 → Softr iframe 하단 짤림
+    🌟 patch 5중 안전망:
+       ① 추가 setTimeout 7 단계 (200·1000·3000·6000·10000·15000·20000ms)
+       ② ResizeObserver: documentElement + body 둘 다 observe (cross-browser 안전성 ↑)
+       ③ MutationObserver: childList·subtree·attributes(style·class)·characterData (typing animation cover)
+       ④ setInterval 500ms 강제 호출 (Observer 미지원 환경 fallback)
+       ⑤ idempotent check (_bsLastHeight): 동일 height 송신 회피 — ops 부담 0
+    🌟 debounce 120ms: typing animation 과도 호출 방지
+    🌟 짝 박제: 5/15 통합 검증 체크리스트 §3 (iframe Softr postMessage BS_HEIGHT 정상)
+  ───────────────────────────────────────────────────────────────
   v2.0.12 patch ㉜·㉝ — 강점 카피 라이브러리 재설계 (5/14 사용자 페르소나 가이드):
     🌟 핵심 통찰: "날 아네·존중받네" 감각 + 원장 자체 칭찬조
     🌟 STRENGTH_LINE_COPY 4 (bubble-2 한 줄 강점):
@@ -1943,14 +1954,26 @@ html, body {
     }, 1800);
   }
 
-  /* ═══ postMessage BS_HEIGHT (Softr wrapper iframe 동기) ═══ */
+  /* ═══ postMessage BS_HEIGHT (Softr wrapper iframe 동기) ═══
+     v2.0.12 ㉞ — DOM 변경 후 재계산 강화 (5/14 iframe BS_HEIGHT QC)
+     ───────────────────────────────────────────────────────
+     - 결함: typing animation 4200·7200ms 단계 bubble + innerHTML 교체 미반영
+     - patch: ResizeObserver (body 크기 자동) + MutationObserver (DOM 변경 자동) + debounce */
+  var _bsLastHeight = 0;
+  var _bsPostTimer = null;
   function postHeight() {
     try {
       var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+      if (h === _bsLastHeight) return;  // idempotent — 동일 height 송신 회피
+      _bsLastHeight = h;
       if (window.parent !== window) {
         window.parent.postMessage({ type: 'BS_HEIGHT', height: h }, '*');
       }
     } catch(e){}
+  }
+  function postHeightDebounced() {
+    if (_bsPostTimer) clearTimeout(_bsPostTimer);
+    _bsPostTimer = setTimeout(postHeight, 120);  // 120ms debounce
   }
 
   /* ═══ 초기화 ═══
@@ -1986,6 +2009,35 @@ html, body {
     window.addEventListener('resize', postHeight);
     setTimeout(postHeight, 200);
     setTimeout(postHeight, 1000);
+    /* v2.0.12 ㉞ — typing animation 단계 cumulative bubble 노출 시점 안전망 (7 단계) */
+    setTimeout(postHeight, 3000);
+    setTimeout(postHeight, 6000);
+    setTimeout(postHeight, 10000);
+    setTimeout(postHeight, 15000);
+    setTimeout(postHeight, 20000);
+    /* v2.0.12 ㉞ — ResizeObserver: body 크기 자동 감지 (typing animation·detailBubbles 노출 cover) */
+    if (typeof ResizeObserver !== 'undefined') {
+      try {
+        var _bsRo = new ResizeObserver(postHeightDebounced);
+        _bsRo.observe(document.documentElement);
+        _bsRo.observe(document.body);  // 두 element 모두 관찰 (cross-browser 안전성 ↑)
+      } catch(e){}
+    }
+    /* v2.0.12 ㉞ — MutationObserver: DOM 변경 자동 감지 (innerHTML 교체·display 변경·textContent 변경 cover)
+       debounced 120ms로 typing animation 과도 호출 방지 */
+    if (typeof MutationObserver !== 'undefined') {
+      try {
+        var _bsMo = new MutationObserver(postHeightDebounced);
+        _bsMo.observe(document.body, {
+          childList: true, subtree: true,
+          attributes: true, attributeFilter: ['style','class'],
+          characterData: true  // textContent 변경 감지 (typing animation cover)
+        });
+      } catch(e){}
+    }
+    /* v2.0.12 ㉞ — fallback throttle: 500ms마다 강제 1회 (Observer 미지원 환경 또는 누락 fallback)
+       idempotent check (_bsLastHeight)로 동일 height 송신 회피 — 실제 ops 부담 0 */
+    setInterval(postHeight, 500);
   }
 
   if (document.readyState === 'loading') {
