@@ -8,7 +8,44 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.11 (KIRA, "평균" 라벨 + segment-aware 비교 카피)
+  뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 5건 patch)
+  ═══════════════════════════════════════════════════════════════
+  v2.0.12 patch (5/13 박제, 5/15 deploy 예정 — KIRA-FE 작업가이드 5건):
+    ⭐ ⑭ bubble-detail-2~4b DOM reorder (점수 내림차순)
+       — reorderKpiBubbles() — 강점이 항상 cs로만 노출되던 결함 fix
+    ⭐ ⑮ bubble-detail-2~4b 본문 카피 동적 매핑
+       — applyDynamicCopies() — Worker v0.6 dynamicData.copies lookup + FALLBACK_COPIES safety net
+       — <p id="bs-kpi-{kpi}-copy" class="bs-kpi-copy"> 4 영역 신규 + CSS .bs-kpi-copy 추가
+    ⭐ ⑯ bubble-detail-3·5 weakKpi 동적 카피
+       — applyWeakKpiCopy() — "재방문율" 가정 결함 fix · KPI_NAME 매핑 + DATA.weakKpi 치환
+       — bubble-detail-5 line 785 "재방문" → <span id="bs-weak-kpi-name"> 동적 ID
+    ⭐ ⑰ "상위 35% 진입 가능" 동적 매핑
+       — applyNextRank() — Worker v0.6 dynamicData.nextRank lookup
+       — line 786 <span id="bs-next-rank"> 신규 ID
+    ⭐ ⑱ monthlyGap "___만원" 동적 매핑
+       — applyMonthlyGap() — Worker v0.6 dynamicData.monthlyGap > DATA.monthlyGap > '___만원' 우선순위
+    ⭐ ⑲ compareLabel 동적 통합 (v2.0.11 ⑬ 확장)
+       — applyCompareLabel() — Worker dynamicData.compareLabel 최우선 + segment fallback
+    ⭐ ⑳ 순번 단어 "첫째/둘째/셋째/넷째" 제거 (ultrathink 사전 결함 fix)
+       — 결함: reorderKpiBubbles 후 본문 순번 mismatch (점수 내림차순 재배열 시 "셋째"가 2번째 위치 등)
+       — patch: bubble-detail-2~4b "🟢 첫째 — 상담 성공률" → "🟢 상담 성공률" 등 4건
+       — 메모리 룰 정합: 60대 원장님 UI 4원칙 (최소화·간결) + 컬러 아이콘으로 의미 전달 충분
+    ⭐ ㉒ 본문 이모지 (🟢/🟡/🟣) 동적 매핑 (ultrathink 사전 결함 fix ❺)
+       — 결함: v2.0.7 ⑩ B안 절대 점수 보정이 mini-bar만 적용, 본문 이모지는 하드코딩
+       — patch: applyKpiIcons() — 점수 vs 평균 +10%·-10% × 절대 점수 70 보정 3중 분기
+       — HTML: 4 element `<span id="bs-kpi-{kpi}-icon">` 신규
+    ⭐ ㉓ bubble-detail-5 strKpi 명시 (ultrathink 사전 결함 fix ❻)
+       — 결함: "강점은 지키고" 모호 표현
+       — patch: `<span id="bs-strong-kpi-name">` 신규 + applyStrongKpiCopy() — KPI_NAME[strKpi] 매핑
+    ⭐ ㉑ bubble-detail-5 monthlyGap 본문 영역 신규 추가 (ultrathink 사전 결함 fix)
+       — 결함: 기존 setText('bs-monthly-gap') 호출 있으나 DOM element 부재 — graceful skip
+       — patch: bubble-detail-5 "상위 35% 진입 가능" 직후 1줄 추가 + 손실 강조 박스 (rgba(226,75,74,.08))
+       — 카피: "지금 매월 ___만원의 매출이 사라지고 있어요."
+       — 메모리 룰 정합: CLAUDE.md §12 베타 페르소나 최강 압도 포인트 "월 ___만원 사라지고 있다"
+    ⭐ bsApplyT15Data 응답 스키마에 dynamicData 추가 (Worker v0.6 호환)
+    ⭐ 짝 박제: 의사결정/뷰티스코어_result_frame_v2_0_12_KIRA_FE_작업가이드_2026-05-13_v0.1.md
+    ⭐ 짝 인프라: Worker v0.6 (외부문서/cloudflare_workers_v0_6.js, 5/13 박제) + Make D-v2 v2.1 (KIRA-OPS 5/14 작업)
+    ⭐ Safety net: Worker 미배포 또는 dynamicData null 시 FALLBACK_COPIES + 현재 카피로 graceful 렌더링
   ═══════════════════════════════════════════════════════════════
   v2.0.11 patch (대표님 명시 — 결함 2건):
     ⭐ ⑫ 4 막대 평균 마커 위에 "평균" 작은 라벨 추가
@@ -458,6 +495,13 @@ html, body {
   flex-shrink: 0 !important; font-size: 14px !important;
   min-width: 78px !important;  /* v2.0.7 — 4 카드 트랙 폭 통일 (이름 글자 수 차이 무시) */
 }
+/* v2.0.12 ⑮ — bubble-detail 본문 카피 동적 영역 */
+#bs-wrap .bs-kpi-copy {
+  margin: 8px 0 0 !important; padding: 0 !important;
+  font-size: 14px !important; line-height: 1.55 !important;
+  color: var(--bs-text) !important;
+  word-break: keep-all !important; overflow-wrap: break-word !important;
+}
 #bs-wrap .bs-kpi-mini-bar {
   flex: 1 1 0 !important; min-width: 0 !important;  /* v2.0.9 — 가변 폭 복귀 (4 버블 모두 full-width라 트랙 폭 자연 정합 + overflow 방지) */
   height: 6px !important; border-radius: 3px !important;
@@ -713,10 +757,9 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🟢 <b>첫째 — 상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
-        <span id="bs-kpi-cs-compare-label">유사 매장 평균 대비</span> <em id="bs-kpi-cs-delta">14% 높음</em><br>
-        첫 상담의 신뢰 형성과 시술 권유가<br>
-        잘 맞춰져 있어요.
+        <span id="bs-kpi-cs-icon">🟢</span> <b>상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
+        <span id="bs-kpi-cs-compare-label">유사 매장 평균 대비</span> <em id="bs-kpi-cs-delta">14% 높음</em>
+        <p id="bs-kpi-cs-copy" class="bs-kpi-copy">첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요</p>
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
           <span class="bs-kpi-mini-name">상담 성공률</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
@@ -730,10 +773,9 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🟡 <b>둘째 — 재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
-        재방문율은 회복할 한 가지 영역이에요.<br>
-        첫 방문 고객의 2회차 전환이 끊기는 패턴인데,<br>
-        <em>5%만 회복하면 종합 점수 12점</em> 올라갑니다.
+        <span id="bs-kpi-rv-icon">🟡</span> <b>재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
+        <p id="bs-kpi-rv-copy" class="bs-kpi-copy">첫 방문 고객의 2회차 전환이 끊기는 패턴이 보여요</p>
+        <span id="bs-kpi-rv-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
           <span class="bs-kpi-mini-name">재방문율</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"><span class="bs-kpi-mini-avg-label">평균</span></span>
@@ -747,10 +789,9 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🟢 <b>셋째 — 매출 구성 <span id="bs-kpi-rs">75</span>점</b><br>
-        단건 시술과 회원권 균형이<br>
-        매우 잘 잡혀 있어요.<br>
-        이 구조 그대로 유지하시면 돼요.
+        <span id="bs-kpi-rs-icon">🟢</span> <b>매출 구성 <span id="bs-kpi-rs">75</span>점</b><br>
+        <p id="bs-kpi-rs-copy" class="bs-kpi-copy">단건 시술과 회원권 균형이 잘 잡혀 있어요</p>
+        <span id="bs-kpi-rs-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini good" id="bs-kpi-mini-rs">
           <span class="bs-kpi-mini-name">매출 구성</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
@@ -764,10 +805,9 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        🟣 <b>넷째 — 데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
-        매일 입력 빈도가 늘면<br>
-        매장 추세가 정확해지고<br>
-        다음 액션이 명확해져요.
+        <span id="bs-kpi-dm-icon">🟣</span> <b>데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
+        <p id="bs-kpi-dm-copy" class="bs-kpi-copy">매일 입력 빈도를 늘리면 추세가 정확해져요</p>
+        <span id="bs-kpi-dm-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini info" id="bs-kpi-mini-dm">
           <span class="bs-kpi-mini-name">데이터 관리</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"><span class="bs-kpi-mini-avg-label">평균</span></span>
@@ -781,9 +821,14 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <b>강점은 지키고,</b><br>
-        <b>재방문 한 축만 보강하면</b><br>
-        <b>상위 35% 진입 가능합니다.</b><br>
+        <b><span id="bs-strong-kpi-name">상담 성공률</span> 강점은 지키고,</b><br>
+        <b><span id="bs-weak-kpi-name">재방문</span> 한 축만 보강하면</b><br>
+        <b><span id="bs-next-rank">상위 35%</span> 진입 가능합니다.</b><br>
+        <br>
+        <span style="display:block;padding:10px 12px;background:rgba(226,75,74,.08);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.5;word-break:keep-all;">
+          지금 매월 <b><span id="bs-monthly-gap">___만원</span></b>의 매출이<br>
+          사라지고 있어요.
+        </span>
         <br>
         매일 매장 변화를<br>
         확인하실 수 있는<br>
@@ -938,11 +983,145 @@ html, body {
     if (d.weakImprove)         DATA.weakImprove = d.weakImprove;
     if (d.weakScoreUp)         DATA.weakScoreUp = d.weakScoreUp;
     if (d.monthlyGap)          DATA.monthlyGap = d.monthlyGap;
+    /* v2.0.12 — Worker v0.6 dynamicData (T_result_동적연동 lookup 결과) */
+    if (d.dynamicData)         DATA.dynamicData = d.dynamicData;
     /* v2.0.8 — T15 metrics 갱신 후 strKpi/weakKpi 미존재 시 새 점수 기반 재산출 */
     if (!d.strKpi || !d.weakKpi) deriveStrengthWeakness();
     /* v2.0.9 — 벤치마크 평균 수신 + Worker 측 strDelta 미산출 시 실수치 재산출 */
     if (d.benchmark && (!d.strDelta || !d.weakImprove)) recomputeDeltasFromBenchmark();
-    console.info('[BS Result v2.0.9] T15+ applied', DATA);
+    /* v2.0.12 — 실시간 데이터 연동 7 함수 통합 호출 */
+    reorderKpiBubbles();   // ⑭ DOM 점수 내림차순
+    applyDynamicCopies();  // ⑮ bubble-detail-2~4b 본문 카피
+    applyWeakKpiCopy();    // ⑯ bubble-detail-5 weakKpi 동적
+    applyNextRank();       // ⑰ bubble-detail-5 nextRank 동적
+    applyMonthlyGap();     // ⑱ monthlyGap 동적
+    applyCompareLabel();   // ⑲ compareLabel 통합 (v2.0.11 ⑬ 확장)
+    applyKpiIcons();       // ㉒ 본문 이모지 동적 (ultrathink ❺)
+    applyStrongKpiCopy();  // ㉓ strKpi 명시 (ultrathink ❻)
+    console.info('[BS Result v2.0.12] T15+ applied', DATA);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     v2.0.12 신규 — 실시간 데이터 연동 5 함수 (KIRA-FE 작업가이드 5/13)
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* v2.0.12 ⑭ — bubble-detail-2~4b DOM reorder (점수 내림차순)
+     ───────────────────────────────────────────────────────
+     - 결함: bubble 순서 cs→rv→rs→dm 고정 → 강점이 항상 첫번째로 노출
+     - patch: DATA.metrics 4점수 내림차순 정렬 → DOM 순서 동적 재배열
+     - 동점 시: KPI_ORDER 기본 순서 (cs > rv > rs > dm) tie-break */
+  function reorderKpiBubbles() {
+    var KPI_ORDER = ['cs', 'rv', 'rs', 'dm'];
+    var BUBBLE_ID_MAP = { cs: 'bubble-detail-2', rv: 'bubble-detail-3', rs: 'bubble-detail-4', dm: 'bubble-detail-4b' };
+    var sorted = KPI_ORDER.slice().sort(function(a, b){
+      var diff = (Number(DATA[b]) || 0) - (Number(DATA[a]) || 0);
+      if (diff !== 0) return diff;
+      return KPI_ORDER.indexOf(a) - KPI_ORDER.indexOf(b);
+    });
+    var anchor = document.getElementById('bubble-detail-1');
+    if (!anchor || !anchor.parentNode) return;
+    var parent = anchor.parentNode;
+    var prevSibling = anchor;
+    sorted.forEach(function(kpi){
+      var bubble = document.getElementById(BUBBLE_ID_MAP[kpi]);
+      if (!bubble) return;
+      parent.insertBefore(bubble, prevSibling.nextSibling);
+      prevSibling = bubble;
+    });
+  }
+
+  /* v2.0.12 ⑮ — bubble-detail-2~4b 본문 카피 동적 매핑
+     ───────────────────────────────────────────────────────
+     - Worker v0.6 dynamicData.copies (T_result_동적연동 lookup) 사용
+     - FALLBACK_COPIES safety net: Worker 미배포·null 응답 시 안전 카피 */
+  var FALLBACK_COPIES = {
+    cs: '첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요',
+    rv: '첫 방문 고객의 2회차 전환이 끊기는 패턴이 보여요',
+    rs: '단건 시술과 회원권 균형이 잘 잡혀 있어요',
+    dm: '매일 입력 빈도를 늘리면 추세가 정확해져요'
+  };
+  function applyDynamicCopies() {
+    ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
+      var el = document.getElementById('bs-kpi-' + kpi + '-copy');
+      if (!el) return;
+      var copy = (DATA.dynamicData && DATA.dynamicData.copies && DATA.dynamicData.copies[kpi]) || FALLBACK_COPIES[kpi];
+      el.textContent = copy;
+    });
+  }
+
+  /* v2.0.12 ⑯ — bubble-detail-5 weakKpi 동적 카피
+     ───────────────────────────────────────────────────────
+     - 결함: bubble-detail-5 "재방문 한 축만 보강하면" 가정 고정
+     - patch: 기존 KPI_NAME (line 1118 영역) 매핑 + DATA.weakKpi 치환
+     - 기존 var KPI_NAME = { rv:'재방문율', cs:'상담 성공률', rs:'매출 구성', dm:'데이터 관리' } 활용 (중복 선언 제거) */
+  function applyWeakKpiCopy() {
+    var weakName = (typeof KPI_NAME !== 'undefined' && KPI_NAME[DATA.weakKpi]) || '운영지표';
+    var els = document.querySelectorAll('[id^="bs-weak-kpi-name"]');
+    Array.prototype.forEach.call(els, function(el){ el.textContent = weakName; });
+  }
+
+  /* v2.0.12 ⑰ — nextRank 동적 매핑 ("상위 N%" 하드코딩 fix) */
+  function applyNextRank() {
+    var el = document.getElementById('bs-next-rank');
+    if (!el) return;
+    var nextRank = (DATA.dynamicData && DATA.dynamicData.nextRank) || '상위 35%';
+    el.textContent = nextRank;
+  }
+
+  /* v2.0.12 ⑱ — monthlyGap 동적 매핑 ("___만원" fallback fix) */
+  function applyMonthlyGap() {
+    var el = document.getElementById('bs-monthly-gap');
+    if (!el) return;
+    var gap = (DATA.dynamicData && DATA.dynamicData.monthlyGap) || DATA.monthlyGap || '___만원';
+    el.textContent = gap;
+  }
+
+  /* v2.0.12 ⑲ — compareLabel 통합 매핑 (v2.0.11 ⑬ 확장)
+     ───────────────────────────────────────────────────────
+     - 우선순위: Worker dynamicData.compareLabel > segment 완성 > 기본 fallback
+     - 4 KPI 모든 compare-label 영역 일괄 갱신 */
+  function applyCompareLabel() {
+    var label = (DATA.dynamicData && DATA.dynamicData.compareLabel)
+             || (DATA.benchmarkCompareLabel)
+             || (DATA.benchmarkSegment ? '유사 ' + DATA.benchmarkSegment + ' 매장 평균 대비' : null)
+             || '유사 매장 평균 대비';
+    var els = document.querySelectorAll('[id$="-compare-label"]');
+    Array.prototype.forEach.call(els, function(el){ el.textContent = label; });
+  }
+
+  /* v2.0.12 ㉒ — 본문 이모지 (🟢/🟡/🟣) 동적 매핑 (ultrathink 사전 결함 fix ❺)
+     ───────────────────────────────────────────────────────
+     - v2.0.7 ⑩ B안 절대 점수 보정 패턴 본문 이모지에도 확장 적용
+     - 분기:
+       · 점수 vs 평균 +10% 이상 + 절대 점수 70 이상 → 🟢 (강점)
+       · 점수 vs 평균 -10% 이상 + 절대 점수 70 미만 → 🟡 (약점·회복)
+       · 그 외 → 🟣 (중립·flat)
+     - mini-bar 컬러 클래스 (good/warn/info)와 시각 일관성 유지 */
+  function applyKpiIcons() {
+    var KPI_AVG_KEY = { cs: 'avgCs', rv: 'avgRv', rs: 'avgRs', dm: 'avgDm' };
+    ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
+      var el = document.getElementById('bs-kpi-' + kpi + '-icon');
+      if (!el) return;
+      var score = Number(DATA[kpi]) || 0;
+      var avg   = Number(DATA[KPI_AVG_KEY[kpi]]) || 0;
+      var delta = avg > 0 ? ((score - avg) / avg) * 100 : 0;
+      var icon;
+      if (delta >= 10 && score >= 70)       icon = '🟢';  // 강점 (평균 대비 + 절대 점수 보정)
+      else if (delta <= -10 && score < 70)  icon = '🟡';  // 약점 (평균 대비 + 절대 점수 보정)
+      else                                  icon = '🟣';  // 중립·flat
+      el.textContent = icon;
+    });
+  }
+
+  /* v2.0.12 ㉓ — bubble-detail-5 strKpi 명시 (ultrathink 사전 결함 fix ❻)
+     ───────────────────────────────────────────────────────
+     - 결함: "강점은 지키고" 모호 표현 — 어떤 강점인지 사용자 인지 X
+     - patch: KPI_NAME[DATA.strKpi] 매핑 (기존 KPI_NAME 활용) */
+  function applyStrongKpiCopy() {
+    var el = document.getElementById('bs-strong-kpi-name');
+    if (!el) return;
+    var strongName = (typeof KPI_NAME !== 'undefined' && KPI_NAME[DATA.strKpi]) || '';
+    el.textContent = strongName;
   }
 
   /* v2.0.9 patch — 벤치마크 평균 기반 strDelta·weakImprove·weakScoreUp 동적 재산출
