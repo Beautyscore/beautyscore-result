@@ -10,6 +10,24 @@
 <!--
   뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 + 사용자 페르소나 검수 5/14)
   ═══════════════════════════════════════════════════════════════
+  v2.0.12 patch ㉜·㉝ — 강점 카피 라이브러리 재설계 (5/14 사용자 페르소나 가이드):
+    🌟 핵심 통찰: "날 아네·존중받네" 감각 + 원장 자체 칭찬조
+    🌟 STRENGTH_LINE_COPY 4 (bubble-2 한 줄 강점):
+       - cs: "상담에서 결제로 이끄는 [원장님의 솜씨]가 빛나고 있어요"
+       - rv: "[원장님의 손길]에 만족한 단골들이 매장을 지탱하고 있어요"
+       - rs: "매출 구성이 [안정적으로] 잡혀 있어요"
+       - dm: "[원장님이 매일 데이터를 챙기시는 그 자체]가 매장의 힘이에요"
+    🌟 STRENGTH_REASON_COPY 4 (bubble-2b 이유 명시, "—" → <br>):
+       - cs: 신뢰 형성·시술 권유·결제 클로징 / 잘 다루고 계시는 흐름
+       - rv: 손기술·테크닉·세심한 응대 / 다시 찾으시는 이유
+       - rs: 단건과 회원권의 균형 / 안정 구조
+       - dm: 매일 기록하시는 습관 / 데이터의 가치를 알고 계시는 원장님
+    🌟 부각 룰:
+       - 핵심 칭찬·인정 부분 → Rose (#C9856E) + 볼드
+       - 사실·근거 부분 → 일반 볼드
+       - "—" em dash 폐기 → <br> 줄바꿈 (50~60대 가독성 ↑)
+    🌟 조사 부조화 영구 해결: 완전 문장 박제 (KPI명 + 조사 hardcoded 폐기)
+  ═══════════════════════════════════════════════════════════════
   v2.0.12 patch ㉙ — 라이브 검증 결함 5건 fix (5/14 검수 후속):
     1️⃣ "운영되고" → "운영하고" (SCORE_DELTA_COPY.above explain)
     2️⃣ bubble-3 "가장 큰 기회는" → "가장 필요한 부분은" (60대 원장 일상어 톤)
@@ -542,6 +560,19 @@ html, body {
   color: var(--bs-text) !important;
   word-break: keep-all !important; overflow-wrap: break-word !important;
 }
+/* 5/14 patch — KPI 카드 제목 하단 분리 (대표님 명시 — 막대 먼저·제목 결론 톤) */
+#bs-wrap .bs-kpi-title-bottom {
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--bs-bd) !important;
+  font-size: 15px !important; line-height: 1.4 !important;
+  color: var(--bs-text) !important;
+  word-break: keep-all !important; overflow-wrap: break-word !important;
+}
+#bs-wrap .bs-kpi-title-bottom b {
+  font-weight: 800 !important; color: var(--bs-navy) !important;
+  letter-spacing: -.2px !important;
+}
 #bs-wrap .bs-kpi-mini-bar {
   flex: 1 1 0 !important; min-width: 0 !important;  /* v2.0.9 — 가변 폭 복귀 (4 버블 모두 full-width라 트랙 폭 자연 정합 + overflow 방지) */
   height: 6px !important; border-radius: 3px !important;
@@ -707,7 +738,7 @@ html, body {
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
         먼저 강점부터요. 💎<br>
-        <b id="bs-strength-line"><span id="bs-strength-name">상담 성공률</span>이 매장의 자산</b>이에요.
+        <b id="bs-strength-line">상담에서 결제로 이끄는 <span style="color:#C9856E;font-weight:800">원장님의 솜씨</span>가 빛나고 있어요</b>
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">✨</span>
           <span class="bs-mini-card-text"><span id="bs-strength-compare-label">유사 매장 평균 대비</span> <b id="bs-strength-delta">14%</b> 높음</span>
@@ -721,7 +752,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        이건 잘 유지하시면서<br>다음 영역만 보강하면 됩니다.
+        <span style="color:#C9856E;font-weight:800">신뢰 형성·시술 권유·결제 클로징</span><br>원장님이 <b>잘 다루고 계시는 흐름</b>이에요.<br>이대로 유지하세요.
       </div>
     </div>
   </div>
@@ -797,7 +828,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <span id="bs-kpi-cs-icon">🟢</span> <b>상담 성공률 <span id="bs-kpi-cs">80</span>점</b><br>
+        <!-- 5/14 patch — 제목 카드 하단으로 이동 (대표님 시각 정합 명시) -->
         <span id="bs-kpi-cs-compare-label">유사 매장 평균 대비</span> <em id="bs-kpi-cs-delta">14% 높음</em>
         <p id="bs-kpi-cs-copy" class="bs-kpi-copy">첫 상담의 신뢰 형성과 시술 권유가 잘 맞춰져 있어요</p>
         <div class="bs-kpi-mini good" id="bs-kpi-mini-cs">
@@ -805,6 +836,7 @@ html, body {
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:80%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-cs-val">80</span>
         </div>
+        <div class="bs-kpi-title-bottom"><span id="bs-kpi-cs-icon">🟢</span> <b>상담 성공률 <span id="bs-kpi-cs">80</span>점</b></div>
       </div>
     </div>
   </div>
@@ -813,7 +845,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <span id="bs-kpi-rv-icon">🟡</span> <b>재방문율 <span id="bs-kpi-rv">65</span>점</b><br>
+        <!-- 5/14 patch — 제목 카드 하단으로 이동 -->
         <p id="bs-kpi-rv-copy" class="bs-kpi-copy">첫 방문 고객의 2회차 전환이 끊기는 패턴이 보여요</p>
         <span id="bs-kpi-rv-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini warn" id="bs-kpi-mini-rv">
@@ -821,6 +853,7 @@ html, body {
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#B36015;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rv-val">65</span>
         </div>
+        <div class="bs-kpi-title-bottom"><span id="bs-kpi-rv-icon">🟡</span> <b>재방문율 <span id="bs-kpi-rv">65</span>점</b></div>
       </div>
     </div>
   </div>
@@ -829,7 +862,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <span id="bs-kpi-rs-icon">🟢</span> <b>매출 구성 <span id="bs-kpi-rs">75</span>점</b><br>
+        <!-- 5/14 patch — 제목 카드 하단으로 이동 -->
         <p id="bs-kpi-rs-copy" class="bs-kpi-copy">단건 시술과 회원권 균형이 잘 잡혀 있어요</p>
         <span id="bs-kpi-rs-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini good" id="bs-kpi-mini-rs">
@@ -837,6 +870,7 @@ html, body {
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:75%; --bs-kpi-c:#2E7D5E;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-rs-val">75</span>
         </div>
+        <div class="bs-kpi-title-bottom"><span id="bs-kpi-rs-icon">🟢</span> <b>매출 구성 <span id="bs-kpi-rs">75</span>점</b></div>
       </div>
     </div>
   </div>
@@ -845,7 +879,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <span id="bs-kpi-dm-icon">🟣</span> <b>데이터 관리 <span id="bs-kpi-dm">65</span>점</b><br>
+        <!-- 5/14 patch — 제목 카드 하단으로 이동 -->
         <p id="bs-kpi-dm-copy" class="bs-kpi-copy">매일 입력 빈도를 늘리면 추세가 정확해져요</p>
         <span id="bs-kpi-dm-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini info" id="bs-kpi-mini-dm">
@@ -853,6 +887,7 @@ html, body {
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
         </div>
+        <div class="bs-kpi-title-bottom"><span id="bs-kpi-dm-icon">🟣</span> <b>데이터 관리 <span id="bs-kpi-dm">65</span>점</b></div>
       </div>
     </div>
   </div>
@@ -1048,6 +1083,8 @@ html, body {
     applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C · dm 가치 + 중복 fix)
     applyCsDelta();           // ㉚ bs-kpi-cs-delta 동적 매핑 (5/14 결함 fix)
     applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
+    applyStrengthLine();      // ㉜ bubble-2 강점 한 줄 동적 (5/14 사용자 페르소나)
+    applyStrengthReason();    // ㉝ bubble-2b 강점 이유 동적 (5/14 사용자 페르소나)
     console.info('[BS Result v2.0.12] T15+ applied', DATA);
   }
 
@@ -1324,6 +1361,43 @@ html, body {
     else if (pct <= -10) label = absPct + '% 낮음';
     else label = '평균 수준';
     el.textContent = label;
+  }
+
+  /* v2.0.12 ㉜·㉝ — 강점 카피 라이브러리 재설계 (5/14 사용자 페르소나 가이드)
+     ───────────────────────────────────────────────────────
+     - 핵심 통찰: 원장님 입장 "날 아네·존중받네" 감각 + 원장 자체 칭찬조
+     - 결함 fix: 기존 "[KPI명]이 매장의 자산" hardcoded → 조사 부조화·의미 부조화
+                 (dm "데이터 관리이 매장의 자산" 받침 부조화 + 자산 의미 부적합)
+     - 신규: KPI별 강점 LINE + REASON 2 카피 매트릭스 박제 (Copywriter Layer 확장)
+     - 부각: 핵심 칭찬·인정 부분에 Rose (#C9856E) + 볼드 / 사실·근거 부분에 일반 볼드
+     - 줄바꿈: "—" 폐기 → <br>로 가독성 ↑ (50~60대 원장님 가독성) */
+  var STRENGTH_LINE_COPY = {
+    cs: '상담에서 결제로 이끄는 <span style="color:#C9856E;font-weight:800">원장님의 솜씨</span>가 빛나고 있어요',
+    rv: '<span style="color:#C9856E;font-weight:800">원장님의 손길</span>에 만족한 단골들이 매장을 지탱하고 있어요',
+    rs: '매출 구성이 <b>안정적으로</b> 잡혀 있어요',
+    dm: '<span style="color:#C9856E;font-weight:800">원장님이 매일 데이터를 챙기시는 그 자체</span>가 매장의 힘이에요'
+  };
+  var STRENGTH_REASON_COPY = {
+    cs: '<span style="color:#C9856E;font-weight:800">신뢰 형성·시술 권유·결제 클로징</span><br>원장님이 <b>잘 다루고 계시는 흐름</b>이에요.<br>이대로 유지하세요.',
+    rv: '<span style="color:#C9856E;font-weight:800">손기술·테크닉·세심한 응대</span><br>고객들이 <b>다시 찾으시는 이유</b>가 명확해요.<br>지금처럼 케어해주세요.',
+    rs: '<b>단건과 회원권의 균형</b>이 매출 흐름을 안정시키고 있어요.<br>이 구조 그대로 유지하세요.',
+    dm: '<b>매일 기록하시는 습관</b>이 분석 정확도를 키우고 있어요.<br><span style="color:#C9856E;font-weight:800">데이터의 가치를 알고 계시는 원장님</span>이세요.'
+  };
+
+  /* v2.0.12 ㉜ — bubble-2 강점 한 줄 동적 (innerHTML — 볼드·컬러 부각) */
+  function applyStrengthLine() {
+    var el = document.getElementById('bs-strength-line');
+    if (!el) return;
+    var strKpi = DATA.strKpi || 'cs';
+    el.innerHTML = STRENGTH_LINE_COPY[strKpi] || STRENGTH_LINE_COPY.cs;
+  }
+
+  /* v2.0.12 ㉝ — bubble-2b 강점 이유 동적 (innerHTML — 줄바꿈·볼드·컬러) */
+  function applyStrengthReason() {
+    var el = document.querySelector('#bubble-2b .bs-bubble');
+    if (!el) return;
+    var strKpi = DATA.strKpi || 'cs';
+    el.innerHTML = STRENGTH_REASON_COPY[strKpi] || STRENGTH_REASON_COPY.cs;
   }
 
   /* v2.0.12 ㉛ — mini-bar 4 class 동적 매핑 (5/14 라이브 검수 결함 fix)
@@ -1679,6 +1753,8 @@ html, body {
     applyWeakRecoveryCopy();  // ㉕ 약점 회복 카피 분기 (Fix C + Fix 3 중복 fix)
     applyCsDelta();           // ㉚ bs-kpi-cs-delta 동적 매핑 (5/14 결함 fix)
     applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
+    applyStrengthLine();      // ㉜ bubble-2 강점 한 줄 동적 (5/14 사용자 페르소나)
+    applyStrengthReason();    // ㉝ bubble-2b 강점 이유 동적 (5/14 사용자 페르소나)
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
