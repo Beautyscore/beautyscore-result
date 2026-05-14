@@ -8,7 +8,7 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.12 (KIRA, 실시간 데이터 연동 + 사용자 페르소나 검수 5/14)
+  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch — 5/15)
   ═══════════════════════════════════════════════════════════════
   v2.0.12 patch ㉞ — iframe BS_HEIGHT 재계산 강화 (5/14 QC 결함 fix):
     🌟 결함: setTimeout(postHeight, 1000) 1회 후 → typing animation 4200·7200ms·detail bubble 노출 미반영 → Softr iframe 하단 짤림
@@ -758,7 +758,7 @@ html, body {
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        먼저 강점부터요. 💎<br>
+        <span id="bs-block-header">먼저 강점부터요. 💎</span><br>
         <b id="bs-strength-line">상담에서 결제로 이끄는 <span style="color:#C9856E;font-weight:800">원장님의 솜씨</span>가 빛나고 있어요</b>
         <div class="bs-mini-card">
           <span class="bs-mini-card-ico">✨</span>
@@ -932,6 +932,10 @@ html, body {
           매월 <b><span id="bs-monthly-gap">___만원</span></b>에 달해요.<br>
           <span style="color:var(--bs-muted);font-size:13px;">이 손실이 회복할 첫 한 가지예요.</span>
         </span>
+        <!-- v2.0.13 P4 — 다음 액션 카피 (dynamicData.nextAction / FE fallback gradeOfFE) -->
+        <div id="bs-next-action-block" style="margin-top:12px;padding:12px 14px;background:rgba(22,33,62,.05);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.6;word-break:keep-all;overflow-wrap:break-word;">
+          <span id="bs-next-action">이 흐름을 다음 한 단계로 더 끌어올려보세요.</span>
+        </div>
         <br>
         매일 매장 변화를<br>
         확인하실 수 있는<br>
@@ -1089,6 +1093,16 @@ html, body {
       /* v2.0.11 — Worker가 완성형 비교 라벨 직접 공급 시 우선 사용 (예: "유사 1인샵·페이스 매장 평균 대비") */
       DATA.benchmarkCompareLabel = d.benchmark.compareLabel || null;
     }
+    /* v2.0.13 P1 — dynamicData.benchmark.avg* 우선 적용 (Worker v0.8 Hybrid Compute)
+       Worker v0.8는 segAvg 직접 산출 → dynamicData.benchmark에 내장
+       → --bs-kpi-avg CSS 변수 동적 좌표 갱신 (게이지 평균선) */
+    if (d.dynamicData && d.dynamicData.benchmark) {
+      var dmb = d.dynamicData.benchmark;
+      if (dmb.avgCs != null) DATA.avgCs = dmb.avgCs;
+      if (dmb.avgRv != null) DATA.avgRv = dmb.avgRv;
+      if (dmb.avgRs != null) DATA.avgRs = dmb.avgRs;
+      if (dmb.avgDm != null) DATA.avgDm = dmb.avgDm;
+    }
     if (d.strKpi)              DATA.strKpi = d.strKpi;
     if (d.weakKpi)             DATA.weakKpi = d.weakKpi;
     if (d.strDelta)            DATA.strDelta = d.strDelta;
@@ -1120,6 +1134,11 @@ html, body {
     applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
     applyStrengthLine();      // ㉜ bubble-2 강점 한 줄 동적 (5/14 사용자 페르소나)
     applyStrengthReason();    // ㉝ bubble-2b 강점 이유 동적 (5/14 사용자 페르소나)
+    /* v2.0.13 — 5등급 Narrative 4 함수 (Worker v0.8 + FE fallback) */
+    applyGradeBadge();        // P2 등급 배지 bg/fg/emoji (dynamicData.gradeBadge)
+    applyBlockHeader();       // P3 블록 헤더 등급별 분기 (dynamicData.blockHeader)
+    applyNextAction();        // P4 다음 액션 카피 신규 (dynamicData.nextAction)
+    applyGaugeFillColor();    // P5 게이지 fill 색상 톤·등급 (applyKpiMiniClass 이후 override)
     console.info('[BS Result v2.0.13] T15+ applied', DATA);
   }
 
@@ -1321,9 +1340,13 @@ html, body {
     ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi){
       var el = document.getElementById('bs-kpi-' + kpi + '-copy');
       if (!el) return;
-      /* 우선순위: Worker dynamicData.copies (Make D-v2 v2.1 lookup) > 클라이언트 fallback (HANA 12 카피) */
+      /* v2.0.13 P6 — Worker dynamicData.copies 직접 사용 (HANA v0.4 180종 — FE 클라이언트 분기 제거)
+         Worker v0.8: grade-aware 카피 (5등급 × 3 톤 × 3 variant = 180종)
+         v0.7 fallback: HANA 12 카피 pickKpiCopy (Worker 미배포 시 graceful) */
       var copy = (DATA.dynamicData && DATA.dynamicData.copies && DATA.dynamicData.copies[kpi])
-              || pickKpiCopy(kpi, DATA[kpi], DATA[KPI_AVG_KEY[kpi]]);
+              || (typeof pickKpiCopy === 'function' ? pickKpiCopy(kpi, DATA[kpi], DATA[KPI_AVG_KEY[kpi]]) : null)
+              || FALLBACK_COPIES[kpi]
+              || '';
       el.textContent = copy;
     });
   }
@@ -1433,6 +1456,115 @@ html, body {
     if (!el) return;
     var strKpi = DATA.strKpi || 'cs';
     el.innerHTML = STRENGTH_REASON_COPY[strKpi] || STRENGTH_REASON_COPY.cs;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     v2.0.13 신규 — 5등급 Narrative 연동 4 함수 (Worker v0.8 + FE fallback)
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* FE-side 5등급 산정 (Worker v0.7 fallback — Worker v0.8: dynamicData.grade 우선) */
+  function gradeOfFE(score) {
+    if (score >= 90) return 'S';
+    if (score >= 75) return 'A';
+    if (score >= 55) return 'B';
+    if (score >= 35) return 'C';
+    return 'D';
+  }
+
+  /* v2.0.13 P2 — 등급 배지 5등급 (dynamicData.gradeBadge · bg/fg/emoji 직접 적용)
+     ─────────────────────────────────────────────────────────────
+     Worker v0.8 gradeBadge: { bg: "#F59E0B", fg: "#FFFFFF", emoji: "🍀" }
+     fallback: 기존 CSS grade-* 클래스 기반 (v0.7 호환) */
+  function applyGradeBadge() {
+    if (!(DATA.dynamicData && DATA.dynamicData.gradeBadge)) return;
+    var gb = DATA.dynamicData.gradeBadge;
+    var gradeSpan = document.getElementById('bs-grade');
+    if (!gradeSpan) return;
+    var scoreGradeDiv = gradeSpan.parentElement;  /* .bs-score-grade div */
+    if (scoreGradeDiv) {
+      scoreGradeDiv.style.setProperty('background', gb.bg, 'important');
+      scoreGradeDiv.style.setProperty('color', gb.fg, 'important');
+    }
+    /* emoji prefix — 기존 grade-s 🏆 처리와 통합 */
+    var gradeText = String(DATA.grade || gradeSpan.textContent || '').replace(/^[^\w가-힣A-Za-z]+/, '').trim();
+    gradeSpan.textContent = gb.emoji + ' ' + gradeText;
+  }
+
+  /* v2.0.13 P3 — 블록 헤더 등급별 분기 (dynamicData.blockHeader · FE fallback gradeOfFE)
+     ─────────────────────────────────────────────────────────────
+     Worker v0.8 blockHeader: { text: "지금 상대적으로 안정적인 영역", emoji: "🍀", color: "#F59E0B" } */
+  function applyBlockHeader() {
+    var el = document.getElementById('bs-block-header');
+    if (!el) return;
+    var bh = DATA.dynamicData && DATA.dynamicData.blockHeader;
+    if (bh && bh.text) {
+      el.textContent = bh.emoji + ' ' + bh.text;
+      el.style.color = bh.color || '';
+      el.style.fontWeight = '700';
+    } else {
+      /* FE fallback — gradeOfFE(score) 기반 */
+      var HEADER_FE = {
+        S: { text: '업계 상위 수준의 영역부터', emoji: '🏆', color: '#FFD700' },
+        A: { text: '잘하고 계신 영역부터요',     emoji: '💎', color: '#8B5CF6' },
+        B: { text: '상대적으로 잘 잡혀 있는 영역', emoji: '🌿', color: '#34D399' },
+        C: { text: '지금 상대적으로 안정적인 영역', emoji: '🍀', color: '#F59E0B' },
+        D: { text: '회복의 첫 실마리',            emoji: '🌱', color: '#9CA3AF' }
+      };
+      var g = gradeOfFE(parseInt(DATA.score, 10) || 0);
+      var h = HEADER_FE[g] || HEADER_FE['B'];
+      el.textContent = h.emoji + ' ' + h.text;
+      el.style.color = h.color;
+      el.style.fontWeight = '700';
+    }
+  }
+
+  /* v2.0.13 P4 — 다음 액션 카피 신규 영역 (dynamicData.nextAction · FE fallback gradeOfFE)
+     ─────────────────────────────────────────────────────────────
+     Worker v0.8 nextAction: "한 영역부터 함께 풀어가요. 무리하지 마세요." */
+  function applyNextAction() {
+    var el = document.getElementById('bs-next-action');
+    if (!el) return;
+    var action = DATA.dynamicData && DATA.dynamicData.nextAction;
+    if (!action) {
+      var NEXT_FE = {
+        S: '이 자산을 지키면서 다음 단계를 설계해보세요.',
+        A: '이 흐름을 다음 한 단계로 더 끌어올려보세요.',
+        B: '한 단계 더 끌어올릴 여지가 충분해요.',
+        C: '한 영역부터 함께 풀어가요. 무리하지 마세요.',
+        D: '기본기부터 함께 다시 다져요. 한 걸음씩이면 충분해요.'
+      };
+      action = NEXT_FE[gradeOfFE(parseInt(DATA.score, 10) || 0)] || NEXT_FE['B'];
+    }
+    el.textContent = action;
+  }
+
+  /* v2.0.13 P5 — 게이지 fill 색상 톤·등급 분기
+     ─────────────────────────────────────────────────────────────
+     강 톤 → grade signature 색상 (S금/A보라/B청록/C앰버/D회색)
+     약 톤 → warn red (#EF4444)
+     중 톤 → neutral gray (rgba(22,33,62,.25))
+     applyKpiMiniClass() 이후 호출 → 색상 override (grade-aware) */
+  function applyGaugeFillColor() {
+    var GRADE_COLOR = { S: '#FFD700', A: '#8B5CF6', B: '#34D399', C: '#F59E0B', D: '#9CA3AF' };
+    var grade = (DATA.dynamicData && DATA.dynamicData.grade)
+             || gradeOfFE(parseInt(DATA.score, 10) || 0);
+    var gradeColor = GRADE_COLOR[grade] || GRADE_COLOR['B'];
+    var KPI_AVG_KEY = { cs: 'avgCs', rv: 'avgRv', rs: 'avgRs', dm: 'avgDm' };
+    ['cs', 'rv', 'rs', 'dm'].forEach(function(kpi) {
+      var avg = Number(DATA[KPI_AVG_KEY[kpi]]) || 0;
+      var score = Number(DATA[kpi]) || 0;
+      var tone = (avg > 0)
+        ? (score >= avg * 1.1 ? 'strong' : score >= avg * 0.9 ? 'neutral' : 'weak')
+        : 'neutral';
+      var barEl = document.getElementById('bs-kpi-mini-' + kpi);
+      if (!barEl) return;
+      var bar = barEl.querySelector('.bs-kpi-mini-bar');
+      if (!bar) return;
+      var fillColor = tone === 'strong' ? gradeColor
+                    : tone === 'weak'   ? '#EF4444'
+                    :                    'rgba(22,33,62,.25)';
+      bar.style.setProperty('--bs-kpi-c', fillColor);
+    });
   }
 
   /* v2.0.12 ㉛ — mini-bar 4 class 동적 매핑 (5/14 라이브 검수 결함 fix)
@@ -1649,10 +1781,13 @@ html, body {
         gradeBadge.textContent = '🏆 ' + DATA.grade;
       }
     }
-    /* 5/14 patch — 등급_라벨 노출 (Phase 3·Airtable 등급_라벨 lookup) */
+    /* 5/14 patch — 등급_라벨 노출 (Phase 3·Airtable 등급_라벨 lookup)
+       v2.0.13: dynamicData.gradeLabel (Worker v0.8) 우선, Airtable lookup 차선 */
     var gradeLabelEl = document.getElementById('bs-grade-label-full');
-    if (gradeLabelEl && DATA.gradeLabel && String(DATA.gradeLabel).trim() !== '') {
-      gradeLabelEl.textContent = DATA.gradeLabel;
+    var gradeLabelText = (DATA.dynamicData && DATA.dynamicData.gradeLabel)
+                      || (DATA.gradeLabel && String(DATA.gradeLabel).trim() !== '' ? DATA.gradeLabel : null);
+    if (gradeLabelEl && gradeLabelText) {
+      gradeLabelEl.textContent = gradeLabelText;
       gradeLabelEl.style.display = '';
     }
     /* v2.0.6 patch — rank 풀 텍스트 분리 (상위 N% + 매장유형 + 강점) */
@@ -1831,6 +1966,11 @@ html, body {
     applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
     applyStrengthLine();      // ㉜ bubble-2 강점 한 줄 동적 (5/14 사용자 페르소나)
     applyStrengthReason();    // ㉝ bubble-2b 강점 이유 동적 (5/14 사용자 페르소나)
+    /* v2.0.13 — 5등급 Narrative 4 함수 (초기 로드 정합) */
+    applyGradeBadge();        // P2 등급 배지
+    applyBlockHeader();       // P3 블록 헤더
+    applyNextAction();        // P4 다음 액션
+    applyGaugeFillColor();    // P5 게이지 fill 색상
   }
   function setBarWidth(parentId, val, avg) {
     var el = document.getElementById(parentId);
