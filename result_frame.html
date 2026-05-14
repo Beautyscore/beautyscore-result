@@ -808,8 +808,14 @@ html, body {
     </div>
   </div>
 
-  <!-- 초기 CTA 옵션 (v2.0.8 — CTA 카피 정정) -->
+  <!-- 초기 CTA 옵션 (v2.0.8 — CTA 카피 정정 / v2.0.13 베타 CTA 분기) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
+    <!-- 베타 신청 CTA (5/29 20:00 KST 마감 — JS 분기로 자동 노출/숨김) -->
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-1"
+       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
+      <span>🎯 베타 50인 신청하기 (5/29 마감)</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
     <button class="bs-cta-option" type="button" id="bs-detail-trigger">
       <span>핵심 운영 지표 상세히보기</span>
       <span class="bs-cta-arrow">▼</span>
@@ -936,8 +942,14 @@ html, body {
     </div>
   </div>
 
-  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정: /pricing 결제 직진 + 카톡 채널 redirect) -->
+  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정 / v2.0.13 베타 CTA 분기) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
+    <!-- 베타 신청 CTA (5/29 20:00 KST 마감 — JS 분기) -->
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
+       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
+      <span>🎯 베타 50인 신청하기 (5/29 마감)</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
     <a class="bs-cta-option" href="https://app.beautyscore.co.kr/pricing" target="_top" id="bs-cta-pricing">
       <span>결제하고 서비스 시작하기</span>
       <span class="bs-cta-arrow">→</span>
@@ -1108,7 +1120,7 @@ html, body {
     applyKpiMiniClass();      // ㉛ mini-bar 4 class 동적 (5/14 결함 fix)
     applyStrengthLine();      // ㉜ bubble-2 강점 한 줄 동적 (5/14 사용자 페르소나)
     applyStrengthReason();    // ㉝ bubble-2b 강점 이유 동적 (5/14 사용자 페르소나)
-    console.info('[BS Result v2.0.12] T15+ applied', DATA);
+    console.info('[BS Result v2.0.13] T15+ applied', DATA);
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -1604,9 +1616,12 @@ html, body {
   }
 
   /* ═══ DOM 데이터 주입 ═══ */
+  // KIRA 5/14 patch: direct seed record + 매장명/원장이름 BLANK fallback. 추적: 운영DB 감사 5건 §3 D안
+  var safeName = function(raw) { return (raw && String(raw).trim() && String(raw).trim() !== 'direct') ? String(raw).trim() : '원장님'; };
+  var safeStore = function(raw) { return (raw && String(raw).trim() && String(raw).trim() !== 'direct') ? String(raw).trim() : '우리 매장'; };
   function setText(id, val) { var el = document.getElementById(id); if (el && val != null) el.textContent = val; }
   function applyData() {
-    setText('bs-store-name', DATA.store);
+    setText('bs-store-name', safeStore(DATA.store));
     /* v2.0.6 patch — period 빈 값이면 "[운영 N년차]에 " 영역 자체 숨김 (단정 표현 차단) */
     var periodPrefix = document.getElementById('bs-period-prefix');
     if (DATA.period && String(DATA.period).trim() !== '') {
@@ -1647,10 +1662,13 @@ html, body {
     var scoreNum = parseInt(DATA.score, 10) || 0;
     var avgNum = (typeof DATA.avgScore === 'number' && !isNaN(DATA.avgScore)) ? DATA.avgScore : scoreNum;
     var deltaNum = scoreNum - avgNum;
-    var deltaSign = deltaNum > 0 ? '+' : '';
-    setText('bs-score-delta', '평균 ' + avgNum + '점 대비 ' + deltaSign + deltaNum + '점');
+    /* §5.3-1 — +N점 금지: deltaSign 변수 제거 (5/14 patch ㉟)
+       applyScoreDelta()가 HANA 카피로 최종 override. 이 임시값도 + 부호 금지. */
     var deltaAbs = Math.abs(deltaNum);
     var deltaWord = deltaNum > 0 ? '높음' : (deltaNum < 0 ? '낮음' : '동일');
+    setText('bs-score-delta', deltaNum === 0
+      ? '동종 매장 평균과 비슷한 수준이에요'
+      : '평균 ' + avgNum + '점 대비 ' + deltaAbs + '점 ' + deltaWord);
     setText('bs-score-delta-explain', deltaNum === 0 ? '(비슷한 매장 평균과 동일)' : '(비슷한 매장 평균보다 ' + deltaAbs + '점 ' + deltaWord + ')');
     /* v2.0.6 patch — rank에서 분리한 매장유형·강점 우선, 없으면 wrapper params, 둘 다 없으면 hide */
     setLineOrHide('bs-store-type-line', parsedRank.extras[0] || DATA.storeType);
@@ -1752,6 +1770,34 @@ html, body {
         }
       });
     });
+    /* v2.0.13 — 베타 CTA 날짜 분기 (5/22 00:00 ~ 5/29 20:00 KST)
+       베타 기간: /beta 버튼 최상단 노출 + /pricing secondary 처리
+       5/29 20:00 KST 이후: 베타 CTA 자동 숨김, pricing 원복 */
+    (function() {
+      var betaEnd = new Date('2026-05-29T20:00:00+09:00');
+      var now = new Date();
+      var isBetaOpen = now < betaEnd;
+      var betaIds = ['bs-cta-beta-1', 'bs-cta-beta-2'];
+      betaIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (isBetaOpen) {
+          el.style.display = '';
+          el.addEventListener('click', function(e) {
+            var betaUrl = 'https://app.beautyscore.co.kr/beta';
+            try {
+              if (window.top !== window.self) { e.preventDefault(); window.top.location.href = betaUrl; }
+            } catch(err) { e.preventDefault(); window.location.href = betaUrl; }
+          });
+        }
+      });
+      /* 베타 기간엔 결제 버튼 secondary 처리 */
+      if (isBetaOpen) {
+        var pEl = document.getElementById('bs-cta-pricing');
+        if (pEl) pEl.classList.add('bs-cta-option-secondary');
+      }
+    })();
+
     /* v2.0.8 — 결제 CTA (/pricing 직진) iframe-top redirect 핸들러 */
     var pricingEl = document.getElementById('bs-cta-pricing');
     if (pricingEl) {
