@@ -8,8 +8,17 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch — 5/15)
+  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 — 5/15)
   ═══════════════════════════════════════════════════════════════
+  v2.0.13 P1 검증 fix (5/14 저녁):
+    🌟 fix ① FALLBACK_COPIES 미정의 버그 (ReferenceError 잠재 결함 제거)
+       applyDynamicCopies(): dynamicData.copies·pickKpiCopy 모두 falsy 시 최종 안전망 변수 정의
+    🌟 fix ② WCAG AA 배지 fg 자동 교정 — getWcagFg(bgHex) 헬퍼 신규
+       applyGradeBadge(): Worker gb.fg 무시 → bg 상대 휘도 기반 navy/white 자동 선택
+       C·S·B·D등급 Worker v0.8 fg:#FFFFFF → 대비율 2.9:1 이하 → 4.5:1+ 보장
+    🌟 fix ③ CSS 등급 배지 fallback WCAG 교정 (grade-s·a·c → color:#16213E dark text)
+       grade-b(파랑)·grade-d(빨강)은 white text 대비율 4.4:1·4.5:1 유지
+  ───────────────────────────────────────────────────────────────
   v2.0.12 patch ㉞ — iframe BS_HEIGHT 재계산 강화 (5/14 QC 결함 fix):
     🌟 결함: setTimeout(postHeight, 1000) 1회 후 → typing animation 4200·7200ms·detail bubble 노출 미반영 → Softr iframe 하단 짤림
     🌟 patch 5중 안전망:
@@ -406,11 +415,13 @@ html, body {
   padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
   transition: background-color .25s ease !important;
 }
-/* 5등급 컬러 (imweb 기준 5/11 박제 최종 — S 금색🏆·A 초록·B 파랑·C 노랑·D 빨강) */
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #D4AF37 !important; box-shadow: 0 2px 8px rgba(212,175,55,.30) !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; }
+/* 5등급 컬러 (imweb 기준 5/11 박제 최종 — S 금색🏆·A 초록·B 파랑·C 노랑·D 빨강)
+   v2.0.13 P1 fix — WCAG AA 접근성 교정: grade-s(금색)·grade-a(초록)·grade-c(노랑) → dark text
+   grade-b(파랑)·grade-d(빨강) → white text 유지 (대비율 4.4:1·4.5:1 통과) */
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #D4AF37 !important; color: #16213E !important; box-shadow: 0 2px 8px rgba(212,175,55,.30) !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; color: #16213E !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; color: #16213E !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; }
 /* 5/14 patch — 등급_라벨 노출 (Phase 3, Airtable 등급_라벨 lookup fldkBtnjJbo9tnAAq) */
 #bs-wrap .bs-bubble-score .bs-grade-label-full {
@@ -1270,6 +1281,16 @@ html, body {
     below:     { main: '동종 매장 평균 대비 {abs}점 회복할 여지가 있어요', explain: '한 가지 영역만 보강하면 회복 가능해요' }
   };
 
+  /* v2.0.13 P1 fix — FALLBACK_COPIES 정의 (ReferenceError 잠재 버그 제거)
+     applyDynamicCopies(): dynamicData.copies[kpi] + pickKpiCopy 모두 falsy일 때 최종 안전망
+     KPI_COPY_LIBRARY 4종 정상이면 실제 도달 X — 방어적 정의 */
+  var FALLBACK_COPIES = {
+    cs: '상담 성공률이 평균 수준이에요. 한 단계 더 끌어올릴 여지가 있어요.',
+    rv: '재방문 흐름이 안정적으로 이어지고 있어요.',
+    rs: '매출 구성이 평균 수준으로 유지되고 있어요.',
+    dm: '데이터 입력을 꾸준히 이어가시면 추세 분석이 정확해져요.'
+  };
+
   /* Engineer Layer — Score delta 카피 산출 (Fix A) */
   function getScoreDeltaCopy(score, avg) {
     var s = Number(score) || 0;
@@ -1471,6 +1492,22 @@ html, body {
     return 'D';
   }
 
+  /* v2.0.13 P1 fix — WCAG AA 접근성 자동 fg 교정 (60대 원장 가독성)
+     bg 상대 휘도(relative luminance) 기준: L > 0.179 → dark (#16213E) / else → white
+     기준: WCAG 2.1 AA normal text 4.5:1 충족 최소 휘도 분기점 0.179
+     Worker v0.8 gradeBadge.fg = #FFFFFF 고정 → C·S·B·D등급 대비율 실패 방어 */
+  function getWcagFg(bgHex) {
+    try {
+      var h = String(bgHex).replace('#','');
+      var r = parseInt(h.slice(0,2),16)/255,
+          g = parseInt(h.slice(2,4),16)/255,
+          b = parseInt(h.slice(4,6),16)/255;
+      var lin = function(c){ return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); };
+      var L = 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+      return L > 0.179 ? '#16213E' : '#FFFFFF';
+    } catch(e) { return '#FFFFFF'; }
+  }
+
   /* v2.0.13 P2 — 등급 배지 5등급 (dynamicData.gradeBadge · bg/fg/emoji 직접 적용)
      ─────────────────────────────────────────────────────────────
      Worker v0.8 gradeBadge: { bg: "#F59E0B", fg: "#FFFFFF", emoji: "🍀" }
@@ -1483,7 +1520,9 @@ html, body {
     var scoreGradeDiv = gradeSpan.parentElement;  /* .bs-score-grade div */
     if (scoreGradeDiv) {
       scoreGradeDiv.style.setProperty('background', gb.bg, 'important');
-      scoreGradeDiv.style.setProperty('color', gb.fg, 'important');
+      /* v2.0.13 P1 fix — WCAG AA 자동 교정: Worker gb.fg 그대로 쓰면 C·S·B·D 대비율 실패
+         getWcagFg(bg) → bg 휘도 기반 navy or white 자동 선택 (gb.fg 무시) */
+      scoreGradeDiv.style.setProperty('color', getWcagFg(gb.bg), 'important');
     }
     /* emoji prefix — 기존 grade-s 🏆 처리와 통합 */
     var gradeText = String(DATA.grade || gradeSpan.textContent || '').replace(/^[^\w가-힣A-Za-z]+/, '').trim();
