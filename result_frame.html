@@ -8,8 +8,18 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 + IP2 HMAC #3 사전 patch — 5/15)
+  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 + IP2 HMAC #3 사전 patch + IP3 grade-X FE fallback — 5/16)
   ═══════════════════════════════════════════════════════════════
+  v2.0.13 IP3 grade-X FE fallback (5/16 e2e P0 검증 결함 fix):
+    🌟 결함: applyGradeBadge() dynamicData.gradeBadge 미존재 시 early return → .bs-score-grade rose fallback → 5등급 시각 구별 0
+    🌟 근거: e2e P0 검증 라이브 5등급 mock URL × 5 결과 — 5/5 rose 단일 표시 확인
+    🌟 fix: applyGradeBadge() 재구성
+       ① gradeSpan/scoreGradeDiv 존재 확인 후 항상 진입 (early return 제거)
+       ② gradeOfFE(score) 기반 grade-X 클래스 부여 → CSS .bs-score-grade.grade-X 규칙 매칭
+       ③ dynamicData.gradeBadge 있을 때만 inline style override + emoji prefix (기존 로직 100% 보존)
+    🌟 Rework 룰 ⑤ Backward Compat: Worker dynamicData 있음 케이스 regression 0
+    🌟 짝 박제: 의사결정/뷰티스코어_e2e_P0_검증_라이브_5등급_결과_2026-05-16_v0.2.md §1.5
+  ───────────────────────────────────────────────────────────────
   v2.0.13 IP2 HMAC #3 사전 patch (5/15 11:30~12:30, 채팅방 3 SUB-B):
     🌟 목적: 5/16 04:00 통합 deploy에서 Worker side HMAC verify 활성될 때 클라이언트도 정합
     🌟 5/17 블랙아웃 진입 (Worker deploy·KV 바인딩 변경 금지) 전 마감
@@ -1586,20 +1596,34 @@ html, body {
      Worker v0.8 gradeBadge: { bg: "#F59E0B", fg: "#FFFFFF", emoji: "🍀" }
      fallback: 기존 CSS grade-* 클래스 기반 (v0.7 호환) */
   function applyGradeBadge() {
-    if (!(DATA.dynamicData && DATA.dynamicData.gradeBadge)) return;
-    var gb = DATA.dynamicData.gradeBadge;
     var gradeSpan = document.getElementById('bs-grade');
     if (!gradeSpan) return;
     var scoreGradeDiv = gradeSpan.parentElement;  /* .bs-score-grade div */
-    if (scoreGradeDiv) {
+    if (!scoreGradeDiv) return;
+
+    /* v2.0.13 IP3 fix (5/16) — FE fallback grade-X class 부여
+       ─────────────────────────────────────────────────────────────
+       이전: dynamicData.gradeBadge 미존재 시 early return → .bs-score-grade rose fallback (5등급 시각 구별 0)
+       신규: gradeOfFE(score) 기반 grade-X 클래스 항상 부여 → CSS .bs-score-grade.grade-X 규칙 매칭
+       Worker dynamicData.gradeBadge 있으면 inline style override (기존 로직 100% 보존) */
+    var grade = (DATA.dynamicData && DATA.dynamicData.grade)
+             || gradeOfFE(parseInt(DATA.score, 10) || 0);
+    ['grade-s','grade-a','grade-b','grade-c','grade-d'].forEach(function(c){
+      scoreGradeDiv.classList.remove(c);
+    });
+    scoreGradeDiv.classList.add('grade-' + String(grade).toLowerCase());
+
+    /* Worker dynamicData.gradeBadge 있을 때만 inline style + emoji override */
+    if (DATA.dynamicData && DATA.dynamicData.gradeBadge) {
+      var gb = DATA.dynamicData.gradeBadge;
       scoreGradeDiv.style.setProperty('background', gb.bg, 'important');
       /* v2.0.13 P1 fix — WCAG AA 자동 교정: Worker gb.fg 그대로 쓰면 C·S·B·D 대비율 실패
          getWcagFg(bg) → bg 휘도 기반 navy or white 자동 선택 (gb.fg 무시) */
       scoreGradeDiv.style.setProperty('color', getWcagFg(gb.bg), 'important');
+      /* emoji prefix — 기존 grade-s 🏆 처리와 통합 */
+      var gradeText = String(DATA.grade || gradeSpan.textContent || '').replace(/^[^\w가-힣A-Za-z]+/, '').trim();
+      gradeSpan.textContent = gb.emoji + ' ' + gradeText;
     }
-    /* emoji prefix — 기존 grade-s 🏆 처리와 통합 */
-    var gradeText = String(DATA.grade || gradeSpan.textContent || '').replace(/^[^\w가-힣A-Za-z]+/, '').trim();
-    gradeSpan.textContent = gb.emoji + ' ' + gradeText;
   }
 
   /* v2.0.13 P3 — 블록 헤더 등급별 분기 (dynamicData.blockHeader · FE fallback gradeOfFE)
