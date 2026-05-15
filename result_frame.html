@@ -1082,7 +1082,7 @@ html, body {
     window.bsFeatureFlags = {};
   }
   if (typeof window.bsFeatureFlags.hmacEnabled !== 'boolean') {
-    window.bsFeatureFlags.hmacEnabled = true;   /* 5/17 3-A 활성 — KIRA-FE */
+    window.bsFeatureFlags.hmacEnabled = false;  /* 5/17 rollback — Worker HMAC verify 미활성 (V14=400≠401) */
   }
 
   /* HMAC-SHA256 헤더 생성 — Web Crypto API SubtleCrypto
