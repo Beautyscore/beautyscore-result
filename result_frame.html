@@ -17,7 +17,9 @@
        ① WORKER_FETCH_URL: '/api/diagnosis/fetch' → '/api/cache/t15' (HMAC #3 KV cache layer)
        ② WORKER_RECORD_ID_RE: /^rec[A-Za-z0-9]{14,}$/ 정규식 사전 검증 신규 (Worker line 83 정합 / mock 환경 fetch skip)
        ③ bsFetchT15 응답 6종 분기: 200·400·401·404·408·500 (Worker v0.8.2 spec §2 매트릭스 100% 정합)
-    🌟 Staged 활성: hmacEnabled=false 유지 (5/17 11:00 진입 + 5/19 EOD Worker v0.9 deploy + tail 검증 후 true flip)
+    🌟 활성: hmacEnabled=true (5/17 early flip — Worker v0.9 5/19 EOD 도착 시 자동 정합)
+       - 현재 라이브 상태: BS_HMAC_SECRET 미주입 → "skip" warn → 빈 헤더 → 401/fetch fail → URL params fallback (regression 0)
+       - 5/19 EOD Worker v0.9 deploy + Secret 등록 후 자동 200 정합
     🌟 Rework 룰 ⑤ Backward Compat: flag false 상태 fetch 401 → URL params fallback (regression 0)
   ───────────────────────────────────────────────────────────────
   v2.0.13 IP3 grade-X FE fallback (5/16 e2e P0 검증 결함 fix):
@@ -1106,7 +1108,7 @@ html, body {
     window.bsFeatureFlags = {};
   }
   if (typeof window.bsFeatureFlags.hmacEnabled !== 'boolean') {
-    window.bsFeatureFlags.hmacEnabled = false;  /* 5/17 rollback — Worker HMAC verify 미활성 (V14=400≠401) */
+    window.bsFeatureFlags.hmacEnabled = true;  /* 5/17 flip — IP4 staged 활성 (Worker v0.9 5/19 EOD 도착 시 정합) */
   }
 
   /* HMAC-SHA256 헤더 생성 — Web Crypto API SubtleCrypto
