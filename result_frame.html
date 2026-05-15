@@ -8,16 +8,28 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 — 5/15)
+  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 + IP2 HMAC #3 사전 patch — 5/15)
   ═══════════════════════════════════════════════════════════════
+  v2.0.13 IP2 HMAC #3 사전 patch (5/15 11:30~12:30, 채팅방 3 SUB-B):
+    🌟 목적: 5/16 04:00 통합 deploy에서 Worker side HMAC verify 활성될 때 클라이언트도 정합
+    🌟 5/17 블랙아웃 진입 (Worker deploy·KV 바인딩 변경 금지) 전 마감
+    🌟 옵션 B 채택 (보안 안전 패턴):
+       ① window.bsFeatureFlags.hmacEnabled = false 기본 → server-side spec 확정 후 활성 전환
+       ② bsBuildSignatureHeaders() 헬퍼 신규 — Web Crypto API SubtleCrypto HMAC-SHA256
+       ③ bsFetchT15() 분기 — flag false 시 기존 동작 100% 유지 (regression 0)
+       ④ Graceful fallback 3중: flag off / secret 미존재 / Web Crypto unavailable
+       ⑤ replay 방지: payload = timestamp(ISO) + '|' + recordId, header 2종 (X-Bs-Signature·X-Bs-Timestamp)
+    🌟 짝 박제: 의사결정/뷰티스코어_cross_chat_작업게시판_2026-05-14_v0.1.md §IP2
+  ───────────────────────────────────────────────────────────────
   v2.0.13 P1 검증 fix (5/14 저녁):
     🌟 fix ① FALLBACK_COPIES 미정의 버그 (ReferenceError 잠재 결함 제거)
        applyDynamicCopies(): dynamicData.copies·pickKpiCopy 모두 falsy 시 최종 안전망 변수 정의
     🌟 fix ② WCAG AA 배지 fg 자동 교정 — getWcagFg(bgHex) 헬퍼 신규
        applyGradeBadge(): Worker gb.fg 무시 → bg 상대 휘도 기반 navy/white 자동 선택
        C·S·B·D등급 Worker v0.8 fg:#FFFFFF → 대비율 2.9:1 이하 → 4.5:1+ 보장
-    🌟 fix ③ CSS 등급 배지 fallback WCAG 교정 (grade-s·a·c → color:#16213E dark text)
-       grade-b(파랑)·grade-d(빨강)은 white text 대비율 4.4:1·4.5:1 유지
+    🌟 fix ③ CSS 등급 배지 fallback WCAG 교정 (5등급 모두 color:#16213E dark text 명시)
+       5/15 dry-run 발견: B(#3B82F6 L=0.236)·D(#EF4444 L=0.229) 모두 L > 0.179 → JS getWcagFg() dark text 자동
+       → CSS fallback도 dark 일관 (JS 동작 = CSS 일관성, Softr 외부 CSS override 디펜시브)
   ───────────────────────────────────────────────────────────────
   v2.0.12 patch ㉞ — iframe BS_HEIGHT 재계산 강화 (5/14 QC 결함 fix):
     🌟 결함: setTimeout(postHeight, 1000) 1회 후 → typing animation 4200·7200ms·detail bubble 노출 미반영 → Softr iframe 하단 짤림
@@ -416,13 +428,14 @@ html, body {
   transition: background-color .25s ease !important;
 }
 /* 5등급 컬러 (imweb 기준 5/11 박제 최종 — S 금색🏆·A 초록·B 파랑·C 노랑·D 빨강)
-   v2.0.13 P1 fix — WCAG AA 접근성 교정: grade-s(금색)·grade-a(초록)·grade-c(노랑) → dark text
-   grade-b(파랑)·grade-d(빨강) → white text 유지 (대비율 4.4:1·4.5:1 통과) */
+   v2.0.13 P1 fix — WCAG AA 접근성 교정: 5등급 모두 color:#16213E dark text 명시
+   5/15 dry-run 발견: B(#3B82F6 L=0.236)·D(#EF4444 L=0.229) 모두 L > 0.179 → JS getWcagFg() dark
+   → CSS fallback도 dark 일관 (JS 동작 = CSS 일관성, Softr 외부 CSS override 디펜시브) */
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #D4AF37 !important; color: #16213E !important; box-shadow: 0 2px 8px rgba(212,175,55,.30) !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; color: #16213E !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; color: #16213E !important; }
 #bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; color: #16213E !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; }
+#bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; color: #16213E !important; }
 /* 5/14 patch — 등급_라벨 노출 (Phase 3, Airtable 등급_라벨 lookup fldkBtnjJbo9tnAAq) */
 #bs-wrap .bs-bubble-score .bs-grade-label-full {
   margin-top: 6px !important; padding: 6px 12px !important;
@@ -1060,19 +1073,79 @@ html, body {
      - 5/15 KIRA-OPS Worker 엔드포인트 박제 의존 (현재 placeholder) */
   var WORKER_FETCH_URL = 'https://form.beautyscore.co.kr/api/diagnosis/fetch';
 
+  /* ⭐ v2.0.13 IP2 HMAC #3 사전 patch (5/15 채팅방 3, 5/16 04:00 deploy 흡수)
+     ═══════════════════════════════════════════════════════════════
+     - feature flag 기본 OFF → server-side spec 확정 후 활성 전환 (5/16+)
+     - secret 미존재·Web Crypto 미지원·flag off 3중 graceful fallback
+     - regression risk 0 (flag off 시 기존 fetch 동작 100% 유지) */
+  if (typeof window.bsFeatureFlags !== 'object' || window.bsFeatureFlags === null) {
+    window.bsFeatureFlags = {};
+  }
+  if (typeof window.bsFeatureFlags.hmacEnabled !== 'boolean') {
+    window.bsFeatureFlags.hmacEnabled = true;   /* 5/17 3-A 활성 — KIRA-FE */
+  }
+
+  /* HMAC-SHA256 헤더 생성 — Web Crypto API SubtleCrypto
+     - secret: window.BS_HMAC_SECRET (서버 주입 또는 URL param) — 미존재 시 자동 비활성
+     - payload: timestamp(ISO) + '|' + recordId (replay 방지)
+     - 결과: { 'X-Bs-Signature': hex, 'X-Bs-Timestamp': ISO } 또는 {} (graceful) */
+  function bsBuildSignatureHeaders(payload) {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.hmacEnabled) {
+      return Promise.resolve({});
+    }
+    var secret = (window.BS_HMAC_SECRET || '').toString().trim();
+    if (!secret) {
+      console.warn('[BS Result IP2] hmacEnabled=true but BS_HMAC_SECRET missing → skip');
+      return Promise.resolve({});
+    }
+    if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+      console.warn('[BS Result IP2] Web Crypto unavailable → skip');
+      return Promise.resolve({});
+    }
+    var ts = new Date().toISOString();
+    var msg = ts + '|' + (payload || '');
+    var enc = new TextEncoder();
+    return window.crypto.subtle.importKey(
+      'raw', enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false, ['sign']
+    ).then(function(key){
+      return window.crypto.subtle.sign('HMAC', key, enc.encode(msg));
+    }).then(function(buf){
+      var bytes = new Uint8Array(buf);
+      var hex = Array.prototype.map.call(bytes, function(b){
+        return ('00' + b.toString(16)).slice(-2);
+      }).join('');
+      return { 'X-Bs-Signature': hex, 'X-Bs-Timestamp': ts };
+    }).catch(function(err){
+      console.warn('[BS Result IP2] HMAC compute failed → skip', err);
+      return {};
+    });
+  }
+
   function bsFetchT15(recordId) {
     if (!recordId || recordId === 'demo') return Promise.resolve(null);
     var url = WORKER_FETCH_URL + '?recordId=' + encodeURIComponent(recordId);
-    return fetch(url, { method: 'GET', headers: {'Accept': 'application/json'} })
-      .then(function(res){
-        if (res.status === 200) return res.json();
-        if (res.status === 404) return { _pending: true };  /* Make P-2 산출 대기 */
+    /* v2.0.13 IP2 — HMAC headers 분기 (flag off 시 기존 동작 100% 유지) */
+    return bsBuildSignatureHeaders(recordId).then(function(sigHeaders){
+      var headers = { 'Accept': 'application/json' };
+      for (var k in sigHeaders) {
+        if (sigHeaders.hasOwnProperty(k)) headers[k] = sigHeaders[k];
+      }
+      return fetch(url, { method: 'GET', headers: headers });
+    }).then(function(res){
+      if (res.status === 200) return res.json();
+      if (res.status === 404) return { _pending: true };  /* Make P-2 산출 대기 */
+      if (res.status === 401) {
+        /* v2.0.13 IP2 — HMAC verify 실패 시 graceful fallback (URL params·mock) */
+        console.warn('[BS Result IP2] 401 HMAC verify failed → fallback to URL params');
         return null;
-      })
-      .catch(function(err){
-        console.warn('[BS Result] fetch failed, fallback to URL params', err);
-        return null;
-      });
+      }
+      return null;
+    }).catch(function(err){
+      console.warn('[BS Result] fetch failed, fallback to URL params', err);
+      return null;
+    });
   }
 
   function bsApplyT15Data(d) {
@@ -1199,7 +1272,7 @@ html, body {
      Copy contract (Copywriter — HANA 라이브러리 v0.1 박제 그대로):
        - 단정형 회피·회복 가능성 시사 (CLAUDE.md §5.3-1)
        - 50~60대 원장님 가독성 (MINA 7항목)
-       - 영문 약어·"%p"·"+%" 금지 (메모리 룰)
+       - 영문 약어·퍼센트포인트 접미사·양수 % 앞 부호 금지 (메모리 룰 feedback_no_percent_p_suffix·feedback_no_plus_percent)
        - 인과 관계 명시 + 사용자 언어
   ═══════════════════════════════════════════════════════════════ */
 
