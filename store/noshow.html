@@ -1,0 +1,628 @@
+<!--
+  result_frame_store_noshow_v1_0_0.html
+  ═══════════════════════════════════════════════════════════════
+  단품 1 노쇼 행동 변화 진단 결과 페이지 (Hub 5/17 dispatch 정합)
+  ═══════════════════════════════════════════════════════════════
+  박제일: 2026-05-17 KST (채팅방 3 SUB-B, 3-EXEC8a fork from p01 v1.0.0)
+  base: result_frame_store_p01_v1_0_0.html → noshow swap (placeholder mock 시각화)
+  ⚠️ TODO (5/19 EOD): HANA 카피 + 채팅방 6 6-7 시각화 spec 수신 후 swap
+  ─────────────────────────────────────────────────────────────
+  base header (보존, p01 fork와 동일 구조):
+  base: result_frame_v2_1_0.html (Feature Flag·HMAC·BS_HEIGHT 패턴 재활용)
+  사양: 의사결정/뷰티스코어_3-NEW2_§8_공통컴포넌트_사전사양_채팅방3_2026-05-16_v0.1.md §1·§2 + §5.2 P01Result type
+  박사급 시안: 의사결정/뷰티스코어_3-NEW2_단품결제후시각화_통합시안_박사급_채팅방3_2026-05-16_v0.1.md §3 3-Act Narrative + §8.1·§8.2
+
+  ─────────────────────────────────────────────────────────────
+  3-Act Narrative 적용:
+    Act 1 (0~3s)  — 결제 완료 Hero + receipt (Stripe inspired + Tobias gradient)
+    Act 2 (3~30s) — 핵심 인사이트 카드 (객단가 비교 바 + 권장 가격대 + 액션 플랜 3종)
+    Act 3 (30~60s)— D+30 재진단 + PDF/공유 + 업셀 진행률 + 관련 단품 2종
+
+  Feature Flag 5종 v2.1.0 base 재활용 (5/24 06:00 KST 일괄 활성):
+    hmacEnabled (default true, IP4 staged) / aiCoach·ogShare·a11y·darkMode·microInteractions
+
+  Worker endpoint:
+    POST /api/store/access?orderId=... → { sig, exp, productId, storeId }
+    GET  /api/store/result?sig=...&exp=... → P01Result (sig 60s TTL)
+    GET  /api/store/count?storeId=... → { count, total, savingAmount }
+
+  Deploy:
+    GitHub Pages: beautyscore-result/store/p01.html (5/26 18:00 KST push)
+    Softr embed: app.beautyscore.co.kr/store/1 → iframe (NOVA Custom Code paste 5/27~5/29)
+
+  Status: minimal viable draft — B 단계 5/22~5/26 sprint 시 §8.6·§8.7·§9 (60대 페르소나) 보강 + QC 4단계
+  ═══════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<meta name="format-detection" content="telephone=no">
+<title>노쇼 행동 변화 진단 결과 — 뷰티스코어</title>
+<meta name="description" content="에스테틱 매장 단품 1 노쇼 행동 변화 진단 결과 — 30일 노쇼율 분석과 회복 액션">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ═══ 뷰티스코어 기본 토큰 (CLAUDE.md §2 + result_frame v2.1.0 정합) ═══ */
+#bs-wrap {
+  --bs-navy:#16213E; --bs-navy2:#243152; --bs-rose:#C9856E; --bs-rose-dk:#B8745E;
+  --bs-nude:#E8B4A8; --bs-nude-soft:#F4DCD2; --bs-cream:#FAF8F4; --bs-cream2:#F1EFE8;
+  --bs-white:#FFFFFF; --bs-text:#16213E; --bs-muted:#6B7488; --bs-bd:rgba(22,33,62,.09);
+  --bs-ok:#2E7D5E; --bs-warn:#B36015;
+  --bs-sh-sm:0 2px 12px rgba(22,33,62,.07);
+  --bs-sh-md:0 4px 20px rgba(22,33,62,.10);
+  /* 박사급 §5.1·§7.1 정합 (B-1 Patch #2·#3·#4) */
+  --bs-ease-standard:cubic-bezier(0.4,0,0.2,1); --bs-ease-emphasized:cubic-bezier(0.2,0,0,1);
+  --bs-ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  --bs-dur-xs:120ms; --bs-dur-sm:240ms; --bs-dur-md:400ms; --bs-dur-lg:600ms; --bs-dur-xl:1000ms;
+  --bs-fs-display:32px; --bs-fs-title:24px; --bs-fs-h1:20px; --bs-fs-h2:18px;
+  --bs-fs-body:16px; --bs-fs-sm:14px; --bs-fs-xs:12px;
+  font-family:"Pretendard Variable", Pretendard, sans-serif !important;
+  background:var(--bs-cream) !important; color:var(--bs-text) !important;
+  word-break:keep-all !important; overflow-wrap:break-word !important;
+  max-width:480px !important; margin:0 auto !important; min-height:100vh !important;
+}
+#bs-wrap * { box-sizing:border-box !important; }
+
+/* ═══ §8.1 Act 1 — 결제 완료 Hero (Stripe + Tobias gradient) ═══ */
+#bs-wrap .bs-store-hero {
+  text-align:center !important; padding:28px 20px 20px !important;
+  background:linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important;
+  color:#fff !important;
+  opacity:0; animation:bsFadeIn var(--bs-dur-lg) var(--bs-ease-emphasized) forwards;
+}
+#bs-wrap .bs-store-icon-wrap { font-size:40px !important; margin-bottom:8px !important; line-height:1 !important; }
+#bs-wrap .bs-store-subtitle { font-size:13px !important; opacity:.75 !important; margin-bottom:4px !important; }
+#bs-wrap .bs-store-title {
+  font-size:var(--bs-fs-title) !important; font-weight:700 !important;
+  letter-spacing:-.3px !important; margin:0 0 14px !important;
+}
+#bs-wrap .bs-store-receipt {
+  background:rgba(255,255,255,.08) !important; border-radius:12px !important;
+  padding:12px 14px !important; margin-top:8px !important;
+  font-size:13px !important; text-align:left !important;
+}
+#bs-wrap .bs-receipt-row {
+  display:flex !important; justify-content:space-between !important;
+  padding:4px 0 !important; border-bottom:1px solid rgba(255,255,255,.08) !important;
+}
+#bs-wrap .bs-receipt-row:last-child { border-bottom:none !important; }
+#bs-wrap .bs-receipt-label { opacity:.7 !important; }
+#bs-wrap .bs-receipt-value { font-weight:600 !important; }
+#bs-wrap .bs-receipt-value.bs-mono { font-family:ui-monospace, monospace !important; }
+
+@keyframes bsFadeIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
+
+/* ═══ §8.2 Act 2 — 핵심 인사이트 카드 (p01 가격 적정 진단) ═══ */
+#bs-wrap .bs-insight-card {
+  background:#fff !important; border-radius:18px !important;
+  box-shadow:var(--bs-sh-md) !important; padding:20px !important;
+  margin:14px 16px !important;
+  opacity:0; animation:bsFadeIn var(--bs-dur-md) var(--bs-ease-standard) forwards;
+  animation-delay:600ms;
+}
+#bs-wrap .bs-insight-headline {
+  font-size:var(--bs-fs-h2) !important; font-weight:700 !important;
+  color:var(--bs-navy) !important; line-height:1.5 !important; margin-bottom:14px !important;
+}
+#bs-wrap .bs-price-compare { margin-bottom:18px !important; }
+#bs-wrap .bs-pc-label {
+  font-size:var(--bs-fs-sm) !important; color:var(--bs-muted) !important;
+  margin-bottom:8px !important;
+}
+#bs-wrap .bs-pc-bar-wrap {
+  position:relative !important; height:14px !important;
+  background:var(--bs-cream2) !important; border-radius:7px !important;
+  overflow:visible !important;
+}
+#bs-wrap .bs-pc-bar-mine {
+  position:absolute !important; left:0 !important; top:0 !important;
+  height:100% !important; background:var(--bs-rose) !important;
+  border-radius:7px !important;
+  transition:width var(--bs-dur-xl) var(--bs-ease-emphasized) !important;
+  /* 박사급 §3.2 Act 2 — 8.00s width animate 0→target */
+}
+#bs-wrap .bs-pc-marker-avg {
+  position:absolute !important; top:-4px !important;
+  width:0 !important; height:0 !important;
+  border-left:6px solid transparent !important; border-right:6px solid transparent !important;
+  border-bottom:8px solid var(--bs-navy) !important;
+  transform:translateX(-50%) !important;
+  /* 평균 마커 ▲ (Tufte data-ink) */
+}
+#bs-wrap .bs-pc-legend {
+  display:flex !important; gap:14px !important; margin-top:10px !important;
+  font-size:11px !important; color:var(--bs-muted) !important;
+}
+#bs-wrap .bs-leg-mine::before { content:'● '; color:var(--bs-rose) !important; }
+#bs-wrap .bs-leg-avg::before { content:'▲ '; color:var(--bs-navy) !important; }
+
+#bs-wrap .bs-price-zone {
+  background:var(--bs-nude-soft) !important; border-radius:12px !important;
+  padding:14px 16px !important; margin-bottom:14px !important;
+}
+#bs-wrap .bs-pz-label {
+  font-size:var(--bs-fs-sm) !important; color:var(--bs-rose-dk) !important;
+  font-weight:600 !important; margin-bottom:4px !important;
+}
+#bs-wrap .bs-pz-range {
+  font-size:var(--bs-fs-h1) !important; font-weight:700 !important;
+  color:var(--bs-navy) !important; letter-spacing:-.3px !important;
+}
+#bs-wrap .bs-pz-reason {
+  font-size:12px !important; color:var(--bs-muted) !important;
+  margin-top:4px !important;
+}
+
+#bs-wrap .bs-insight-reason {
+  font-size:var(--bs-fs-sm) !important; color:var(--bs-muted) !important;
+  line-height:1.6 !important; margin:12px 0 14px !important;
+}
+#bs-wrap .bs-action-list {
+  display:flex !important; flex-direction:column !important; gap:10px !important;
+  margin-top:14px !important;
+}
+#bs-wrap .bs-action-item {
+  display:flex !important; align-items:flex-start !important; gap:10px !important;
+  padding:12px 14px !important; background:var(--bs-cream2) !important;
+  border-radius:12px !important;
+  font-size:var(--bs-fs-body) !important; line-height:1.55 !important;
+  opacity:0; animation:bsFadeIn var(--bs-dur-md) var(--bs-ease-standard) forwards;
+}
+#bs-wrap .bs-action-item:nth-child(1) { animation-delay:1200ms; }
+#bs-wrap .bs-action-item:nth-child(2) { animation-delay:1400ms; }
+#bs-wrap .bs-action-item:nth-child(3) { animation-delay:1600ms; }
+#bs-wrap .bs-action-num {
+  flex-shrink:0 !important; width:22px !important; height:22px !important;
+  border-radius:50% !important; background:var(--bs-rose) !important; color:#fff !important;
+  font-size:12px !important; font-weight:700 !important;
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+}
+
+/* ═══ §8.3 Act 3 — D+30 재진단 배지 ═══ */
+#bs-wrap .bs-rediag-badge {
+  display:flex !important; align-items:center !important; gap:12px !important;
+  background:var(--bs-cream) !important; border:1px solid var(--bs-bd) !important;
+  border-radius:14px !important; padding:14px 16px !important;
+  margin:0 16px 14px !important;
+  opacity:0; animation:bsFadeIn var(--bs-dur-md) var(--bs-ease-standard) forwards;
+  animation-delay:2000ms;
+}
+#bs-wrap .bs-rediag-icon { font-size:24px !important; flex-shrink:0 !important; }
+#bs-wrap .bs-rediag-content { flex:1 !important; }
+#bs-wrap .bs-rediag-label {
+  font-size:13px !important; font-weight:600 !important; color:var(--bs-navy) !important;
+}
+#bs-wrap .bs-rediag-date {
+  font-size:12px !important; color:var(--bs-muted) !important; margin-top:2px !important;
+}
+#bs-wrap .bs-rediag-config {
+  background:transparent !important; border:none !important;
+  font-size:18px !important; cursor:pointer !important;
+  min-height:44px !important; min-width:44px !important;
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+}
+
+/* ═══ §8.4 Act 3 — PDF + 공유 버튼 ═══ */
+#bs-wrap .bs-action-row {
+  display:flex !important; gap:10px !important;
+  padding:0 16px 14px !important; justify-content:center !important;
+}
+#bs-wrap .bs-btn-pdf, #bs-wrap .bs-btn-share {
+  flex:1 !important; padding:13px 0 !important;
+  min-height:44px !important;
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  border-radius:14px !important;
+  font-size:14px !important; font-weight:600 !important;
+  cursor:pointer !important; border:none !important; white-space:nowrap !important;
+}
+#bs-wrap .bs-btn-pdf { background:var(--bs-navy) !important; color:#fff !important; }
+#bs-wrap .bs-btn-share { background:var(--bs-nude-soft) !important; color:var(--bs-navy) !important; }
+
+/* ═══ §8.5 Act 3 — 업셀 진행률 ═══ */
+#bs-wrap .bs-upsell-progress {
+  background:linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important;
+  border-radius:18px !important; padding:18px 20px !important;
+  margin:0 16px 14px !important; color:#fff !important;
+}
+#bs-wrap .bs-up-header { display:flex !important; align-items:center !important; gap:8px !important; margin-bottom:10px !important; }
+#bs-wrap .bs-up-label { font-size:13px !important; font-weight:600 !important; }
+#bs-wrap .bs-up-bar-outer {
+  height:6px !important; background:rgba(255,255,255,.2) !important;
+  border-radius:3px !important; overflow:hidden !important;
+}
+#bs-wrap .bs-up-bar-inner {
+  height:100% !important; background:var(--bs-rose) !important;
+  border-radius:3px !important; width:0;
+  transition:width var(--bs-dur-xl) var(--bs-ease-emphasized) !important;
+}
+#bs-wrap .bs-up-meta {
+  display:flex !important; justify-content:space-between !important;
+  margin-top:6px !important; font-size:11px !important; opacity:.75 !important;
+}
+
+/* ═══ §8.6 Act 3 — 관련 단품 2종 ═══ */
+#bs-wrap .bs-related-grid {
+  display:grid !important; grid-template-columns:1fr 1fr !important;
+  gap:10px !important; padding:0 16px 20px !important;
+}
+#bs-wrap .bs-rel-card {
+  background:#fff !important; border-radius:14px !important;
+  padding:16px 12px !important; min-height:44px !important;
+  text-align:center !important; cursor:pointer !important;
+  box-shadow:var(--bs-sh-sm) !important; text-decoration:none !important; color:var(--bs-text) !important;
+  display:flex !important; flex-direction:column !important;
+  align-items:center !important; justify-content:center !important;
+  transition:transform var(--bs-dur-sm) var(--bs-ease-standard) !important;
+}
+#bs-wrap .bs-rel-card:hover { transform:translateY(-2px) !important; }
+#bs-wrap .bs-rel-icon { font-size:24px !important; margin-bottom:6px !important; }
+#bs-wrap .bs-rel-name { font-size:12px !important; font-weight:600 !important; color:var(--bs-navy) !important; margin-bottom:4px !important; }
+#bs-wrap .bs-rel-price { font-size:12px !important; color:var(--bs-rose) !important; font-weight:700 !important; }
+
+/* ═══ Reduced motion fallback (박사급 §5.3) ═══ */
+@media (prefers-reduced-motion: reduce) {
+  #bs-wrap *, #bs-wrap *::before, #bs-wrap *::after {
+    animation-duration:0.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important; scroll-behavior:auto !important;
+  }
+  #bs-wrap .bs-store-hero, #bs-wrap .bs-insight-card,
+  #bs-wrap .bs-rediag-badge, #bs-wrap .bs-action-item {
+    opacity:1 !important; animation:none !important; transform:none !important;
+  }
+}
+
+/* ═══ 만료 안내 (sig TTL 60s 초과 시) ═══ */
+#bs-wrap .bs-expired-card {
+  background:#fff !important; border-radius:18px !important;
+  padding:32px 24px !important; margin:32px 16px !important;
+  text-align:center !important; box-shadow:var(--bs-sh-md) !important;
+}
+#bs-wrap .bs-expired-icon { font-size:48px !important; margin-bottom:12px !important; }
+#bs-wrap .bs-expired-title { font-size:18px !important; font-weight:700 !important; color:var(--bs-navy) !important; margin-bottom:8px !important; }
+#bs-wrap .bs-expired-msg { font-size:14px !important; color:var(--bs-muted) !important; line-height:1.6 !important; margin-bottom:16px !important; }
+#bs-wrap .bs-expired-cta {
+  display:inline-flex !important; align-items:center !important; justify-content:center !important;
+  min-height:44px !important; padding:12px 24px !important;
+  background:var(--bs-navy) !important; color:#fff !important;
+  border-radius:12px !important; text-decoration:none !important;
+  font-size:14px !important; font-weight:600 !important;
+}
+</style>
+</head>
+<body>
+
+<div id="bs-wrap">
+
+  <!-- ═══ Act 1 (0~3s) — 결제 완료 Hero ═══ -->
+  <header class="bs-store-hero" role="banner" aria-label="노쇼 행동 변화 진단 결제 완료">
+    <div class="bs-store-icon-wrap" aria-hidden="true">⏰</div>
+    <div class="bs-store-subtitle">진단이 완료되었습니다</div>
+    <h1 class="bs-store-title">노쇼 행동 변화</h1>
+    <div class="bs-store-receipt" aria-label="결제 영수증">
+      <div class="bs-receipt-row">
+        <span class="bs-receipt-label">주문번호</span>
+        <span class="bs-receipt-value bs-mono" id="bs-rec-order">—</span>
+      </div>
+      <div class="bs-receipt-row">
+        <span class="bs-receipt-label">결제 시각</span>
+        <span class="bs-receipt-value" id="bs-rec-time">—</span>
+      </div>
+      <div class="bs-receipt-row">
+        <span class="bs-receipt-label">결제 금액</span>
+        <span class="bs-receipt-value">14,900원</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ Act 2 (3~30s) — 핵심 인사이트 카드 ═══ -->
+  <main role="main" aria-label="노쇼 행동 변화 진단 결과">
+    <section class="bs-insight-card" aria-labelledby="bs-insight-headline">
+      <div class="bs-insight-headline" id="bs-insight-headline">
+        지난 30일 노쇼율이<br>매장 운영에 어떤 영향을 미치는지 분석했어요.
+      </div>
+
+      <!-- 노쇼율 비교 바 (placeholder mock — 채팅방 6 6-7 spec 수신 후 30일 추세 sparkline swap) -->
+      <div class="bs-price-compare">
+        <div class="bs-pc-label">지난 30일 노쇼율</div>
+        <div class="bs-pc-bar-wrap" role="img" aria-label="노쇼율 비교: 내 매장 vs 유사 매장 평균">
+          <div class="bs-pc-bar-mine" id="bs-pc-mine" data-target="65"></div>
+          <div class="bs-pc-marker-avg" id="bs-pc-avg" style="left:50%"></div>
+        </div>
+        <div class="bs-pc-legend">
+          <span class="bs-leg-mine">내 매장</span>
+          <span class="bs-leg-avg">유사 매장 평균</span>
+        </div>
+      </div>
+
+      <!-- 월간 노쇼 손실액 (권장 가격대 영역 swap) -->
+      <div class="bs-price-zone">
+        <div class="bs-pz-label">월간 노쇼 손실액</div>
+        <div class="bs-pz-range" id="bs-pz-range">—</div>
+        <div class="bs-pz-reason">예약 취소율 · 정시 출석률 · 고객 충성도 3축 기반</div>
+      </div>
+
+      <div class="bs-insight-reason">
+        유사 매장 평균보다 노쇼율이 높습니다.<br>
+        노쇼 회복으로 매출 보전 여력이 충분히 확보돼요.
+      </div>
+
+      <!-- 액션 플랜 3종 (HANA 카피 수신 후 swap, 현재 placeholder mock) -->
+      <div class="bs-action-list" aria-label="액션 플랜 3종">
+        <div class="bs-action-item">
+          <span class="bs-action-num" aria-hidden="true">1</span>
+          <span id="bs-noshow-action-1">예약 D-1 자동 알림톡 발송으로 노쇼 사전 차단</span>
+        </div>
+        <div class="bs-action-item">
+          <span class="bs-action-num" aria-hidden="true">2</span>
+          <span id="bs-noshow-action-2">노쇼 발생 후 친화 톤 안내문 발송 (재예약 유도)</span>
+        </div>
+        <div class="bs-action-item">
+          <span class="bs-action-num" aria-hidden="true">3</span>
+          <span id="bs-noshow-action-3">노쇼 잦은 시간대 인원 분산 또는 예약금 도입</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Act 3 (30~60s) — D+30 재진단 + Action + Upsell + Related ═══ -->
+    <div class="bs-rediag-badge" role="status">
+      <span class="bs-rediag-icon" aria-hidden="true">📅</span>
+      <div class="bs-rediag-content">
+        <div class="bs-rediag-label">D+30 무료 재진단 예약됨</div>
+        <div class="bs-rediag-date" id="bs-rediag-date">—</div>
+      </div>
+      <button class="bs-rediag-config" aria-label="알림 설정 변경" onclick="bsConfigRediag()">⚙</button>
+    </div>
+
+    <div class="bs-action-row">
+      <button class="bs-btn-pdf" onclick="bsDownloadPdf()" aria-label="진단 결과 PDF 다운로드">⬇ PDF 다운로드</button>
+      <button class="bs-btn-share" onclick="bsShareInsta()" aria-label="진단 결과 공유">📤 공유</button>
+    </div>
+
+    <section class="bs-upsell-progress" aria-label="단품 누적 진행률">
+      <div class="bs-up-header">
+        <span aria-hidden="true">📦</span>
+        <span class="bs-up-label">단품 3개 모으면 BASIC 50% 할인</span>
+      </div>
+      <div class="bs-up-bar-outer">
+        <div class="bs-up-bar-inner" id="bs-up-bar"
+             role="progressbar" aria-valuenow="1" aria-valuemax="3"
+             aria-label="단품 3개 중 1개 보유"></div>
+      </div>
+      <div class="bs-up-meta">
+        <span id="bs-up-count">현재 1 / 3개</span>
+        <span id="bs-up-saving">절약 22,485원</span>
+      </div>
+    </section>
+
+    <section class="bs-related-grid" aria-label="관련 단품 추천">
+      <a class="bs-rel-card" href="/store/priceelasticity">
+        <span class="bs-rel-icon" aria-hidden="true">📊</span>
+        <span class="bs-rel-name">가격 탄력성 진단</span>
+        <span class="bs-rel-price">14,900원</span>
+      </a>
+      <a class="bs-rel-card" href="/store/4">
+        <span class="bs-rel-icon" aria-hidden="true">🕐</span>
+        <span class="bs-rel-name">황금 시간대 진단</span>
+        <span class="bs-rel-price">14,900원</span>
+      </a>
+    </section>
+  </main>
+
+  <!-- 만료 안내 (sig TTL 60s 초과 시 main 숨김 + 본 영역 노출) -->
+  <div class="bs-expired-card" id="bs-expired-card" style="display:none" role="alert">
+    <div class="bs-expired-icon" aria-hidden="true">⏰</div>
+    <div class="bs-expired-title">결과 링크가 만료되었어요</div>
+    <div class="bs-expired-msg">보안을 위해 단품 결과 링크는 1분 후 만료됩니다.<br>대시보드에서 다시 확인하세요.</div>
+    <a class="bs-expired-cta" href="/dashboard">대시보드로 이동 →</a>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ═══ Feature Flag — v2.1.0 패턴 재활용 ═══ */
+  window.bsFeatureFlags = window.bsFeatureFlags || {};
+  if (typeof window.bsFeatureFlags.hmacEnabled !== 'boolean') {
+    window.bsFeatureFlags.hmacEnabled = true;  /* IP4 staged */
+  }
+  /* Phase 2 5종 — 5/24 06:00 KST 활성 시점 본 페이지에서도 적용 가능 (a11y·darkMode 등) */
+  ['ogShare', 'darkMode', 'microInteractions', 'a11y', 'aiCoach'].forEach(function(k) {
+    if (typeof window.bsFeatureFlags[k] !== 'boolean') window.bsFeatureFlags[k] = false;
+  });
+
+  /* 3-A3 (5/17 KST, Hub Risk 2 옵션 D) — Dark Launch Feature Flag STORE_1_LIVE
+     - 단품 1 (노쇼 행동 변화) 라이브 5/26 activate
+     - default false → 5/26 server flip 시 사용자 노출
+     - flag false 시 페이지 진입은 가능하나 "5/26 라이브 예정" placeholder 노출
+     - Audit Trail: Hub dispatch 5/17 EOD + Risk 2 옵션 D 정합 */
+  if (typeof window.bsFeatureFlags.STORE_1_LIVE !== 'boolean') {
+    window.bsFeatureFlags.STORE_1_LIVE = false;
+  }
+  function bsStore1Live() {
+    return !!(window.bsFeatureFlags && window.bsFeatureFlags.STORE_1_LIVE);
+  }
+
+  /* ═══ URL params 파싱 (Signed URL TTL 검증) ═══ */
+  var params = new URLSearchParams(location.search);
+  var sig = params.get('sig');
+  var exp = parseInt(params.get('exp'), 10);
+  var orderId = params.get('orderId') || '';
+
+  /* ═══ TTL 만료 체크 ═══ */
+  function isExpired() {
+    if (!sig || !exp) return true;
+    return (Date.now() / 1000) > exp;
+  }
+
+  function showExpired() {
+    var main = document.querySelector('main');
+    var hero = document.querySelector('.bs-store-hero');
+    if (main) main.style.display = 'none';
+    if (hero) hero.style.display = 'none';
+    var expCard = document.getElementById('bs-expired-card');
+    if (expCard) expCard.style.display = 'block';
+    postHeight();
+  }
+
+  /* ═══ Worker fetch (sig·exp 기반 P01Result) ═══ */
+  function bsLoadStoreResult() {
+    if (isExpired()) { showExpired(); return; }
+
+    fetch('/api/store/result?sig=' + encodeURIComponent(sig) + '&exp=' + exp, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Bs-Product-Id': 'p01'
+      }
+    }).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(data) {
+      bsRenderP01(data);
+    }).catch(function(err) {
+      console.warn('[BS Store P01] fetch failed:', err);
+      bsRenderP01(bsMockP01());  /* graceful fallback */
+    });
+  }
+
+  /* ═══ Mock fallback (검증·preview용) ═══ */
+  function bsMockP01() {
+    return {
+      productId: 'p01',
+      storeId: 'recDemo',
+      orderId: 'ord_20260516_demo',
+      purchasedAt: new Date().toISOString(),
+      rediagD30: new Date(Date.now() + 30 * 86400000).toISOString(),
+      myPrice: 85000,
+      avgPrice: 110000,
+      minZone: 100000,
+      maxZone: 130000,
+      actions: [
+        '주력 시술 가격을 110,000원으로 인상 권장',
+        '기존 회원에게는 가격 변경 전 1개월 안내',
+        '가격 인상과 동시에 클렌징 케어 1회 무료 추가'
+      ],
+      upsellCount: 1
+    };
+  }
+
+  /* ═══ Renderer — p01 시각화 (객단가 비교 바 + 권장 가격대 + 액션 플랜) ═══ */
+  function bsRenderP01(d) {
+    /* Receipt */
+    setText('bs-rec-order', d.orderId || '—');
+    setText('bs-rec-time', formatDateTime(d.purchasedAt));
+
+    /* 객단가 비교 바 (max = avgPrice × 1.5 기준 normalize) */
+    var maxScale = Math.max(d.maxZone || 0, d.avgPrice || 0) * 1.5;
+    var minePct = Math.min(100, (d.myPrice / maxScale) * 100);
+    var avgPct = Math.min(100, (d.avgPrice / maxScale) * 100);
+
+    /* Bostock narrative reveal — Act 2 5.00s 시점 width animate */
+    setTimeout(function() {
+      var mine = document.getElementById('bs-pc-mine');
+      var avg = document.getElementById('bs-pc-avg');
+      if (mine) mine.style.width = minePct + '%';
+      if (avg) avg.style.left = avgPct + '%';
+    }, 800);
+
+    /* 권장 가격대 */
+    setText('bs-pz-range',
+      (d.minZone || 0).toLocaleString() + '원 ~ ' + (d.maxZone || 0).toLocaleString() + '원');
+
+    /* 액션 플랜 3종 */
+    if (Array.isArray(d.actions)) {
+      d.actions.slice(0, 3).forEach(function(a, i) {
+        setText('bs-p01-action-' + (i + 1), a);
+      });
+    }
+
+    /* D+30 재진단 날짜 */
+    setText('bs-rediag-date', formatDate(d.rediagD30) + ' 알림 예정');
+
+    /* 업셀 진행률 */
+    var upBar = document.getElementById('bs-up-bar');
+    var upCount = (d.upsellCount || 1);
+    setTimeout(function() {
+      if (upBar) {
+        upBar.style.width = (upCount / 3 * 100) + '%';
+        upBar.setAttribute('aria-valuenow', String(upCount));
+      }
+    }, 1200);
+    setText('bs-up-count', '현재 ' + upCount + ' / 3개');
+
+    /* iframe BS_HEIGHT 동기 */
+    setTimeout(postHeight, 100);
+    setTimeout(postHeight, 1500);
+    setTimeout(postHeight, 3500);
+  }
+
+  /* ═══ Helpers ═══ */
+  function setText(id, txt) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  }
+  function formatDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+  }
+  function formatDateTime(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  /* ═══ Action handlers (placeholder, B 단계 5/22~5/26 sprint 보강) ═══ */
+  window.bsConfigRediag = function() {
+    alert('알림 설정 화면은 준비 중입니다.');  /* TODO: 모달 또는 settings 페이지로 이동 */
+  };
+  window.bsDownloadPdf = function() {
+    alert('PDF 다운로드는 준비 중입니다.');  /* TODO: Worker /api/store/pdf?sig=... */
+  };
+  window.bsShareInsta = function() {
+    if (navigator.share) {
+      navigator.share({
+        title: '[뷰티스코어] 가격 적정 진단 결과',
+        text: '주력 시술 객단가가 업종 평균 대비 어디인지 확인했어요.',
+        url: location.href
+      }).catch(function(){});
+    } else {
+      alert('공유 기능은 모바일에서 지원됩니다.');
+    }
+  };
+
+  /* ═══ iframe BS_HEIGHT postMessage (v2.0.12 ㉞ 5중 안전망 정합) ═══ */
+  var _lastHeight = 0;
+  function postHeight() {
+    try {
+      var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+      if (h === _lastHeight) return;
+      _lastHeight = h;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'BS_HEIGHT', height: h }, '*');
+      }
+    } catch(e){}
+  }
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+
+  /* ═══ Init ═══ */
+  function init() {
+    bsLoadStoreResult();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>

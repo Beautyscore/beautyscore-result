@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<title>Component Showcase v0.1 — 뷰티스코어 박사급 시안 sandbox</title>
+<meta name="description" content="result_frame v2.1.0 Component Showcase 10종 디자이너·개발자 reference sandbox">
+<!--
+  result_frame_showcase_v0_1.html
+  ═══════════════════════════════════════════════════════════════
+  Component Showcase 10종 라이브 view sandbox (E-β, 박사급 시안 §8 정합)
+  ═══════════════════════════════════════════════════════════════
+  박제일: 2026-05-17 KST (채팅방 3 SUB-B, E-β)
+  base: 박사급 시안 v0.2 §1·§5·§6·§7·§8 + result_frame v2.1.0
+  목적: 디자이너·개발자·MINA·NOVA 시각 reference + Phase 2 5종 Toggle 사전 확인
+  ─────────────────────────────────────────────────────────────
+  10 Component:
+    ① 결제 완료 Hero (Act 1) ② 핵심 인사이트 카드 (Act 2) ③ D+30 재진단 배지 (Act 3)
+    ④ 업셀 진행률 바 ⑤ 관련 단품 그리드 ⑥ 구독 알림 카드 (⑤~⑧ 공통)
+    ⑦ 코칭 진도 카드 (⑨~⑩ 공통) ⑧ Sparkline mini-chart ⑨ Heatmap (p04) ⑩ Grade badge (p02)
+
+  Toggle 3종 (Phase 2 #14·#13·#15 sandbox 활성):
+    - 다크모드 (.bs-dark-mode) · A11y 강화 (.bs-a11y) · 마이크로 인터랙션 (.bs-micro)
+  ═══════════════════════════════════════════════════════════════
+-->
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ═══ 박사급 시안 §6 Color System v0.2 + §7 Typography 7-step ═══ */
+:root, body {
+  --bs-navy: #16213E; --bs-navy2: #243152; --bs-rose: #C9856E; --bs-rose-dk: #B8745E;
+  --bs-nude: #E8B4A8; --bs-nude-soft: #F4DCD2; --bs-cream: #FAF8F4; --bs-cream2: #F1EFE8;
+  --bs-white: #FFFFFF; --bs-text: #16213E; --bs-muted: #6B7488; --bs-caption: #9DA8BD;
+  --bs-bd: rgba(22,33,62,.09); --bs-ok: #2E7D5E; --bs-warn: #B36015;
+  --bs-sh-sm: 0 2px 12px rgba(22,33,62,.07);
+  --bs-sh-md: 0 4px 20px rgba(22,33,62,.10);
+  /* §5.1 Motion easing */
+  --bs-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --bs-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --bs-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* §5.1 Duration */
+  --bs-dur-xs: 120ms; --bs-dur-sm: 240ms; --bs-dur-md: 400ms; --bs-dur-lg: 600ms; --bs-dur-xl: 1000ms;
+  /* §7.1 Type scale */
+  --bs-fs-display: 32px; --bs-fs-title: 24px; --bs-fs-h1: 20px; --bs-fs-h2: 18px;
+  --bs-fs-body: 16px; --bs-fs-sm: 14px; --bs-fs-xs: 12px;
+}
+
+/* 다크모드 (§6.4 정합) */
+body.bs-dark-mode {
+  --bs-cream: #06090F; --bs-cream2: #16213E; --bs-white: #1A2438;
+  --bs-text: #FAF8F4; --bs-muted: #9DA8BD; --bs-bd: rgba(255,255,255,.12);
+  --bs-navy: #E8EBF1; --bs-navy2: #C5CCD9; --bs-nude-soft: #2A1F1B;
+}
+
+/* Reduced motion (§5.3 정합) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  font-family: "Pretendard Variable", Pretendard, sans-serif;
+  background: var(--bs-cream);
+  color: var(--bs-text);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.6;
+  margin: 0; padding: 0;
+  transition: background var(--bs-dur-md) var(--bs-ease-standard),
+              color var(--bs-dur-md) var(--bs-ease-standard);
+}
+
+/* ═══ Layout ═══ */
+.sb-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px; }
+.sb-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bs-white);
+  border-bottom: 1px solid var(--bs-bd);
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--bs-sh-sm);
+}
+.sb-header h1 { font-size: var(--bs-fs-h1); font-weight: 700; margin: 0; color: var(--bs-navy); letter-spacing: -.3px; }
+.sb-toggle-group { display: flex; gap: 8px; }
+.sb-toggle-btn {
+  min-height: 36px; padding: 6px 12px;
+  background: var(--bs-cream2); color: var(--bs-text);
+  border: 1px solid var(--bs-bd); border-radius: 8px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all var(--bs-dur-sm) var(--bs-ease-standard);
+}
+.sb-toggle-btn.is-on { background: var(--bs-navy); color: var(--bs-white); border-color: var(--bs-navy); }
+.sb-toggle-btn:hover { transform: translateY(-1px); }
+
+.sb-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+@media (max-width: 768px) { .sb-grid { grid-template-columns: 1fr; } }
+.sb-nav {
+  position: sticky; top: 80px;
+  align-self: start;
+  background: var(--bs-white);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--bs-sh-sm);
+  font-size: var(--bs-fs-sm);
+}
+.sb-nav h3 { font-size: 12px; color: var(--bs-muted); text-transform: uppercase;
+             letter-spacing: .08em; margin: 12px 0 6px; font-weight: 700; }
+.sb-nav h3:first-child { margin-top: 0; }
+.sb-nav a {
+  display: block; padding: 6px 8px; color: var(--bs-text);
+  text-decoration: none; border-radius: 6px;
+  font-size: 13px; line-height: 1.4;
+}
+.sb-nav a:hover { background: var(--bs-cream2); color: var(--bs-rose-dk); }
+
+.sb-main { display: flex; flex-direction: column; gap: 32px; }
+
+/* Section card */
+.sb-section {
+  background: var(--bs-white);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: var(--bs-sh-md);
+}
+.sb-section h2 {
+  font-size: var(--bs-fs-title);
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--bs-navy);
+  letter-spacing: -.3px;
+}
+.sb-section .sb-sec-sub {
+  font-size: var(--bs-fs-sm);
+  color: var(--bs-muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.sb-component-stage {
+  background: var(--bs-cream);
+  border: 1px dashed var(--bs-bd);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+/* Philosophy chips */
+.sb-philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.sb-pchip {
+  background: var(--bs-cream); border-radius: 10px; padding: 12px;
+  border-left: 3px solid var(--bs-rose);
+}
+.sb-pchip-num { font-size: 11px; color: var(--bs-rose-dk); font-weight: 700; }
+.sb-pchip-name { font-size: var(--bs-fs-sm); font-weight: 700; margin: 2px 0 4px; color: var(--bs-navy); }
+.sb-pchip-desc { font-size: 12px; color: var(--bs-muted); line-height: 1.5; }
+
+/* Color token swatches */
+.sb-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.sb-swatch {
+  border-radius: 12px; overflow: hidden;
+  box-shadow: var(--bs-sh-sm);
+  font-size: 11px;
+}
+.sb-swatch-color { height: 60px; }
+.sb-swatch-info { padding: 8px 10px; background: var(--bs-white); color: var(--bs-text); }
+.sb-swatch-name { font-weight: 700; font-size: 12px; }
+.sb-swatch-hex { color: var(--bs-muted); font-family: ui-monospace, monospace; }
+
+/* Type scale demo */
+.sb-type-row { display: flex; align-items: baseline; gap: 16px;
+               padding: 10px 0; border-bottom: 1px solid var(--bs-bd); }
+.sb-type-row:last-child { border-bottom: none; }
+.sb-type-token { font-size: 11px; color: var(--bs-muted);
+                 font-family: ui-monospace, monospace; min-width: 140px; }
+.sb-type-sample { color: var(--bs-text); font-weight: 600; }
+
+/* ═══ §8 Component Showcase CSS (박사급 §8.1~§8.10) ═══ */
+
+/* §8.1 Hero (Act 1) */
+.bs-store-hero {
+  text-align: center; padding: 28px 20px 20px;
+  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%);
+  color: var(--bs-white); border-radius: 14px;
+  max-width: 380px; margin: 0 auto;
+}
+.bs-store-icon-wrap { font-size: 40px; margin-bottom: 8px; line-height: 1; }
+.bs-store-subtitle { font-size: 13px; opacity: .75; margin-bottom: 4px; }
+.bs-store-title { font-size: var(--bs-fs-title); font-weight: 700;
+                  letter-spacing: -.3px; margin: 0 0 14px; }
+.bs-store-receipt { background: rgba(255,255,255,.08); border-radius: 12px;
+                    padding: 12px 14px; font-size: 13px; text-align: left; }
+.bs-receipt-row { display: flex; justify-content: space-between;
+                  padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.bs-receipt-row:last-child { border-bottom: none; }
+.bs-receipt-label { opacity: .7; }
+.bs-receipt-value { font-weight: 600; }
+
+/* §8.2 Insight Card (Act 2) */
+.bs-insight-card { background: var(--bs-white); border-radius: 18px;
+                   box-shadow: var(--bs-sh-md); padding: 20px;
+                   max-width: 380px; margin: 0 auto; }
+.bs-insight-headline { font-size: var(--bs-fs-h2); font-weight: 700;
+                       color: var(--bs-navy); line-height: 1.5; margin-bottom: 14px; }
+.bs-price-compare { margin-bottom: 18px; }
+.bs-pc-label { font-size: var(--bs-fs-sm); color: var(--bs-muted); margin-bottom: 8px; }
+.bs-pc-bar-wrap { position: relative; height: 14px;
+                  background: var(--bs-cream2); border-radius: 7px; }
+.bs-pc-bar-mine { position: absolute; left: 0; top: 0; height: 100%;
+                  background: var(--bs-rose); border-radius: 7px;
+                  width: 65%;
+                  transition: width var(--bs-dur-xl) var(--bs-ease-emphasized); }
+.bs-pc-marker-avg { position: absolute; top: -4px; left: 50%;
+                    width: 0; height: 0;
+                    border-left: 6px solid transparent; border-right: 6px solid transparent;
+                    border-bottom: 8px solid var(--bs-navy); transform: translateX(-50%); }
+.bs-pc-legend { display: flex; gap: 14px; margin-top: 10px;
+                font-size: 11px; color: var(--bs-muted); }
+.bs-leg-mine::before { content: '● '; color: var(--bs-rose); }
+.bs-leg-avg::before { content: '▲ '; color: var(--bs-navy); }
+.bs-action-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.bs-action-item { display: flex; align-items: flex-start; gap: 10px;
+                  padding: 12px 14px; background: var(--bs-cream2);
+                  border-radius: 12px; font-size: var(--bs-fs-body); line-height: 1.55; }
+.bs-action-num { flex-shrink: 0; width: 22px; height: 22px;
+                 border-radius: 50%; background: var(--bs-rose); color: var(--bs-white);
+                 font-size: 12px; font-weight: 700;
+                 display: inline-flex; align-items: center; justify-content: center; }
+
+/* §8.3 D+30 Rediag Badge (Act 3) */
+.bs-rediag-badge { display: flex; align-items: center; gap: 12px;
+                   background: var(--bs-cream); border: 1px solid var(--bs-bd);
+                   border-radius: 14px; padding: 14px 16px;
+                   max-width: 380px; margin: 0 auto; }
+.bs-rediag-icon { font-size: 24px; flex-shrink: 0; }
+.bs-rediag-content { flex: 1; }
+.bs-rediag-label { font-size: 13px; font-weight: 600; color: var(--bs-navy); }
+.bs-rediag-date { font-size: 12px; color: var(--bs-muted); margin-top: 2px; }
+.bs-rediag-config { background: transparent; border: none; font-size: 18px;
+                    min-height: 44px; min-width: 44px;
+                    display: inline-flex; align-items: center; justify-content: center;
+                    cursor: pointer; }
+
+/* §8.4 Upsell Progress */
+.bs-upsell-progress { background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%);
+                      border-radius: 18px; padding: 18px 20px;
+                      color: var(--bs-white); max-width: 380px; margin: 0 auto; }
+.bs-up-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.bs-up-label { font-size: 13px; font-weight: 600; }
+.bs-up-bar-outer { height: 6px; background: rgba(255,255,255,.2);
+                   border-radius: 3px; overflow: hidden; }
+.bs-up-bar-inner { height: 100%; background: var(--bs-rose); border-radius: 3px;
+                   width: 33%; transition: width var(--bs-dur-xl) var(--bs-ease-emphasized); }
+.bs-up-meta { display: flex; justify-content: space-between;
+              margin-top: 6px; font-size: 11px; opacity: .75; }
+
+/* §8.5 Related Grid */
+.bs-related-grid { display: grid; grid-template-columns: 1fr 1fr;
+                   gap: 10px; max-width: 380px; margin: 0 auto; }
+.bs-rel-card { background: var(--bs-white); border-radius: 14px;
+               padding: 16px 12px; min-height: 44px;
+               text-align: center; cursor: pointer;
+               box-shadow: var(--bs-sh-sm); text-decoration: none; color: var(--bs-text);
+               display: flex; flex-direction: column;
+               align-items: center; justify-content: center;
+               transition: transform var(--bs-dur-sm) var(--bs-ease-standard); }
+.bs-rel-card:hover { transform: translateY(-2px); }
+.bs-rel-icon { font-size: 24px; margin-bottom: 6px; }
+.bs-rel-name { font-size: 12px; font-weight: 600; color: var(--bs-navy); margin-bottom: 4px; }
+.bs-rel-price { font-size: 12px; color: var(--bs-rose); font-weight: 700; }
+
+/* §8.6 Subscription Alert Card (dashboard embed) */
+.bs-sub-card { background: var(--bs-white); border-radius: 18px;
+               padding: 18px 20px; box-shadow: var(--bs-sh-sm);
+               max-width: 380px; margin: 0 auto; }
+.bs-sub-header { display: flex; justify-content: space-between;
+                 align-items: center; margin-bottom: 12px; }
+.bs-sub-name { font-size: var(--bs-fs-h2); font-weight: 700; color: var(--bs-navy); }
+.bs-sub-badge { font-size: 11px; color: var(--bs-ok); font-weight: 700;
+                background: rgba(46,125,94,.08); padding: 2px 8px; border-radius: 10px; }
+.bs-sub-metric { font-size: var(--bs-fs-display); font-weight: 800;
+                 color: var(--bs-navy); letter-spacing: -.04em; line-height: 1.1; }
+.bs-sub-spark { margin-top: 8px; }
+.bs-sub-foot { font-size: 12px; color: var(--bs-muted); margin-top: 10px; }
+
+/* §8.7 Coaching Progress Card */
+.bs-coach-card { background: var(--bs-white); border-radius: 18px;
+                 padding: 20px; box-shadow: var(--bs-sh-md);
+                 max-width: 380px; margin: 0 auto; }
+.bs-coach-header { display: flex; justify-content: space-between;
+                   align-items: center; margin-bottom: 12px; }
+.bs-coach-name { font-size: var(--bs-fs-h2); font-weight: 700; color: var(--bs-navy); }
+.bs-coach-week { font-size: 11px; color: var(--bs-muted); }
+.bs-cp-bar-outer { height: 8px; background: var(--bs-cream2);
+                   border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+.bs-cp-bar-inner { height: 100%; background: linear-gradient(90deg, var(--bs-navy), var(--bs-rose));
+                   width: 33%; border-radius: 4px;
+                   transition: width var(--bs-dur-xl) var(--bs-ease-emphasized); }
+.bs-cp-pct { font-size: 11px; color: var(--bs-muted); text-align: right; }
+.bs-coach-goal, .bs-coach-result { padding: 10px 0; border-top: 1px solid var(--bs-bd);
+                                    font-size: var(--bs-fs-sm); }
+.bs-coach-label { color: var(--bs-muted); font-size: 12px; }
+.bs-coach-value { color: var(--bs-text); font-weight: 600; }
+
+/* §8.8 Sparkline canvas */
+.bs-spark-canvas { display: block; }
+
+/* §8.9 Heatmap (7×12) */
+.bs-heatmap-wrap { max-width: 380px; margin: 0 auto; }
+.bs-heatmap-y-labels { display: flex; flex-direction: column;
+                       gap: 2px; font-size: 11px; color: var(--bs-muted);
+                       text-align: right; padding-right: 6px; }
+.bs-heatmap-grid { display: grid;
+                   grid-template-columns: repeat(12, 1fr);
+                   gap: 2px; }
+.bs-hm-cell { aspect-ratio: 1; border-radius: 3px;
+              background: rgba(22,33,62,.1); }
+.bs-hm-noshow { outline: 2px solid var(--bs-rose); outline-offset: -1px; }
+.bs-heatmap-x-labels { display: grid; grid-template-columns: repeat(12, 1fr);
+                       gap: 2px; font-size: 10px; color: var(--bs-muted);
+                       text-align: center; margin-top: 6px; }
+
+/* §8.10 Grade Badge donut + matrix */
+.bs-grade-card { background: var(--bs-white); border-radius: 18px;
+                 padding: 24px; box-shadow: var(--bs-sh-md);
+                 max-width: 380px; margin: 0 auto; text-align: center; }
+.bs-rank-donut-wrap { position: relative; display: inline-block;
+                      width: 160px; height: 160px; }
+.bs-rank-donut-wrap canvas { display: block; }
+.bs-rank-label-center { position: absolute; top: 50%; left: 50%;
+                        transform: translate(-50%, -50%);
+                        text-align: center; }
+.bs-rank-pct { font-size: var(--bs-fs-h2); font-weight: 700; color: var(--bs-navy); }
+.bs-rank-grade { font-size: var(--bs-fs-h1); font-weight: 800; margin-top: 4px; color: var(--bs-rose-dk); }
+
+/* Micro interactions (Toggle .bs-micro 활성 시) */
+body.bs-micro .bs-rel-card,
+body.bs-micro .bs-cta-option { transition: transform var(--bs-dur-sm) var(--bs-ease-standard); }
+body.bs-micro .bs-rel-card:hover,
+body.bs-micro .bs-cta-option:hover { transform: translateY(-2px); }
+
+/* A11y enhanced (Toggle .bs-a11y 활성 시) */
+body.bs-a11y *:focus-visible { outline: 2px solid var(--bs-navy); outline-offset: 2px; }
+body.bs-a11y .bs-pc-bar-mine::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(45deg,
+    transparent, transparent 4px,
+    rgba(255,255,255,.3) 4px, rgba(255,255,255,.3) 8px);
+}
+</style>
+</head>
+<body>
+
+<header class="sb-header" role="banner">
+  <h1>🎨 Component Showcase v0.1 — 박사급 sandbox</h1>
+  <div class="sb-toggle-group" role="group" aria-label="Phase 2 Toggle">
+    <button class="sb-toggle-btn" id="tg-dark" type="button" aria-pressed="false">🌙 다크</button>
+    <button class="sb-toggle-btn" id="tg-a11y" type="button" aria-pressed="false">♿ A11y</button>
+    <button class="sb-toggle-btn" id="tg-micro" type="button" aria-pressed="false">✨ 마이크로</button>
+  </div>
+</header>
+
+<div class="sb-wrap">
+  <div class="sb-grid">
+
+    <!-- Sidebar Nav -->
+    <nav class="sb-nav" aria-label="섹션 네비게이션">
+      <h3>박사급 시안 v0.2</h3>
+      <a href="#philosophy">§1 Design Philosophy</a>
+      <a href="#color">§6 Color System</a>
+      <a href="#typography">§7 Typography</a>
+      <h3>§8 Component 10종</h3>
+      <a href="#c1">① 결제 완료 Hero</a>
+      <a href="#c2">② 핵심 인사이트 카드</a>
+      <a href="#c3">③ D+30 재진단 배지</a>
+      <a href="#c4">④ 업셀 진행률</a>
+      <a href="#c5">⑤ 관련 단품 그리드</a>
+      <a href="#c6">⑥ 구독 알림 카드</a>
+      <a href="#c7">⑦ 코칭 진도 카드</a>
+      <a href="#c8">⑧ Sparkline</a>
+      <a href="#c9">⑨ Heatmap</a>
+      <a href="#c10">⑩ Grade Badge</a>
+    </nav>
+
+    <!-- Main -->
+    <main class="sb-main" role="main">
+
+      <!-- Design Philosophy -->
+      <section class="sb-section" id="philosophy">
+        <h2>§1 Design Philosophy — "Calm Data, Confident Action"</h2>
+        <p class="sb-sec-sub">Dieter Rams 5 + 60대 페르소나 5 add — Founding 10 Principles</p>
+        <div class="sb-philosophy-grid">
+          <div class="sb-pchip"><div class="sb-pchip-num">#1</div><div class="sb-pchip-name">Less, but better</div><div class="sb-pchip-desc">Rams · 정보 최소화로 의미 극대화</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#2</div><div class="sb-pchip-name">Honest</div><div class="sb-pchip-desc">Rams · 데이터 그대로 표현, 과장 X</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#3</div><div class="sb-pchip-name">Unobtrusive</div><div class="sb-pchip-desc">Rams · UI는 도구, 주인공은 데이터</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#4</div><div class="sb-pchip-name">Long-lasting</div><div class="sb-pchip-desc">Rams · 트렌드 회피·brand 일관성</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#5</div><div class="sb-pchip-name">Thorough to last detail</div><div class="sb-pchip-desc">Rams · 모든 디테일 동일 박제 정밀도</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#6</div><div class="sb-pchip-name">Calm Data ⭐</div><div class="sb-pchip-desc">60대 add · 패닉 유발 X (%p 폐기·회복 톤)</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#7</div><div class="sb-pchip-name">Single Task Focus ⭐</div><div class="sb-pchip-desc">60대 add · 1 page = 1 action</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#8</div><div class="sb-pchip-name">Confident Action ⭐</div><div class="sb-pchip-desc">60대 add · 다음 액션 명확·즉시</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#9</div><div class="sb-pchip-name">Emotional Anchor ⭐</div><div class="sb-pchip-desc">60대 add · 안심·자신감·동반자 톤</div></div>
+          <div class="sb-pchip"><div class="sb-pchip-num">#10</div><div class="sb-pchip-name">Recovery-First ⭐</div><div class="sb-pchip-desc">60대 add · 약점도 회복 가능 톤</div></div>
+        </div>
+      </section>
+
+      <!-- Color System -->
+      <section class="sb-section" id="color">
+        <h2>§6 Color System v0.2 — Refactoring UI base + WCAG AA</h2>
+        <p class="sb-sec-sub">Brand 8 + Emotion 4 + 5등급 grade tokens · 다크 모드 invert 매트릭스</p>
+        <div class="sb-color-grid">
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#16213E"></div><div class="sb-swatch-info"><div class="sb-swatch-name">navy</div><div class="sb-swatch-hex">#16213E</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#243152"></div><div class="sb-swatch-info"><div class="sb-swatch-name">navy2</div><div class="sb-swatch-hex">#243152</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#C9856E"></div><div class="sb-swatch-info"><div class="sb-swatch-name">rose</div><div class="sb-swatch-hex">#C9856E</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#E8B4A8"></div><div class="sb-swatch-info"><div class="sb-swatch-name">nude</div><div class="sb-swatch-hex">#E8B4A8</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#F4DCD2"></div><div class="sb-swatch-info"><div class="sb-swatch-name">nude-soft</div><div class="sb-swatch-hex">#F4DCD2</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#FAF8F4"></div><div class="sb-swatch-info"><div class="sb-swatch-name">cream</div><div class="sb-swatch-hex">#FAF8F4</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#F1EFE8"></div><div class="sb-swatch-info"><div class="sb-swatch-name">cream2</div><div class="sb-swatch-hex">#F1EFE8</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#D4AF37"></div><div class="sb-swatch-info"><div class="sb-swatch-name">grade-S</div><div class="sb-swatch-hex">#D4AF37 · 8.4:1</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#22C55E"></div><div class="sb-swatch-info"><div class="sb-swatch-name">grade-A</div><div class="sb-swatch-hex">#22C55E · 6.9:1</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#3B82F6"></div><div class="sb-swatch-info"><div class="sb-swatch-name">grade-B</div><div class="sb-swatch-hex">#3B82F6 · 5.2:1</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#EAB308"></div><div class="sb-swatch-info"><div class="sb-swatch-name">grade-C</div><div class="sb-swatch-hex">#EAB308 · 9.1:1</div></div></div>
+          <div class="sb-swatch"><div class="sb-swatch-color" style="background:#EF4444"></div><div class="sb-swatch-info"><div class="sb-swatch-name">grade-D</div><div class="sb-swatch-hex">#EF4444 · 4.7:1</div></div></div>
+        </div>
+      </section>
+
+      <!-- Typography -->
+      <section class="sb-section" id="typography">
+        <h2>§7 Typography 7-step (Pretendard + 60대 16px minimum)</h2>
+        <p class="sb-sec-sub">행간 1.6~1.7 · letter-spacing 음수 · 한 줄 20~30자 권장</p>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-display · 32px / 800</span><span class="sb-type-sample" style="font-size:32px;font-weight:800;letter-spacing:-.05em">진단이 완료되었습니다</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-title · 24px / 700</span><span class="sb-type-sample" style="font-size:24px;font-weight:700;letter-spacing:-.03em">가격 적정 진단</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-h1 · 20px / 700</span><span class="sb-type-sample" style="font-size:20px;font-weight:700;letter-spacing:-.3px">카드 헤더</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-h2 · 18px / 600</span><span class="sb-type-sample" style="font-size:18px;font-weight:600;letter-spacing:-.2px">강조 본문</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-body · 16px / 500 ⭐ 60대 min</span><span class="sb-type-sample" style="font-size:16px;font-weight:500;letter-spacing:-.1px">본문 minimum (60대 룰)</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-sm · 14px / 500</span><span class="sb-type-sample" style="font-size:14px;font-weight:500">보조 텍스트</span></div>
+        <div class="sb-type-row"><span class="sb-type-token">--bs-fs-xs · 12px / 400</span><span class="sb-type-sample" style="font-size:12px;font-weight:400">캡션·라벨</span></div>
+      </section>
+
+      <!-- ① Hero -->
+      <section class="sb-section" id="c1">
+        <h2>① 결제 완료 Hero (Act 1)</h2>
+        <p class="sb-sec-sub">Stripe success state + Tobias gradient · 0~3s emotional moment</p>
+        <div class="sb-component-stage">
+          <header class="bs-store-hero">
+            <div class="bs-store-icon-wrap" aria-hidden="true">💰</div>
+            <div class="bs-store-subtitle">진단이 완료되었습니다</div>
+            <h1 class="bs-store-title">가격 적정 진단</h1>
+            <div class="bs-store-receipt">
+              <div class="bs-receipt-row"><span class="bs-receipt-label">주문번호</span><span class="bs-receipt-value" style="font-family:ui-monospace,monospace">ord_20260517_demo</span></div>
+              <div class="bs-receipt-row"><span class="bs-receipt-label">결제 시각</span><span class="bs-receipt-value">2026-05-17 14:32</span></div>
+              <div class="bs-receipt-row"><span class="bs-receipt-label">결제 금액</span><span class="bs-receipt-value">14,900원</span></div>
+            </div>
+          </header>
+        </div>
+      </section>
+
+      <!-- ② Insight Card -->
+      <section class="sb-section" id="c2">
+        <h2>② 핵심 인사이트 카드 (Act 2)</h2>
+        <p class="sb-sec-sub">Tufte data-ink + Bostock narrative reveal · 3~30s 인사이트 1건 hero</p>
+        <div class="sb-component-stage">
+          <section class="bs-insight-card">
+            <div class="bs-insight-headline">주력 시술 가격이<br>업종 평균 대비 어떤 위치인지 분석했어요.</div>
+            <div class="bs-price-compare">
+              <div class="bs-pc-label">현재 주력 시술 객단가</div>
+              <div class="bs-pc-bar-wrap" role="img" aria-label="객단가 비교: 내 매장 vs 유사 매장 평균">
+                <div class="bs-pc-bar-mine"></div>
+                <div class="bs-pc-marker-avg"></div>
+              </div>
+              <div class="bs-pc-legend">
+                <span class="bs-leg-mine">내 매장</span>
+                <span class="bs-leg-avg">유사 매장 평균</span>
+              </div>
+            </div>
+            <div class="bs-action-list" aria-label="액션 플랜 3종">
+              <div class="bs-action-item"><span class="bs-action-num">1</span><span>주력 시술 가격을 권장 가격대 중간값으로 조정</span></div>
+              <div class="bs-action-item"><span class="bs-action-num">2</span><span>기존 회원에게는 가격 변경 전 1개월 안내</span></div>
+              <div class="bs-action-item"><span class="bs-action-num">3</span><span>가격 인상과 동시에 부가 서비스 1종 무료 추가</span></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ③ Rediag Badge -->
+      <section class="sb-section" id="c3">
+        <h2>③ D+30 재진단 배지 (Act 3)</h2>
+        <p class="sb-sec-sub">Jared Spool magic moment · 한 달 후 다시 만나는 약속 · Touch 44×44 정합</p>
+        <div class="sb-component-stage">
+          <div class="bs-rediag-badge" role="status">
+            <span class="bs-rediag-icon" aria-hidden="true">📅</span>
+            <div class="bs-rediag-content">
+              <div class="bs-rediag-label">D+30 무료 재진단 예약됨</div>
+              <div class="bs-rediag-date">2026년 6월 16일 알림 예정</div>
+            </div>
+            <button class="bs-rediag-config" aria-label="알림 설정 변경">⚙</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ④ Upsell -->
+      <section class="sb-section" id="c4">
+        <h2>④ 업셀 진행률 바</h2>
+        <p class="sb-sec-sub">Refactoring UI hierarchy · Linear motion 1000ms width animate</p>
+        <div class="sb-component-stage">
+          <section class="bs-upsell-progress" aria-label="단품 누적 진행률">
+            <div class="bs-up-header">
+              <span aria-hidden="true">📦</span>
+              <span class="bs-up-label">단품 3개 모으면 BASIC 50% 할인</span>
+            </div>
+            <div class="bs-up-bar-outer">
+              <div class="bs-up-bar-inner" role="progressbar" aria-valuenow="1" aria-valuemax="3" aria-label="단품 3개 중 1개 보유"></div>
+            </div>
+            <div class="bs-up-meta"><span>현재 1 / 3개</span><span>절약 22,485원</span></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ⑤ Related Grid -->
+      <section class="sb-section" id="c5">
+        <h2>⑤ 관련 단품 그리드</h2>
+        <p class="sb-sec-sub">Figma layered card · 2-col mobile · 44×44 touch target</p>
+        <div class="sb-component-stage">
+          <section class="bs-related-grid" aria-label="관련 단품 추천">
+            <a class="bs-rel-card" href="#noshow">
+              <span class="bs-rel-icon" aria-hidden="true">⏰</span>
+              <span class="bs-rel-name">노쇼 행동 변화 진단</span>
+              <span class="bs-rel-price">14,900원</span>
+            </a>
+            <a class="bs-rel-card" href="#priceelasticity">
+              <span class="bs-rel-icon" aria-hidden="true">📊</span>
+              <span class="bs-rel-name">가격 탄력성 진단</span>
+              <span class="bs-rel-price">14,900원</span>
+            </a>
+          </section>
+        </div>
+      </section>
+
+      <!-- ⑥ Subscription -->
+      <section class="sb-section" id="c6">
+        <h2>⑥ 구독 알림 카드 (⑤~⑧ 공통, dashboard embed)</h2>
+        <p class="sb-sec-sub">Tufte sparkline + 익명화 + 단일 메트릭 hero</p>
+        <div class="sb-component-stage">
+          <div class="bs-sub-card">
+            <div class="bs-sub-header">
+              <span class="bs-sub-name">회원권 떠나기 전 알림</span>
+              <span class="bs-sub-badge">● 구독 중</span>
+            </div>
+            <div class="bs-sub-metric">8명</div>
+            <div class="bs-sub-spark"><canvas id="spark-sub" width="60" height="24" class="bs-spark-canvas" aria-label="30일 갱신 추세"></canvas></div>
+            <div class="bs-sub-foot">이번 달 회원권 갱신 예정 · 김○○ 외 7명</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑦ Coaching -->
+      <section class="sb-section" id="c7">
+        <h2>⑦ 코칭 진도 카드 (⑨~⑩ 공통)</h2>
+        <p class="sb-sec-sub">Stripe progress · linear (gauge 회피, Tufte 원칙)</p>
+        <div class="sb-component-stage">
+          <div class="bs-coach-card">
+            <div class="bs-coach-header">
+              <span class="bs-coach-name">잘 팔리는 시술 키우기 코칭</span>
+              <span class="bs-coach-week">Week 4 / 12</span>
+            </div>
+            <div class="bs-cp-bar-outer">
+              <div class="bs-cp-bar-inner" role="progressbar" aria-valuenow="33" aria-valuemax="100"></div>
+            </div>
+            <div class="bs-cp-pct">33%</div>
+            <div class="bs-coach-goal"><span class="bs-coach-label">이번 주 목표</span><br><span class="bs-coach-value">주력 시술 패키지 2건 판매</span></div>
+            <div class="bs-coach-result"><span class="bs-coach-label">지난 주 성과</span><br><span class="bs-coach-value">2건 달성 (누적 32,000원)</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑧ Sparkline -->
+      <section class="sb-section" id="c8">
+        <h2>⑧ Sparkline mini-chart (Tufte signature)</h2>
+        <p class="sb-sec-sub">60×24px · axis 없음 · 끝점 dot · navy stroke + rose endpoint · data-ink ratio 0.95+</p>
+        <div class="sb-component-stage" style="text-align:center;padding:40px 20px;">
+          <canvas id="spark-1" width="180" height="60" class="bs-spark-canvas" aria-label="30일 매출 추세 sparkline"></canvas>
+          <div style="margin-top:8px;font-size:11px;color:var(--bs-muted)">canvas 180×60 (3x 확대) — 실제 60×24</div>
+        </div>
+      </section>
+
+      <!-- ⑨ Heatmap -->
+      <section class="sb-section" id="c9">
+        <h2>⑨ Heatmap 7×12 (p04 황금 시간대)</h2>
+        <p class="sb-sec-sub">Bostock choropleth · stagger 50ms/row · navy 농도 + rose 노쇼 위험 outline</p>
+        <div class="sb-component-stage">
+          <div class="bs-heatmap-wrap" role="img" aria-label="요일 7 × 시간 12 매출 밀도 히트맵">
+            <div class="bs-heatmap-grid" id="bs-heatmap-grid"></div>
+            <div class="bs-heatmap-x-labels"><span>10시</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21시</span></div>
+            <div style="margin-top:10px;font-size:11px;color:var(--bs-muted);text-align:center">⬜ 낮음 · ▮ navy 정상 · ⬜ rose 노쇼 위험</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑩ Grade Badge -->
+      <section class="sb-section" id="c10">
+        <h2>⑩ Grade Badge 도넛 (p02 매장 순위)</h2>
+        <p class="sb-sec-sub">Stripe gradient · 1500ms ease-out fill · getWcagFg auto · IntersectionObserver lazy</p>
+        <div class="sb-component-stage">
+          <div class="bs-grade-card">
+            <div class="bs-rank-donut-wrap">
+              <canvas id="grade-donut" width="160" height="160" role="img" aria-label="매장 순위 도넛 상위 28% A등급"></canvas>
+              <div class="bs-rank-label-center">
+                <div class="bs-rank-pct">상위 28%</div>
+                <div class="bs-rank-grade">💎 A</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;font-size:14px;color:var(--bs-muted)">상위 10% 매장까지 12점 회복 가능</div>
+          </div>
+        </div>
+      </section>
+
+      <footer style="margin-top:24px;padding:24px;text-align:center;font-size:12px;color:var(--bs-muted);line-height:1.7;">
+        <div>Component Showcase v0.1 — 박사급 시안 §8 정합</div>
+        <div>© 2026 Beautyscore. All rights reserved.</div>
+        <div style="margin-top:8px;">짝 박제: 의사결정/뷰티스코어_3-NEW2_단품결제후시각화_통합시안_박사급_*.md v0.2</div>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ═══ Toggle 3종 (다크·a11y·micro) ═══ */
+  var TOGGLES = [
+    { id: 'tg-dark',  cls: 'bs-dark-mode' },
+    { id: 'tg-a11y',  cls: 'bs-a11y' },
+    { id: 'tg-micro', cls: 'bs-micro' }
+  ];
+  TOGGLES.forEach(function(t) {
+    var btn = document.getElementById(t.id);
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      var on = document.body.classList.toggle(t.cls);
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  });
+
+  /* ═══ Sparkline (§8.8 Tufte 표준) ═══ */
+  function bsRenderSparkline(canvas, data) {
+    if (!canvas || !data || !data.length) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    var max = Math.max.apply(null, data), min = Math.min.apply(null, data);
+    var range = max - min || 1;
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = '#16213E'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    ctx.beginPath();
+    data.forEach(function(v, i) {
+      var x = (i / (data.length - 1)) * (w - 6) + 3;
+      var y = h - ((v - min) / range) * (h - 6) - 3;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    var lastV = data[data.length - 1];
+    var lastY = h - ((lastV - min) / range) * (h - 6) - 3;
+    ctx.fillStyle = '#C9856E';
+    ctx.beginPath();
+    ctx.arc(w - 3, lastY, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /* mock 30일 회원권 갱신 추세 */
+  var subData = [12, 14, 13, 15, 14, 16, 17, 15, 14, 13, 14, 15, 16, 18, 17, 16, 15, 14, 13, 12, 13, 14, 15, 16, 17, 18, 19, 18, 17, 8];
+  bsRenderSparkline(document.getElementById('spark-sub'), subData);
+
+  /* mock 30일 매출 추세 (Sparkline 단독 시연용) */
+  var salesData = [85, 92, 88, 95, 91, 89, 94, 97, 93, 90, 88, 92, 96, 99, 95, 93, 91, 94, 98, 102, 99, 96, 93, 95, 100, 105, 108, 104, 101, 110];
+  bsRenderSparkline(document.getElementById('spark-1'), salesData);
+
+  /* ═══ Heatmap 7×12 (§8.9) ═══ */
+  function bsRenderHeatmap(container, slots) {
+    if (!container) return;
+    container.innerHTML = '';
+    var maxD = Math.max.apply(null, slots.map(function(s){ return s.density; })) || 1;
+    for (var day = 0; day < 7; day++) {
+      for (var hour = 10; hour <= 21; hour++) {
+        var slot = slots.find(function(s){ return s.day === day && s.hour === hour; });
+        var cell = document.createElement('div');
+        cell.className = 'bs-hm-cell' + (slot && slot.noshow ? ' bs-hm-noshow' : '');
+        if (slot) {
+          var alpha = slot.density / maxD;
+          cell.style.background = slot.noshow
+            ? 'rgba(201, 133, 110, ' + (0.3 + alpha * 0.7).toFixed(2) + ')'
+            : 'rgba(22, 33, 62, ' + (0.1 + alpha * 0.8).toFixed(2) + ')';
+        }
+        container.appendChild(cell);
+      }
+    }
+  }
+
+  /* mock 84 slots */
+  var heatmapSlots = [];
+  for (var d = 0; d < 7; d++) {
+    for (var hr = 10; hr <= 21; hr++) {
+      var density = Math.round(20 + Math.random() * 80);
+      var noshow = (Math.random() < 0.06);
+      heatmapSlots.push({ day: d, hour: hr, density: density, noshow: noshow });
+    }
+  }
+  bsRenderHeatmap(document.getElementById('bs-heatmap-grid'), heatmapSlots);
+
+  /* ═══ Grade Badge donut (§8.10) ═══ */
+  function bsRenderGradeDonut(canvas, pct, grade) {
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    var cx = w / 2, cy = h / 2;
+    var radius = Math.min(w, h) / 2 - 12;
+    var lineWidth = 12;
+    var GRADE = { S: '#D4AF37', A: '#22C55E', B: '#3B82F6', C: '#EAB308', D: '#EF4444' };
+    var fill = GRADE[grade] || '#6B7488';
+    var target = (pct / 100) * Math.PI * 2;
+    var duration = 1500;
+    var start = performance.now();
+
+    function frame(now) {
+      var p = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var cur = target * eased;
+      ctx.clearRect(0, 0, w, h);
+      ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#F1EFE8'; ctx.lineWidth = lineWidth; ctx.stroke();
+      if (cur > 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, -Math.PI/2, -Math.PI/2 + cur);
+        ctx.strokeStyle = fill; ctx.lineWidth = lineWidth; ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  bsRenderGradeDonut(document.getElementById('grade-donut'), 28, 'A');
+})();
+</script>
+
+</body>
+</html>

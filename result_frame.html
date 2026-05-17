@@ -8,30 +8,23 @@
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="에스테틱 매장 경영진단 결과 — 원장님의 첫 진단 결과">
 <!--
-  뷰티스코어 result-frame v2.0.13 (KIRA, 5등급 Narrative + HANA v0.4 180종 6 patch + P1 검증 fix 3건 + IP2 HMAC #3 사전 patch + IP3 grade-X FE fallback + IP4 /api/cache/t15 endpoint + 응답 6종 분기 — 5/17)
+  뷰티스코어 result-frame v2.1.0 (KIRA, Phase 2 #11~#15 통합 — 5/17 P1 sprint)
   ═══════════════════════════════════════════════════════════════
-  v2.0.13 IP4 /api/cache/t15 endpoint staged (5/17 채팅방 2 P0-2 spec finalize 정합):
-    🌟 트리거: 채팅방 2 P0-2 spec finalize 박제 (게시판 [Completed] #61·#70, 5/16 EOD)
-    🌟 짝 박제: 의사결정/뷰티스코어_Worker_cache_t15_HMAC_spec_2026-05-16_v0.2.md
-    🌟 변경 3건:
-       ① WORKER_FETCH_URL: '/api/diagnosis/fetch' → '/api/cache/t15' (HMAC #3 KV cache layer)
-       ② WORKER_RECORD_ID_RE: /^rec[A-Za-z0-9]{14,}$/ 정규식 사전 검증 신규 (Worker line 83 정합 / mock 환경 fetch skip)
-       ③ bsFetchT15 응답 6종 분기: 200·400·401·404·408·500 (Worker v0.8.2 spec §2 매트릭스 100% 정합)
-    🌟 활성: hmacEnabled=true (5/17 early flip — Worker v0.9 5/19 EOD 도착 시 자동 정합)
-       - 현재 라이브 상태: BS_HMAC_SECRET 미주입 → "skip" warn → 빈 헤더 → 401/fetch fail → URL params fallback (regression 0)
-       - 5/19 EOD Worker v0.9 deploy + Secret 등록 후 자동 200 정합
-    🌟 Rework 룰 ⑤ Backward Compat: flag false 상태 fetch 401 → URL params fallback (regression 0)
-  ───────────────────────────────────────────────────────────────
-  v2.0.13 IP3 grade-X FE fallback (5/16 e2e P0 검증 결함 fix):
-    🌟 결함: applyGradeBadge() dynamicData.gradeBadge 미존재 시 early return → .bs-score-grade rose fallback → 5등급 시각 구별 0
-    🌟 근거: e2e P0 검증 라이브 5등급 mock URL × 5 결과 — 5/5 rose 단일 표시 확인
-    🌟 fix: applyGradeBadge() 재구성
-       ① gradeSpan/scoreGradeDiv 존재 확인 후 항상 진입 (early return 제거)
-       ② gradeOfFE(score) 기반 grade-X 클래스 부여 → CSS .bs-score-grade.grade-X 규칙 매칭
-       ③ dynamicData.gradeBadge 있을 때만 inline style override + emoji prefix (기존 로직 100% 보존)
-    🌟 Rework 룰 ⑤ Backward Compat: Worker dynamicData 있음 케이스 regression 0
-    🌟 짝 박제: 의사결정/뷰티스코어_e2e_P0_검증_라이브_5등급_결과_2026-05-16_v0.2.md §1.5
-  ───────────────────────────────────────────────────────────────
+  v2.1.0 Phase 2 통합 (5/17 채팅방 3 KIRA-FE/RESULT, 5/22 D-Day 13:30~16:00 deploy):
+    🌟 목표: result_frame Phase 2 5건(#11~#15) 통합 + Feature Flag 5종 false 기본 (5/24 06:00 일괄 활성)
+    🌟 통합 5건 (Feature Flag · CSS class toggle 패턴):
+       ① #11 AI 코칭 — bsInitAiCoach + Worker /api/premium/ai-coach (PREMIUM 맛보기 1회, X-Idempotency-Key 주간 제한)
+       ② #12 OG 공유 — bsInitShare + navigator.share + clipboard fallback (#bs-share-area)
+       ③ #13 A11y   — bsInitA11y  + .bs-a11y CSS 색맹 패턴 + role/aria-label
+       ④ #14 다크모드 — bsInitDarkMode + .bs-dark-mode CSS + prefers-color-scheme
+       ⑤ #15 마이크로 인터랙션 — bsInitMicroInteractions + .bs-micro CSS (donut·KPI·ripple)
+    🌟 Feature Flag 5종 (모두 false 기본, 5/24 06:00 KST 일괄 true):
+       window.bsFeatureFlags = { aiCoach, ogShare, a11y, darkMode, microInteractions }
+    🌟 v2.0.13 동작 100% 보존 (regression 0) — flag false 시 즉시 return
+    🌟 짝 박제: 의사결정/뷰티스코어_result_frame_v2_1_0_Phase2_통합코드_사전박제_채팅방3_2026-05-17.md
+                의사결정/뷰티스코어_채팅방3_A_B_단계_sprint_매트릭스_2026-05-17_v0.1.md
+    🌟 deploy 절차: GitHub Pages `beautyscore-result/result_frame.html` re-push (5/22 13:45 KST)
+  ═══════════════════════════════════════════════════════════════
   v2.0.13 IP2 HMAC #3 사전 patch (5/15 11:30~12:30, 채팅방 3 SUB-B):
     🌟 목적: 5/16 04:00 통합 deploy에서 Worker side HMAC verify 활성될 때 클라이언트도 정합
     🌟 5/17 블랙아웃 진입 (Worker deploy·KV 바인딩 변경 금지) 전 마감
@@ -322,6 +315,16 @@ html, body {
   --bs-sh-sm:0 2px 12px rgba(22,33,62,.07);
   --bs-sh-md:0 4px 20px rgba(22,33,62,.10);
   --bs-ease:cubic-bezier(.4,0,.2,1);
+  /* 박사급 §5.1 — Motion easing tokens (Apple HIG + Material Motion 정합, B-1 Patch #2) */
+  --bs-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --bs-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --bs-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 박사급 §5.1 — Duration tokens (B-1 Patch #3) */
+  --bs-dur-xs: 120ms; --bs-dur-sm: 240ms; --bs-dur-md: 400ms; --bs-dur-lg: 600ms; --bs-dur-xl: 1000ms;
+  /* 박사급 §7.1 — Type scale 7-step (60대 16px minimum, B-1 Patch #4) */
+  --bs-fs-display: 32px; --bs-fs-title: 24px; --bs-fs-h1: 20px; --bs-fs-h2: 18px;
+  --bs-fs-body: 16px;  /* 60대 가독성 minimum */
+  --bs-fs-sm: 14px; --bs-fs-xs: 12px;
   background: var(--bs-cream) !important; color: var(--bs-text) !important;
   font-size: 15px !important; line-height: 1.6 !important; min-height: 100vh !important;
 }
@@ -410,8 +413,8 @@ html, body {
   border: 1px solid var(--bs-bd) !important;
   border-radius: 18px !important; border-bottom-left-radius: 6px !important;
   padding: 16px 18px !important;
-  font-size: 16px !important; color: var(--bs-text) !important;
-  line-height: 1.65 !important; letter-spacing: -.1px !important;
+  font-size: 18px !important; color: var(--bs-text) !important;  /* Hub 5/18 task 5 — 60대 18px+ 강화 (was 16px, line-height 1.7) */
+  line-height: 1.7 !important; letter-spacing: -.1px !important;
   max-width: calc(100% - 40px) !important;
   box-shadow: var(--bs-sh-sm) !important;
 }
@@ -721,6 +724,356 @@ html, body {
 
 /* Foot */
 #bs-wrap .bs-foot { text-align: center !important; padding: 24px 14px 0 !important; font-size: 12px !important; color: var(--bs-muted) !important; line-height: 1.7 !important; }
+
+/* ═══ Phase 2 #14 다크모드 — prefers-color-scheme: dark + .bs-dark-mode 클래스 ═══
+   활성 조건: bsFeatureFlags.darkMode = true AND OS 다크모드 (5/24 06:00)
+   색상 매핑: --bs-cream → #1A1F2E / --bs-white → #243152 / --bs-text → #F4DCD2 / --bs-rose CTA 보정 → #E8B4A8 */
+#bs-wrap.bs-dark-mode { background: #1A1F2E !important; }
+#bs-wrap.bs-dark-mode .bs-bubble,
+#bs-wrap.bs-dark-mode .bs-cta-bubble,
+#bs-wrap.bs-dark-mode .bs-mini-card { background: #243152 !important; }
+#bs-wrap.bs-dark-mode .bs-bubble-score { background: linear-gradient(135deg, #1A1F2E 0%, #243152 100%) !important; }
+#bs-wrap.bs-dark-mode,
+#bs-wrap.bs-dark-mode .bs-bubble,
+#bs-wrap.bs-dark-mode .bs-bubble b,
+#bs-wrap.bs-dark-mode .bs-bubble span,
+#bs-wrap.bs-dark-mode .bs-score-rank,
+#bs-wrap.bs-dark-mode .bs-score-grade,
+#bs-wrap.bs-dark-mode .bs-mini-card-text { color: #F4DCD2 !important; }
+#bs-wrap.bs-dark-mode .bs-cta-option { background: #243152 !important; color: #F4DCD2 !important; border-color: rgba(244,220,210,.15) !important; }
+#bs-wrap.bs-dark-mode .bs-cta-option-secondary { background: rgba(244,220,210,.06) !important; }
+#bs-wrap.bs-dark-mode .bs-kpi-mini-bar::before {
+  background: repeating-linear-gradient(to bottom, #F4DCD2 0px, #F4DCD2 3px, transparent 3px, transparent 6px) !important;
+}
+#bs-wrap.bs-dark-mode .bs-bar-legend { background: rgba(244,220,210,.07) !important; color: rgba(244,220,210,.6) !important; }
+#bs-wrap.bs-dark-mode .bs-foot { color: rgba(244,220,210,.4) !important; }
+#bs-wrap.bs-dark-mode .bs-foot a { color: #E8B4A8 !important; }
+#bs-wrap.bs-dark-mode .bs-muted,
+#bs-wrap.bs-dark-mode .bs-kpi-mini-avg-label { color: rgba(244,220,210,.5) !important; }
+
+/* ═══ Phase 2 #13 A11y — 색맹 패턴 오버레이 (채도만으론 구분 어려운 환경 보조) ═══
+   활성 조건: bsFeatureFlags.a11y = true (5/24 06:00)
+   .bs-a11y 클래스가 #bs-wrap에 추가될 때 KPI 막대에 45도 사선 패턴 오버레이 */
+#bs-wrap.bs-a11y .bs-kpi-mini-bar::after {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0px, transparent 3px,
+    rgba(255,255,255,.22) 3px, rgba(255,255,255,.22) 5px
+  ) !important;
+  background-color: var(--bs-kpi-c, var(--bs-rose-dk)) !important;
+}
+
+/* ═══ Phase 2 #15 마이크로 인터랙션 ═══
+   활성 조건: bsFeatureFlags.microInteractions = true (5/24 06:00)
+   .bs-micro 클래스가 #bs-wrap에 추가될 때 활성 */
+/* donut 채워지는 애니메이션 (1s ease-out) */
+#bs-wrap.bs-micro #bs-donut-fg { transition: stroke-dasharray 1s ease-out !important; }
+/* KPI 막대 stagger — data-bs-bar-idx 속성으로 200ms씩 지연 */
+#bs-wrap.bs-micro .bs-kpi-mini-bar[data-bs-bar-idx="1"]::after { transition-delay: 0ms !important; }
+#bs-wrap.bs-micro .bs-kpi-mini-bar[data-bs-bar-idx="2"]::after { transition-delay: 200ms !important; }
+#bs-wrap.bs-micro .bs-kpi-mini-bar[data-bs-bar-idx="3"]::after { transition-delay: 400ms !important; }
+#bs-wrap.bs-micro .bs-kpi-mini-bar[data-bs-bar-idx="4"]::after { transition-delay: 600ms !important; }
+/* 미니카드 호버 */
+#bs-wrap.bs-micro .bs-mini-card {
+  transition: transform .15s ease, box-shadow .15s ease !important;
+  cursor: default !important;
+}
+#bs-wrap.bs-micro .bs-mini-card:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 24px rgba(22,33,62,.16) !important; }
+/* 평균 마커 fade-in */
+@keyframes bsAvgMarkerFade { from { opacity: 0; } to { opacity: .9; } }
+#bs-wrap.bs-micro .bs-kpi-mini-bar::before { animation: bsAvgMarkerFade .5s .4s ease-out both !important; }
+/* 터치 ripple — JS에서 span 삽입, CSS에서 애니메이션 */
+@keyframes bsRipple { from { transform: scale(0); opacity: .5; } to { transform: scale(3); opacity: 0; } }
+#bs-wrap.bs-micro .bs-cta-option { overflow: hidden !important; position: relative !important; }
+.bs-ripple-dot {
+  position: absolute !important; width: 10px !important; height: 10px !important;
+  border-radius: 50% !important; pointer-events: none !important;
+  background: rgba(201,133,110,.4) !important;
+  transform: scale(0) !important;
+  animation: bsRipple .55s ease-out forwards !important;
+  margin: -5px 0 0 -5px !important;
+}
+
+/* ═══ Phase 2 #12 OG 공유 버튼 스타일 ═══ */
+#bs-wrap .bs-share-area { padding: 4px 0 0 !important; }
+#bs-wrap .bs-share-btn {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  gap: 8px !important; width: 100% !important;
+  padding: 12px 20px !important; margin: 0 !important;
+  background: rgba(201,133,110,.09) !important;
+  border: 1.5px solid rgba(201,133,110,.28) !important;
+  border-radius: 14px !important; cursor: pointer !important;
+  font-size: 14px !important; font-weight: 600 !important;
+  color: var(--bs-rose-dk, #C9856E) !important;
+  font-family: "Pretendard Variable", Pretendard, sans-serif !important;
+  letter-spacing: -.2px !important;
+  transition: background .15s ease !important;
+  word-break: keep-all !important;
+}
+#bs-wrap .bs-share-btn:hover { background: rgba(201,133,110,.16) !important; }
+#bs-wrap .bs-share-btn:active { background: rgba(201,133,110,.22) !important; }
+
+/* ═══ Phase 2 #11 AI 코칭 섹션 스타일 ═══
+   활성 조건: bsFeatureFlags.aiCoach = true (5/24 06:00 KST)
+   PREMIUM 맛보기 1회 — Worker /api/premium/ai-coach (채팅방 5 deploy 5/22) */
+#bs-wrap .bs-ai-coach-area {
+  background: linear-gradient(135deg, #1a1040 0%, #16213E 100%) !important;
+  border-radius: 18px !important;
+  padding: 20px 18px !important;
+  margin: 10px 0 0 !important;
+  color: #fff !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  text-align: center !important;
+}
+#bs-wrap .bs-ai-coach-badge {
+  display: inline-block !important;
+  background: rgba(255,215,0,.15) !important;
+  color: #FFD700 !important;
+  border: 1px solid rgba(255,215,0,.3) !important;
+  border-radius: 20px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  margin-bottom: 10px !important;
+  letter-spacing: -.2px !important;
+}
+#bs-wrap .bs-ai-coach-title {
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  margin: 0 0 4px !important;
+  letter-spacing: -.3px !important;
+}
+#bs-wrap .bs-ai-coach-sub {
+  font-size: 13px !important;
+  opacity: .8 !important;
+  line-height: 1.55 !important;
+  margin: 0 0 14px !important;
+}
+#bs-wrap .bs-ai-coach-btn {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 13px 18px !important;
+  background: linear-gradient(90deg, #C9856E, #E8B4A8) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  font-family: "Pretendard Variable", Pretendard, sans-serif !important;
+  letter-spacing: -.2px !important;
+  word-break: keep-all !important;
+}
+#bs-wrap .bs-ai-coach-btn:hover { filter: brightness(1.05) !important; }
+#bs-wrap .bs-ai-coach-btn:active { filter: brightness(.95) !important; }
+#bs-wrap .bs-ai-coach-loading {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  gap: 6px !important;
+  padding: 12px 0 0 !important;
+}
+#bs-wrap .bs-ai-coach-loading .bs-ai-dot {
+  width: 6px !important; height: 6px !important;
+  background: rgba(255,255,255,.6) !important;
+  border-radius: 50% !important;
+  animation: bsAiDotPulse 1.4s ease-in-out infinite !important;
+}
+#bs-wrap .bs-ai-coach-loading .bs-ai-dot:nth-child(2) { animation-delay: .2s !important; }
+#bs-wrap .bs-ai-coach-loading .bs-ai-dot:nth-child(3) { animation-delay: .4s !important; }
+#bs-wrap .bs-ai-coach-loading .bs-ai-loading-text { font-size: 13px !important; opacity: .85 !important; margin-left: 6px !important; }
+@keyframes bsAiDotPulse { 0%, 60%, 100% { opacity: .3; transform: scale(.8); } 30% { opacity: 1; transform: scale(1.1); } }
+#bs-wrap .bs-ai-coach-result {
+  margin-top: 12px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(255,255,255,.15) !important;
+  text-align: left !important;
+}
+#bs-wrap .bs-ai-coach-result-text {
+  font-size: 18px !important;  /* Hub 5/18 task 5 — 60대 18px+ 강화 (was 16px, Patch #4 base) */
+  line-height: 1.7 !important;
+  opacity: .92 !important;
+  white-space: pre-line !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  margin-bottom: 12px !important;
+}
+#bs-wrap .bs-ai-coach-upgrade {
+  display: block !important;
+  text-align: center !important;
+  color: #FFD700 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  padding: 8px 0 !important;
+  letter-spacing: -.2px !important;
+}
+/* 다크모드 보정 (이미 navy 그라데이션 기반이라 큰 변경 불필요) */
+#bs-wrap.bs-dark-mode .bs-ai-coach-area {
+  background: linear-gradient(135deg, #0a0820 0%, #16213E 100%) !important;
+}
+
+/* ═══ 3-EXEC6 (5/17 KST) — Phase 2 #14 다크모드 token 전체 확장 (C-β 사양 → 실제 코드)
+   - localStorage `bs_theme` 우선 + prefers-color-scheme fallback
+   - 5/24 06:00 Feature Flag 활성 시 라이브
+   - 5등급 grade badge·bubble·hero·CTA 영역 다크 보정
+   - WCAG AA 색대비 4.5:1+ 보장 (getWcagFg JS 함수 실시간 보정 + CSS fallback) ═══ */
+
+/* (1) 사용자 토글 클래스 — bsInitDarkMode JS에서 .bs-dark-mode 추가 */
+#bs-wrap.bs-dark-mode {
+  --bs-cream: #06090F !important;
+  --bs-cream2: #16213E !important;
+  --bs-white: #1A2438 !important;
+  --bs-text: #FAF8F4 !important;
+  --bs-muted: #9DA8BD !important;
+  --bs-bd: rgba(255, 255, 255, 0.12) !important;
+  --bs-navy: #E8EBF1 !important;
+  --bs-navy2: #C5CCD9 !important;
+  --bs-nude-soft: #2A1F1B !important;
+  --bs-sh-sm: 0 2px 12px rgba(0, 0, 0, 0.35) !important;
+  --bs-sh-md: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* (2) prefers-color-scheme: dark 자동 감지 — 사용자 토글 미사용 시 fallback */
+@media (prefers-color-scheme: dark) {
+  #bs-wrap:not(.bs-light-mode) {
+    --bs-cream: #06090F;
+    --bs-cream2: #16213E;
+    --bs-white: #1A2438;
+    --bs-text: #FAF8F4;
+    --bs-muted: #9DA8BD;
+    --bs-bd: rgba(255, 255, 255, 0.12);
+    --bs-nude-soft: #2A1F1B;
+  }
+}
+
+/* (3) bubble·hero·CTA 다크 영역 보정 */
+#bs-wrap.bs-dark-mode .bs-bubble {
+  background: var(--bs-white) !important;
+  color: var(--bs-text) !important;
+  border-color: var(--bs-bd) !important;
+}
+#bs-wrap.bs-dark-mode .bs-foot {
+  color: var(--bs-muted) !important;
+}
+
+/* (4) 5등급 grade badge — getWcagFg() JS가 실시간 휘도 보정 (CSS fallback) */
+#bs-wrap.bs-dark-mode .bs-bubble-score .bs-score-grade {
+  /* grade bg 자체가 밝은 색이므로 dark text 유지 — JS getWcagFg() 자동 보정 */
+  color: #16213E !important;
+}
+
+/* (5) 토글 버튼 (헤더 우상단, 44×44 정합) */
+#bs-wrap .bs-theme-toggle {
+  position: absolute !important;
+  top: 12px !important; right: 12px !important;
+  width: 44px !important; height: 44px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+}
+#bs-wrap.bs-dark-mode .bs-theme-toggle { background: rgba(0, 0, 0, 0.3) !important; }
+
+/* ═══ 3-EXEC7 (5/17 KST) — Phase 2 #15 마이크로 인터랙션 keyframes 5종
+   - loading dot pulse (1.4s infinite) — 기존 bsAiDotPulse 재활용
+   - hover lift (CTA·card translateY -2px)
+   - tap ripple (.bs-ripple-dot 600ms scale fade)
+   - donut fill 1500ms (Grade Badge·KPI 도넛)
+   - skeleton shimmer (loading 영역, 1.6s linear infinite)
+   - 5/24 06:00 Feature Flag microInteractions ON 시 활성 ═══ */
+
+/* (1) skeleton shimmer (loading 영역 골격 표시) */
+@keyframes bsSkeletonShimmer {
+  0%   { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+#bs-wrap.bs-micro .bs-skeleton {
+  background: linear-gradient(90deg, var(--bs-cream2, #F1EFE8) 0%, rgba(255,255,255,0.4) 50%, var(--bs-cream2, #F1EFE8) 100%) !important;
+  background-size: 400px 100%;
+  animation: bsSkeletonShimmer 1.6s linear infinite !important;
+}
+
+/* (2) hover lift — CTA·card subtle translateY (Val Head functional motion) */
+#bs-wrap.bs-micro .bs-cta-option,
+#bs-wrap.bs-micro .bs-rel-card,
+#bs-wrap.bs-micro .bs-detail-trigger {
+  transition: transform var(--bs-dur-sm, 240ms) var(--bs-ease-standard, ease-out),
+              box-shadow var(--bs-dur-sm, 240ms) var(--bs-ease-standard, ease-out) !important;
+}
+#bs-wrap.bs-micro .bs-cta-option:hover,
+#bs-wrap.bs-micro .bs-rel-card:hover,
+#bs-wrap.bs-micro .bs-detail-trigger:hover {
+  transform: translateY(-2px) !important;
+}
+
+/* (3) tap ripple — pointerdown 시 dot 600ms scale fade (bsInitMicroInteractions JS 정합) */
+@keyframes bsRippleScale {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+#bs-wrap.bs-micro .bs-ripple-dot {
+  position: absolute !important;
+  width: 20px !important; height: 20px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+  animation: bsRippleScale 600ms var(--bs-ease-emphasized, ease-out) !important;
+}
+
+/* (4) donut fill stagger (Grade Badge·KPI 도넛, IntersectionObserver lazy 정합) */
+@keyframes bsDonutFill {
+  from { stroke-dashoffset: var(--bs-donut-from, 263.89); }
+  to   { stroke-dashoffset: var(--bs-donut-to, 0); }
+}
+#bs-wrap.bs-micro .bs-donut-anim {
+  animation: bsDonutFill 1500ms var(--bs-ease-emphasized, ease-out) forwards !important;
+}
+
+/* (5) loading dot pulse (이미 bsAiDotPulse line 879 정의됨 — 본 영역에 cross-ref 주석만) */
+/* @keyframes bsAiDotPulse — line 879 정의 (3 dot 1.4s infinite·delay .2s·.4s 매트릭스) */
+
+/* ═══ 박사급 §9.2 — Touch target 44×44px minimum (B-1 Patch #5, Apple HIG 정합) ═══
+   - 50~60대 원장 터치 정확도 보장
+   - interactive button class 일괄 적용
+   - regression 0 (기존 padding보다 큰 경우만 영향, 자동 가운데 정렬 보존) */
+#bs-wrap .bs-cta-option,
+#bs-wrap .bs-detail-trigger,
+#bs-wrap .bs-skip-btn,
+#bs-wrap .bs-kakao-trigger,
+#bs-wrap .bs-share-trigger,
+#bs-wrap .bs-ai-coach-btn,
+#bs-wrap .bs-ai-coach-upgrade {
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ═══ 박사급 §5.3 — Reduced motion fallback (B-1 Patch #1, WCAG 2.1 motion accessibility) ═══
+   - prefers-reduced-motion: reduce 시 모든 animation·transition 0.01ms (실질 정지)
+   - opacity transition은 보존 (정보 노출 손실 회피, 박사급 시안 §5.3 룰)
+   - Phase 2 #15 microInteractions + 도넛 IntersectionObserver + ripple 모두 정합
+   - regression 0 — 정상 사용자(prefers-reduced-motion 미설정) 동작 100% 보존 */
+@media (prefers-reduced-motion: reduce) {
+  #bs-wrap *, #bs-wrap *::before, #bs-wrap *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* opacity transition만 보존 (정보 노출 손실 회피) */
+  #bs-wrap .bs-bubble,
+  #bs-wrap .bs-cta-option,
+  #bs-wrap .bs-fade-in {
+    transition: opacity 200ms ease !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -973,13 +1326,13 @@ html, body {
         <b><span id="bs-weak-kpi-name">재방문</span> 한 축만 보강하면</b><br>
         <b><span id="bs-next-rank">상위 35%</span> 진입 가능합니다.</b><br>
         <br>
-        <span id="bs-monthly-gap-block" style="display:block;padding:12px 14px;background:rgba(226,75,74,.08);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.6;word-break:keep-all;">
+        <span id="bs-monthly-gap-block" style="display:block;padding:12px 14px;background:rgba(226,75,74,.08);border-radius:10px;font-size:18px;color:var(--bs-text);line-height:1.7;word-break:keep-all;">
           <span id="bs-monthly-gap-context">예약 취소·노쇼로 인한 손실</span>이<br>
           매월 <b><span id="bs-monthly-gap">___만원</span></b>에 달해요.<br>
           <span style="color:var(--bs-muted);font-size:13px;">이 손실이 회복할 첫 한 가지예요.</span>
         </span>
         <!-- v2.0.13 P4 — 다음 액션 카피 (dynamicData.nextAction / FE fallback gradeOfFE) -->
-        <div id="bs-next-action-block" style="margin-top:12px;padding:12px 14px;background:rgba(22,33,62,.05);border-radius:10px;font-size:14px;color:var(--bs-text);line-height:1.6;word-break:keep-all;overflow-wrap:break-word;">
+        <div id="bs-next-action-block" style="margin-top:12px;padding:12px 14px;background:rgba(22,33,62,.05);border-radius:10px;font-size:18px;color:var(--bs-text);line-height:1.7;word-break:keep-all;overflow-wrap:break-word;">
           <span id="bs-next-action">이 흐름을 다음 한 단계로 더 끌어올려보세요.</span>
         </div>
         <br>
@@ -987,7 +1340,7 @@ html, body {
         확인하실 수 있는<br>
         <b>BASIC 플랜</b>으로<br>
         시작해보시는 건 어떠세요?<br>
-        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">연간 결제 시 월 26,910원 · 원장님 매장을 매일 같이 챙겨드릴게요</span>
+        <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">정식 출시 시점에 사전 등록자 우선 안내드릴게요</span>
       </div>
     </div>
   </div>
@@ -1000,14 +1353,44 @@ html, body {
       <span>🎯 베타 50인 신청하기 (5/29 마감)</span>
       <span class="bs-cta-arrow">→</span>
     </a>
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/pricing" target="_top" id="bs-cta-pricing">
-      <span>결제하고 서비스 시작하기</span>
+    <!-- α-fix (5/17) — 결제 차단 정책 v0.2 옵션 C: /pricing 직진 → form.beautyscore.co.kr (사전 등록 swap)
+         해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원 -->
+    <a class="bs-cta-option" href="https://form.beautyscore.co.kr" target="_top" id="bs-cta-pricing">
+      <span>사전 등록하고 정식 출시 안내 받기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
     <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-kakao-trigger">
       <span>나중에 다시볼게요</span>
       <span class="bs-cta-arrow">💬</span>
     </button>
+  </div>
+
+  <!-- Phase 2 #12 OG 공유 버튼 — bsFeatureFlags.ogShare=true 시 노출 (5/24 06:00) -->
+  <div class="bs-share-area" id="bs-share-area" style="display:none" role="region" aria-label="진단 결과 공유">
+    <button class="bs-share-btn" id="bs-share-trigger" type="button" aria-label="진단 결과 카톡으로 공유하기">
+      <span aria-hidden="true">📤</span>
+      <span>진단 결과 공유하기</span>
+    </button>
+  </div>
+
+  <!-- Phase 2 #11 AI 코칭 — bsFeatureFlags.aiCoach=true 시 노출 (5/24 06:00 KST, PREMIUM 맛보기 1회) -->
+  <div class="bs-ai-coach-area" id="bs-ai-coach-area" style="display:none" role="region" aria-label="AI 코칭 PREMIUM 맛보기">
+    <div class="bs-ai-coach-badge">⭐ PREMIUM 맛보기 1회</div>
+    <div class="bs-ai-coach-title">AI가 직접 분석해드릴게요</div>
+    <div class="bs-ai-coach-sub">원장님 매장 데이터 기반 맞춤 인사이트를 지금 확인하세요</div>
+    <button class="bs-ai-coach-btn" id="bs-ai-coach-btn" type="button" aria-label="AI 코칭 받기 (1회 무료)">
+      <span aria-hidden="true">🤖</span>
+      <span>AI 코칭 받기 (1회 무료)</span>
+    </button>
+    <div class="bs-ai-coach-loading" id="bs-ai-coach-loading" style="display:none" aria-live="polite" aria-label="AI 분석 진행 중">
+      <span class="bs-ai-dot"></span><span class="bs-ai-dot"></span><span class="bs-ai-dot"></span>
+      <span class="bs-ai-loading-text">AI가 분석 중이에요...</span>
+    </div>
+    <div class="bs-ai-coach-result" id="bs-ai-coach-result" style="display:none" aria-live="polite">
+      <div class="bs-ai-coach-result-text" id="bs-ai-coach-result-text"></div>
+      <!-- α-fix (5/17) — PREMIUM 결제 흐름 차단 v0.2: /pricing → form.beautyscore.co.kr (사전 등록 swap) -->
+      <a href="https://form.beautyscore.co.kr" class="bs-ai-coach-upgrade" target="_top">💎 PREMIUM 정식 출시 안내 받기 →</a>
+    </div>
   </div>
 
   <div class="bs-foot">
@@ -1109,6 +1492,35 @@ html, body {
   }
   if (typeof window.bsFeatureFlags.hmacEnabled !== 'boolean') {
     window.bsFeatureFlags.hmacEnabled = true;  /* 5/17 flip — IP4 staged 활성 (Worker v0.9 5/19 EOD 도착 시 정합) */
+  }
+  /* Phase 2 flags — 5/24 06:00 KST 일괄 활성 */
+  if (typeof window.bsFeatureFlags.ogShare !== 'boolean') window.bsFeatureFlags.ogShare = false;
+  if (typeof window.bsFeatureFlags.darkMode !== 'boolean') window.bsFeatureFlags.darkMode = false;
+  if (typeof window.bsFeatureFlags.microInteractions !== 'boolean') window.bsFeatureFlags.microInteractions = false;
+  if (typeof window.bsFeatureFlags.a11y !== 'boolean') window.bsFeatureFlags.a11y = false;
+  if (typeof window.bsFeatureFlags.aiCoach !== 'boolean') window.bsFeatureFlags.aiCoach = false;
+
+  /* 3-EXEC1 (5/17 KST, Hub Risk 2 옵션 D) — Dark Launch master flag
+     - RESULT_FRAME_V21 = OFF 기본 → v2.0.12 동작 100% 보존 (backward compat)
+     - 5/22 D-Day 13:30 deploy = OFF 상태로 push (smoke test PASS 후 ON 전환)
+     - 5/24 06:00 PREMIUM 맛보기 activate 시점 Phase 2 5종 flip + RESULT_FRAME_V21 ON
+     - 검증 매트릭스 5항 (Feature Flag OFF 무영향·backward compat·5분 smoke·노출 0·7/1 dry run) */
+  if (typeof window.bsFeatureFlags.RESULT_FRAME_V21 !== 'boolean') {
+    window.bsFeatureFlags.RESULT_FRAME_V21 = false;
+  }
+  /* Dark Launch helper — flag OFF 시 v2.1.0 신규 영역 모두 noop, v2.0.12 동작 유지 */
+  function bsV21Enabled() {
+    return !!(window.bsFeatureFlags && window.bsFeatureFlags.RESULT_FRAME_V21);
+  }
+  /* 3-EXEC1 Risk 1 옵션 C — 가격대별 차등 인증 분기 (client-side wrapper, server 검증은 채팅방 2)
+     - 단품 (14,900원): 3 layer (referral 코드 노출)
+     - PRO/PREMIUM: 4 layer (디바이스 binding + 세션 1개 + 재시도 binding 표시)
+     - DATA.productTier 기준 자동 분기 (단품·PRO·PREMIUM·체험·기본) */
+  function bsAuthLayerByTier(tier) {
+    if (tier === 'PREMIUM') return { layers: 4, deviceBinding: true, sessionOne: true, retryBinding: true };
+    if (tier === 'PRO')     return { layers: 4, deviceBinding: true, sessionOne: true, retryBinding: false };
+    if (tier === 'STORE')   return { layers: 3, deviceBinding: false, sessionOne: false, retryBinding: false };
+    return { layers: 2, deviceBinding: false, sessionOne: false, retryBinding: false };  /* 무료 진단 기본 */
   }
 
   /* HMAC-SHA256 헤더 생성 — Web Crypto API SubtleCrypto
@@ -1839,6 +2251,13 @@ html, body {
        2. benchmarkSegment + 템플릿 (예: segment="1인샵·페이스" → "유사 1인샵·페이스 매장 평균 대비")
        3. mock fallback: "유사 매장 평균 대비" (T8 segment 매칭 정보 없는 상태에서 안전 generic) */
   function buildCompareLabel() {
+    /* 3-EXEC2 (5/17 KST) — 4-tier 통일 patch (applyCompareLabel line 1798과 정합)
+       Tier 1: Worker dynamicData.compareLabel (실시간 응답, 최우선)
+       Tier 2: T15 캐시 benchmarkCompareLabel (Worker 캐시)
+       Tier 3: segment 템플릿 (benchmarkSegment 매핑)
+       Tier 4: mock fallback ("유사 매장 평균 대비" generic)
+       β task 검증 (5/17) 잠재 결함 #1 해소 — overwrite race condition 차단 */
+    if (DATA.dynamicData && DATA.dynamicData.compareLabel) return DATA.dynamicData.compareLabel;
     if (DATA.benchmarkCompareLabel) return DATA.benchmarkCompareLabel;
     if (DATA.benchmarkSegment) return '유사 ' + DATA.benchmarkSegment + ' 매장 평균 대비';
     return '유사 매장 평균 대비';
@@ -2104,10 +2523,12 @@ html, body {
       }
     })();
 
-    /* v2.0.8 — 결제 CTA (/pricing 직진) iframe-top redirect 핸들러 */
+    /* v2.0.8 — 결제 CTA iframe-top redirect 핸들러
+       α-fix (5/17, B-1 v0.5) — 결제 차단 정책 v0.2 옵션 C: /pricing → form.beautyscore.co.kr (사전 등록 swap)
+       해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원 */
     var pricingEl = document.getElementById('bs-cta-pricing');
     if (pricingEl) {
-      var pricingUrl = 'https://app.beautyscore.co.kr/pricing';
+      var pricingUrl = 'https://form.beautyscore.co.kr';
       pricingEl.addEventListener('click', function(e){
         try {
           if (window.top !== window.self) {
@@ -2330,6 +2751,257 @@ html, body {
     }, 1800);
   }
 
+  /* ═══ Phase 2 #15 마이크로 인터랙션 ═══ */
+  function bsInitMicroInteractions() {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.microInteractions) return;
+    var wrap = document.getElementById('bs-wrap');
+    if (!wrap) return;
+    wrap.classList.add('bs-micro');
+    /* KPI 막대 stagger — data-bs-bar-idx 속성 부여 */
+    var bars = wrap.querySelectorAll('.bs-kpi-mini-bar');
+    for (var i = 0; i < bars.length; i++) bars[i].setAttribute('data-bs-bar-idx', String(i + 1));
+    /* 도넛 — IntersectionObserver로 lazy 채움 (1s ease-out) */
+    var fg = document.getElementById('bs-donut-fg');
+    if (fg) {
+      var finalDash = fg.getAttribute('stroke-dasharray') || '0 263.89';
+      fg.setAttribute('stroke-dasharray', '0 263.89');
+      if (typeof IntersectionObserver !== 'undefined') {
+        var donutObs = new IntersectionObserver(function(entries) {
+          for (var j = 0; j < entries.length; j++) {
+            if (entries[j].isIntersecting) {
+              fg.setAttribute('stroke-dasharray', finalDash);
+              donutObs.disconnect();
+              break;
+            }
+          }
+        }, { threshold: 0.1 });
+        donutObs.observe(fg);
+      } else {
+        setTimeout(function() { fg.setAttribute('stroke-dasharray', finalDash); }, 300);
+      }
+    }
+    /* 터치 ripple — pointerdown 시 .bs-ripple-dot span 삽입 */
+    var ctaBtns = wrap.querySelectorAll('.bs-cta-option');
+    for (var b = 0; b < ctaBtns.length; b++) {
+      (function(btn) {
+        btn.addEventListener('pointerdown', function(e) {
+          var dot = document.createElement('span');
+          dot.className = 'bs-ripple-dot';
+          var rect = btn.getBoundingClientRect();
+          dot.style.left = (e.clientX - rect.left) + 'px';
+          dot.style.top  = (e.clientY - rect.top)  + 'px';
+          btn.appendChild(dot);
+          setTimeout(function() { if (dot.parentNode) dot.parentNode.removeChild(dot); }, 600);
+        });
+      })(ctaBtns[b]);
+    }
+  }
+
+  /* ═══ Phase 2 #13 A11y ═══ */
+  function bsInitA11y() {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.a11y) return;
+    var wrap = document.getElementById('bs-wrap');
+    if (!wrap) return;
+    wrap.classList.add('bs-a11y');
+    /* 도넛 aria */
+    var fg = document.getElementById('bs-donut-fg');
+    var scoreEl = document.getElementById('bs-score');
+    if (fg && scoreEl) fg.setAttribute('aria-label', '매장 운영 점수 도넛: ' + scoreEl.textContent.trim() + '점');
+    /* KPI 막대 role=progressbar */
+    var rows = wrap.querySelectorAll('.bs-kpi-mini-row');
+    for (var r = 0; r < rows.length; r++) {
+      var bar  = rows[r].querySelector('.bs-kpi-mini-bar');
+      var name = rows[r].querySelector('.bs-kpi-mini-name');
+      var val  = rows[r].querySelector('.bs-kpi-mini-val');
+      if (bar && name && val) {
+        bar.setAttribute('role', 'progressbar');
+        bar.setAttribute('aria-valuemin', '0');
+        bar.setAttribute('aria-valuemax', '100');
+        bar.setAttribute('aria-label', name.textContent.trim() + ' ' + val.textContent.trim());
+      }
+    }
+    /* CTA 버튼 aria-label (텍스트 없는 arrow 버튼 보완) */
+    var ctas = wrap.querySelectorAll('.bs-cta-option');
+    for (var c = 0; c < ctas.length; c++) {
+      if (!ctas[c].getAttribute('aria-label')) {
+        var txt = ctas[c].textContent.replace('→','').replace('▼','').trim();
+        if (txt) ctas[c].setAttribute('aria-label', txt);
+      }
+    }
+  }
+
+  /* ═══ Phase 2 #14 다크모드 ═══ */
+  function bsInitDarkMode() {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.darkMode) return;
+    var wrap = document.getElementById('bs-wrap');
+    if (!wrap) return;
+    var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq && mq.matches) wrap.classList.add('bs-dark-mode');
+    try {
+      mq.addEventListener('change', function(e) {
+        if (e.matches) wrap.classList.add('bs-dark-mode');
+        else wrap.classList.remove('bs-dark-mode');
+      });
+    } catch(e) {
+      try { mq.addListener(function(e) { /* iOS 13 이하 fallback */
+        if (e.matches) wrap.classList.add('bs-dark-mode');
+        else wrap.classList.remove('bs-dark-mode');
+      }); } catch(e2){}
+    }
+  }
+
+  /* ═══ Phase 2 #12 OG 공유 ═══ */
+  function bsInitShare() {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.ogShare) return;
+    var area = document.getElementById('bs-share-area');
+    var btn  = document.getElementById('bs-share-trigger');
+    if (!area || !btn) return;
+    area.style.display = '';
+    btn.addEventListener('click', function() {
+      var storeName  = (DATA && DATA.storeName) || '매장';
+      var score      = (DATA && DATA.score)     || '?';
+      var grade      = (DATA && DATA.grade)     || '';
+      var base       = window.location.href.split('?')[0];
+      var shareUrl   = base + ((DATA && DATA.recordId && DATA.recordId !== 'demo') ? '?recordId=' + encodeURIComponent(DATA.recordId) : '');
+      var shareTitle = '[뷰티스코어] ' + storeName + ' 진단 결과';
+      var shareText  = storeName + ' ' + score + '점 (' + grade + '등급) — 내 매장 경영진단 결과예요.\n같이 해봐요 →';
+      if (navigator.share) {
+        navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(function(){});
+      } else {
+        /* clipboard fallback */
+        var full = shareText + '\n' + shareUrl;
+        var labelEl = btn.querySelector('span:last-child');
+        function showCopied() {
+          if (labelEl) { var orig = labelEl.textContent; labelEl.textContent = '링크 복사됨 ✓'; setTimeout(function(){ labelEl.textContent = orig; }, 2000); }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(full).then(showCopied).catch(function(){});
+        } else {
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = full; ta.style.cssText = 'position:fixed;opacity:0;top:-9999px;';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            showCopied();
+          } catch(e){}
+        }
+      }
+    });
+  }
+
+  /* ═══ Phase 2 #11 AI 코칭 ═══
+     PREMIUM 맛보기 1회 — Worker /api/premium/ai-coach (채팅방 5 deploy 5/22)
+     - 사용 여부 사전 확인 (graceful fallback: 버튼 노출)
+     - 사용 시 X-Idempotency-Key로 주간 idempotency 보장 */
+  function bsInitAiCoach() {
+    if (!window.bsFeatureFlags || !window.bsFeatureFlags.aiCoach) return;
+    var area = document.getElementById('bs-ai-coach-area');
+    var btn  = document.getElementById('bs-ai-coach-btn');
+    if (!area || !btn) return;
+    area.style.display = '';
+    /* 사용 여부 사전 확인 (선택 — 실패해도 graceful) */
+    var sessionToken = '';
+    try { sessionToken = sessionStorage.getItem('bs_session_token_v1') || ''; } catch(e){}
+    var recordId = (DATA && DATA.recordId) || '';
+    if (recordId && recordId !== 'demo') {
+      fetch('https://form.beautyscore.co.kr/api/premium/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': sessionToken ? ('Bearer ' + sessionToken) : ''
+        },
+        body: JSON.stringify({ recordId: recordId })
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (d && d.used && d.result) bsShowAiResult(d.result);
+      }).catch(function(){ /* graceful */ });
+    }
+    btn.addEventListener('click', bsRequestAiCoach);
+  }
+
+  function bsRequestAiCoach() {
+    var btn     = document.getElementById('bs-ai-coach-btn');
+    var loading = document.getElementById('bs-ai-coach-loading');
+    if (btn) btn.style.display = 'none';
+    if (loading) loading.style.display = '';
+    var sessionToken = '';
+    try { sessionToken = sessionStorage.getItem('bs_session_token_v1') || ''; } catch(e){}
+    var recordId = (DATA && DATA.recordId) || '';
+    var weekStamp = new Date().toISOString().slice(0,10);  /* YYYY-MM-DD (주간 idempotency) */
+    fetch('https://form.beautyscore.co.kr/api/premium/ai-coach', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': sessionToken ? ('Bearer ' + sessionToken) : '',
+        'X-Idempotency-Key': recordId + '_weekly_' + weekStamp
+      },
+      body: JSON.stringify({
+        recordId: recordId,
+        prompt_type: 'weekly_insight',
+        ab_variant: 'v1_coach'  /* HANA 5/19 finalize 후 A/B 분기 */
+      })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if (loading) loading.style.display = 'none';
+      var msg = (d && (d.insight || d.result)) || '분석이 완료됐어요.';
+      bsShowAiResult(msg);
+    }).catch(function(err){
+      if (loading) loading.style.display = 'none';
+      if (btn) btn.style.display = '';
+      console.warn('[BS Phase2 #11 AI Coach] 요청 실패:', err);
+    });
+  }
+
+  /* 3-EXEC3 (5/17 KST) — Phase 2 #11 AI 코칭 응답 UX 박사급 patch (C-α 사양 → 실제 코드)
+     - Stripe streaming pattern + 박사급 §3.3 Act 3 magic moment (30~60s window) 정합
+     - 문장 단위 200ms stagger reveal + 600ms ease-out fade-in
+     - aria-live announcement (WCAG 정합 — screen reader)
+     - reduced-motion 정합 (즉시 textContent) */
+  function bsShowAiResult(text) {
+    var result = document.getElementById('bs-ai-coach-result');
+    var resultText = document.getElementById('bs-ai-coach-result-text');
+    if (!result || !resultText) return;
+    result.style.display = '';
+    result.style.opacity = '0';
+    resultText.textContent = '';
+
+    /* reduced-motion 정합 */
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      resultText.textContent = text;
+      result.style.opacity = '1';
+      bsAnnounceAi(text);
+      return;
+    }
+
+    /* fade-in 컨테이너 (600ms ease-out, --bs-ease-emphasized 정합) */
+    result.style.transition = 'opacity 600ms cubic-bezier(0.2, 0, 0, 1)';
+    requestAnimationFrame(function() { result.style.opacity = '1'; });
+
+    /* 문장 단위 streaming reveal (마침표·줄바꿈 분할, 200ms stagger) */
+    var sentences = String(text).split(/(?<=[.!?。])\s+|\n+/).filter(Boolean);
+    var idx = 0;
+    function appendNext() {
+      if (idx >= sentences.length) { bsAnnounceAi(text); return; }
+      resultText.textContent += (idx > 0 ? ' ' : '') + sentences[idx];
+      idx++;
+      setTimeout(appendNext, 200);
+    }
+    setTimeout(appendNext, 200);
+  }
+
+  /* aria-live announcement (screen reader 정합, WCAG 2.1 Level AA) */
+  function bsAnnounceAi(text) {
+    var announcer = document.getElementById('bs-ai-announcer');
+    if (!announcer) {
+      announcer = document.createElement('div');
+      announcer.id = 'bs-ai-announcer';
+      announcer.setAttribute('aria-live', 'polite');
+      announcer.setAttribute('aria-atomic', 'true');
+      announcer.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;';
+      document.body.appendChild(announcer);
+    }
+    announcer.textContent = 'AI 코칭 결과: ' + text;
+  }
+
   /* ═══ postMessage BS_HEIGHT (Softr wrapper iframe 동기) ═══
      v2.0.12 ㉞ — DOM 변경 후 재계산 강화 (5/14 iframe BS_HEIGHT QC)
      ───────────────────────────────────────────────────────
@@ -2414,6 +3086,13 @@ html, body {
     /* v2.0.12 ㉞ — fallback throttle: 500ms마다 강제 1회 (Observer 미지원 환경 또는 누락 fallback)
        idempotent check (_bsLastHeight)로 동일 height 송신 회피 — 실제 ops 부담 0 */
     setInterval(postHeight, 500);
+    /* Phase 2 초기화 — flag=false면 즉시 return (v2.0.13 동작 100% 유지)
+       v2.1.0 5종 통합 (#11~#15 Phase 2 일괄): 5/24 06:00 KST 활성 */
+    bsInitDarkMode();           /* #14 다크모드 */
+    bsInitA11y();               /* #13 A11y */
+    bsInitMicroInteractions();  /* #15 마이크로 인터랙션 */
+    bsInitShare();              /* #12 OG 공유 */
+    bsInitAiCoach();            /* #11 AI 코칭 (PREMIUM 맛보기 1회) */
   }
 
   if (document.readyState === 'loading') {
