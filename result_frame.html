@@ -1225,6 +1225,252 @@ html, body {
     </a>
   </div>
 
+  <!-- 4-A4 (5/17 채팅방 4 협업 요청 옵션 A 채택) — 결제 차단 사전 등록 swap 컴포넌트 v0.1 통째 inline paste
+       활성: window.bsFeatureFlags.PAYMENT_BLOCK_V02 && PRE_REGISTER_SWAP 둘 다 true
+       Dark Launch OFF 기본 (5/22 D-Day 직전 ON·7/1 정식 출시 OFF 복귀)
+       Flag ON 시 swap UI 노출 + data-bs-payment-cta 결제 CTA 자동 hide
+       원본: 코드/payment_block_swap_v0.1.html (5 페이지 공통 컴포넌트, 채팅방 4 KIRA-FE/ONBOARD 박제) -->
+  <style>
+  #bs-wrap .bs-pbs-swap {
+    display: none;
+    max-width: 480px;
+    margin: 24px auto;
+    padding: 28px 22px;
+    background: var(--bs-white, #FFFFFF) !important;
+    border: 1px solid var(--bs-bd, rgba(22,33,62,0.09)) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 2px 12px rgba(22,33,62,0.07), 0 0 0 .5px rgba(22,33,62,0.06) !important;
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    font-family: 'Pretendard Variable', 'Pretendard', sans-serif !important;
+  }
+  #bs-wrap .bs-pbs-swap.bs-pbs-active { display: block !important; }
+  #bs-wrap .bs-pbs-header { text-align: center !important; margin-bottom: 20px !important; }
+  #bs-wrap .bs-pbs-header h3 {
+    font-size: 18px !important; font-weight: 800 !important;
+    color: var(--bs-text, #16213E) !important;
+    letter-spacing: -.3px !important; margin: 0 0 8px !important;
+  }
+  #bs-wrap .bs-pbs-header p {
+    font-size: 14px !important; line-height: 1.6 !important;
+    color: var(--bs-muted, #6B7488) !important; margin: 0 !important;
+  }
+  #bs-wrap .bs-pbs-header p b {
+    color: var(--bs-rose, #C9856E) !important; font-weight: 700 !important;
+  }
+  #bs-wrap .bs-pbs-benefits {
+    margin: 20px 0 !important; padding: 16px !important;
+    background: var(--bs-cream, #FAF8F4) !important;
+    border-radius: 14px !important;
+  }
+  #bs-wrap .bs-pbs-benefits > div {
+    font-size: 14px !important; line-height: 1.7 !important;
+    color: var(--bs-text, #16213E) !important;
+    word-break: keep-all !important;
+  }
+  #bs-wrap .bs-pbs-form {
+    display: flex !important; flex-direction: column !important; gap: 12px !important;
+    margin-top: 18px !important;
+  }
+  #bs-wrap .bs-pbs-form label {
+    font-size: 13px !important; font-weight: 700 !important;
+    color: var(--bs-text, #16213E) !important;
+  }
+  #bs-wrap .bs-pbs-input {
+    width: 100% !important; padding: 12px 14px !important;
+    min-height: 48px !important;
+    font-size: 16px !important;
+    font-family: 'Pretendard Variable', sans-serif !important;
+    border: 1.5px solid var(--bs-bd, rgba(22,33,62,0.16)) !important;
+    border-radius: 12px !important;
+    background: var(--bs-cream, #FAF8F4) !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: border-color .15s !important;
+  }
+  #bs-wrap .bs-pbs-input:focus {
+    border-color: var(--bs-rose, #C9856E) !important;
+    background: var(--bs-white, #FFFFFF) !important;
+  }
+  #bs-wrap .bs-pbs-btn-primary {
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    width: 100% !important; padding: 14px 20px !important;
+    min-height: 48px !important;
+    font-size: 16px !important; font-weight: 700 !important;
+    font-family: inherit !important;
+    color: var(--bs-white, #FFFFFF) !important;
+    background: var(--bs-rose, #C9856E) !important;
+    border: none !important; border-radius: 14px !important;
+    cursor: pointer !important;
+    letter-spacing: -.2px !important;
+    transition: background .15s, transform .1s !important;
+    text-align: center !important;
+  }
+  #bs-wrap .bs-pbs-btn-primary:hover {
+    background: var(--bs-rose-dk, #B8745E) !important;
+    transform: translateY(-1px) !important;
+  }
+  #bs-wrap .bs-pbs-btn-primary:disabled {
+    background: var(--bs-bd2, #cbd5e1) !important; cursor: not-allowed !important;
+    transform: none !important;
+  }
+  #bs-wrap .bs-pbs-divider {
+    text-align: center !important;
+    font-size: 12px !important; color: var(--bs-caption, #9DA8BD) !important;
+    margin: 4px 0 !important; position: relative !important;
+  }
+  #bs-wrap .bs-pbs-btn-kakao {
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    gap: 8px !important; width: 100% !important; padding: 12px 20px !important;
+    min-height: 44px !important;
+    font-size: 15px !important; font-weight: 700 !important;
+    color: #3C1E1E !important;
+    background: #FEE500 !important;
+    border: none !important; border-radius: 12px !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    text-align: center !important;
+  }
+  #bs-wrap .bs-pbs-btn-kakao:hover { background: #FDD835 !important; }
+  #bs-wrap .bs-pbs-toast {
+    margin-top: 14px !important; padding: 12px 16px !important;
+    font-size: 13px !important; line-height: 1.6 !important;
+    border-radius: 10px !important;
+    display: none !important; word-break: keep-all !important;
+  }
+  #bs-wrap .bs-pbs-toast.bs-pbs-toast-success {
+    display: block !important;
+    background: #ecfdf5 !important; color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+  }
+  #bs-wrap .bs-pbs-toast.bs-pbs-toast-error {
+    display: block !important;
+    background: #fef2f2 !important; color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+  }
+  </style>
+
+  <div class="bs-pbs-swap" id="bs-pbs-swap">
+    <div class="bs-pbs-header">
+      <h3>정식 출시 알림 받기</h3>
+      <p>뷰티스코어 PRO 플랜은 <b>2026년 7월 1일</b> 정식 출시 예정입니다.</p>
+    </div>
+    <div class="bs-pbs-benefits">
+      <div>✉️ 정식 출시 D-3 사전 안내</div>
+      <div>🎁 첫 결제 시 우선 검토 대상 포함</div>
+    </div>
+    <form class="bs-pbs-form" id="bs-pbs-form">
+      <label for="bs-pbs-email">이메일</label>
+      <input type="email" class="bs-pbs-input" id="bs-pbs-email"
+             placeholder="원장님 이메일을 입력해 주세요"
+             inputmode="email" autocomplete="email" required>
+      <button type="submit" class="bs-pbs-btn-primary" id="bs-pbs-submit">
+        이메일로 사전 등록
+      </button>
+      <div class="bs-pbs-divider">또는</div>
+      <a href="https://pf.kakao.com/_xxxx" class="bs-pbs-btn-kakao" target="_blank" rel="noopener">
+        카카오 채널 추가하기
+      </a>
+    </form>
+    <div class="bs-pbs-toast" id="bs-pbs-toast"></div>
+  </div>
+
+  <script>
+  (function() {
+    'use strict';
+    /* Feature Flag 정의 (v2.1.0 매트릭스와 중복 정의 — 안전성 위해 inline 보존) */
+    window.bsFeatureFlags = window.bsFeatureFlags || {};
+    if (window.bsFeatureFlags.PAYMENT_BLOCK_V02 === undefined) window.bsFeatureFlags.PAYMENT_BLOCK_V02 = false;
+    if (window.bsFeatureFlags.PRE_REGISTER_SWAP === undefined) window.bsFeatureFlags.PRE_REGISTER_SWAP = false;
+
+    function bsApplyPaymentBlockSwap() {
+      var swap = document.getElementById('bs-pbs-swap');
+      if (!swap) return;
+      var flagOn = window.bsFeatureFlags.PAYMENT_BLOCK_V02 && window.bsFeatureFlags.PRE_REGISTER_SWAP;
+      if (flagOn) {
+        swap.classList.add('bs-pbs-active');
+        document.querySelectorAll('[data-bs-payment-cta]').forEach(function(el) {
+          el.style.display = 'none';
+        });
+      }
+    }
+
+    async function bsSubmitPreRegister(email) {
+      var payload = {
+        email: email,
+        source: window.location.pathname,
+        ts: new Date().toISOString(),
+        user_agent: navigator.userAgent.substring(0, 200)
+      };
+      try {
+        var res = await fetch('https://app.beautyscore.co.kr/api/pre-register/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) return { success: true, source: 'worker' };
+      } catch (e) {
+        console.warn('[pre-register] worker fetch failed, fallback localStorage', e);
+      }
+      try {
+        var stored = JSON.parse(localStorage.getItem('bs_pre_register_queue') || '[]');
+        stored.push(payload);
+        localStorage.setItem('bs_pre_register_queue', JSON.stringify(stored));
+        return { success: true, source: 'localStorage_mock' };
+      } catch (e) {
+        console.warn('[pre-register] localStorage failed', e);
+      }
+      return { success: false, source: 'error' };
+    }
+
+    function bsShowPbsToast(message, type) {
+      var toast = document.getElementById('bs-pbs-toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.className = 'bs-pbs-toast bs-pbs-toast-' + (type || 'success');
+      setTimeout(function() { toast.className = 'bs-pbs-toast'; }, 5000);
+    }
+
+    function bsBindPreRegisterForm() {
+      var form = document.getElementById('bs-pbs-form');
+      if (!form) return;
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var emailInput = document.getElementById('bs-pbs-email');
+        var submitBtn = document.getElementById('bs-pbs-submit');
+        var email = (emailInput.value || '').trim();
+        if (!email || !email.includes('@') || !email.includes('.')) {
+          bsShowPbsToast('올바른 이메일을 입력해 주세요', 'error');
+          emailInput.focus();
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.textContent = '등록 중...';
+        var result = await bsSubmitPreRegister(email);
+        if (result.success) {
+          bsShowPbsToast('✅ 사전 등록 완료! 7월 1일 정식 출시 시 우선 안내드립니다.', 'success');
+          emailInput.value = '';
+        } else {
+          bsShowPbsToast('일시적 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = '이메일로 사전 등록';
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        bsApplyPaymentBlockSwap();
+        bsBindPreRegisterForm();
+      });
+    } else {
+      bsApplyPaymentBlockSwap();
+      bsBindPreRegisterForm();
+    }
+  })();
+  </script>
+  <!-- 4-A4 결제 차단 swap 컴포넌트 inline paste 종료 -->
+
   <!-- 타이핑 인디케이터 -->
   <div class="bs-typing-row" id="bs-typing">
     <div class="bs-mini-avatar">👩‍💼</div>
@@ -1354,8 +1600,9 @@ html, body {
       <span class="bs-cta-arrow">→</span>
     </a>
     <!-- α-fix (5/17) — 결제 차단 정책 v0.2 옵션 C: /pricing 직진 → form.beautyscore.co.kr (사전 등록 swap)
-         해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원 -->
-    <a class="bs-cta-option" href="https://form.beautyscore.co.kr" target="_top" id="bs-cta-pricing">
+         해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원
+         4-A4 (5/17) — Feature Flag PAYMENT_BLOCK_V02 + PRE_REGISTER_SWAP ON 시 자동 hide (data-bs-payment-cta="primary") -->
+    <a class="bs-cta-option" href="https://form.beautyscore.co.kr" target="_top" id="bs-cta-pricing" data-bs-payment-cta="primary">
       <span>사전 등록하고 정식 출시 안내 받기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
@@ -1388,8 +1635,9 @@ html, body {
     </div>
     <div class="bs-ai-coach-result" id="bs-ai-coach-result" style="display:none" aria-live="polite">
       <div class="bs-ai-coach-result-text" id="bs-ai-coach-result-text"></div>
-      <!-- α-fix (5/17) — PREMIUM 결제 흐름 차단 v0.2: /pricing → form.beautyscore.co.kr (사전 등록 swap) -->
-      <a href="https://form.beautyscore.co.kr" class="bs-ai-coach-upgrade" target="_top">💎 PREMIUM 정식 출시 안내 받기 →</a>
+      <!-- α-fix (5/17) — PREMIUM 결제 흐름 차단 v0.2: /pricing → form.beautyscore.co.kr (사전 등록 swap)
+           4-A4 (5/17) — Feature Flag ON 시 자동 hide (data-bs-payment-cta="premium") -->
+      <a href="https://form.beautyscore.co.kr" class="bs-ai-coach-upgrade" target="_top" data-bs-payment-cta="premium">💎 PREMIUM 정식 출시 안내 받기 →</a>
     </div>
   </div>
 
@@ -1507,6 +1755,16 @@ html, body {
      - 검증 매트릭스 5항 (Feature Flag OFF 무영향·backward compat·5분 smoke·노출 0·7/1 dry run) */
   if (typeof window.bsFeatureFlags.RESULT_FRAME_V21 !== 'boolean') {
     window.bsFeatureFlags.RESULT_FRAME_V21 = false;
+  }
+  /* 4-A4 (5/17 KST, 채팅방 4 협업 요청 옵션 A) — 결제 차단 정책 v0.2 + 사전 등록 swap
+     - PAYMENT_BLOCK_V02 + PRE_REGISTER_SWAP 둘 다 ON 시 swap UI 노출 + 결제 CTA 자동 hide
+     - Dark Launch OFF 기본 (5/22 D-Day 직전 ON·7/1 정식 출시 OFF 복귀)
+     - 5 페이지 공통 컴포넌트 일관성 (`코드/payment_block_swap_v0.1.html` 통째 inline paste) */
+  if (typeof window.bsFeatureFlags.PAYMENT_BLOCK_V02 !== 'boolean') {
+    window.bsFeatureFlags.PAYMENT_BLOCK_V02 = false;
+  }
+  if (typeof window.bsFeatureFlags.PRE_REGISTER_SWAP !== 'boolean') {
+    window.bsFeatureFlags.PRE_REGISTER_SWAP = false;
   }
   /* Dark Launch helper — flag OFF 시 v2.1.0 신규 영역 모두 noop, v2.0.12 동작 유지 */
   function bsV21Enabled() {
