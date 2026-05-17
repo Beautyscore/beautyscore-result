@@ -1396,22 +1396,56 @@ html, body {
     }
 
     async function bsSubmitPreRegister(email) {
+      /* 채팅방 2 KIRA-SEC 사양 정합 v0.1 (5/17 EOD advance 7일 완료):
+         - endpoint: POST /api/pre-register (단일 endpoint, /submit 분리 X)
+         - body 매트릭스: { email, phone, product_interest, utm_session_id }
+         - X-Idempotency-Key (선택, email+phone+day SHA-1 24h TTL — 본 채팅방 email-only 단순화)
+         - 503 NOT_YET_ACTIVE (Dark Launch 7/1까지) → localStorage mock fallback 유지
+         - 짝 박제: 의사결정/뷰티스코어_사전등록_endpoint_T_PRE_REGISTER_사양_v0.1_2026-05-17.md */
+      var utmSid = '';
+      try {
+        utmSid = sessionStorage.getItem('bs_utm_session_id') || '';
+        if (!utmSid) {
+          utmSid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+          sessionStorage.setItem('bs_utm_session_id', utmSid);
+        }
+      } catch(e) {}
       var payload = {
         email: email,
+        phone: '',                                /* result_frame UI = email-only 단순화 */
+        product_interest: 'PRE_REGISTER_RESULT',  /* 무료 진단 결과 페이지 사전 등록 source */
+        utm_session_id: utmSid,
+        /* 메타 (server graceful 무시 가능) */
         source: window.location.pathname,
         ts: new Date().toISOString(),
         user_agent: navigator.userAgent.substring(0, 200)
       };
       try {
-        var res = await fetch('https://app.beautyscore.co.kr/api/pre-register/submit', {
+        var res = await fetch('https://app.beautyscore.co.kr/api/pre-register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Idempotency-Key': email + '_' + (new Date().toISOString().slice(0, 10))
+          },
           body: JSON.stringify(payload)
         });
-        if (res.ok) return { success: true, source: 'worker' };
+        /* 200 정상 활성 (7/1 정식 출시 후) */
+        if (res.ok) {
+          try {
+            /* 7/1 활성 후 localStorage mock 큐 폐기 (정합) */
+            localStorage.removeItem('bs_pre_register_queue');
+          } catch(e) {}
+          return { success: true, source: 'worker' };
+        }
+        /* 503 NOT_YET_ACTIVE — Dark Launch 기간 (5/17~7/1) 정상 응답, localStorage 임시 저장 */
+        if (res.status === 503) {
+          console.info('[pre-register] Dark Launch 503 NOT_YET_ACTIVE — localStorage fallback (7/1 활성 예정)');
+          /* fallthrough → localStorage 분기 */
+        }
       } catch (e) {
         console.warn('[pre-register] worker fetch failed, fallback localStorage', e);
       }
+      /* localStorage mock fallback — Dark Launch 503 또는 fetch error 모두 안전 큐 */
       try {
         var stored = JSON.parse(localStorage.getItem('bs_pre_register_queue') || '[]');
         stored.push(payload);
