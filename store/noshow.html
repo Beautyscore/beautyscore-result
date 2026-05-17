@@ -419,6 +419,14 @@
     <a class="bs-expired-cta" href="/dashboard">대시보드로 이동 →</a>
   </div>
 
+  <!-- 준비 중 안내 (5/18 v0.2 — STORE_1_LIVE false 시 main 숨김 + 본 영역 노출 · 5/26 활성 후 자동 제거) -->
+  <div class="bs-expired-card" id="bs-coming-soon-card" style="display:none" role="alert">
+    <div class="bs-expired-icon" aria-hidden="true">🚧</div>
+    <div class="bs-expired-title">준비 중입니다</div>
+    <div class="bs-expired-msg">노쇼 행동 변화 진단 결과는<br>5월 26일부터 제공됩니다.<br><br>지금까지 입력하신 정보는<br>대시보드에서 확인하실 수 있어요.</div>
+    <a class="bs-expired-cta" href="/dashboard">대시보드로 이동 →</a>
+  </div>
+
 </div>
 
 <script>
@@ -469,8 +477,22 @@
     postHeight();
   }
 
+  /* 5/18 v0.2 — STORE_1_LIVE false 시 placeholder 노출 (5/26 활성 전 임시 안전망)
+     사용자 P0-2 fix·결제 후 페이지 진입 시 가격 진단 데이터 누출 차단 */
+  function showComingSoon() {
+    var main = document.querySelector('main');
+    var hero = document.querySelector('.bs-store-hero');
+    if (main) main.style.display = 'none';
+    if (hero) hero.style.display = 'none';
+    var soonCard = document.getElementById('bs-coming-soon-card');
+    if (soonCard) soonCard.style.display = 'block';
+    postHeight();
+  }
+
   /* ═══ Worker fetch (sig·exp 기반 P01Result) ═══ */
   function bsLoadStoreResult() {
+    /* 5/18 v0.2 patch — STORE_1_LIVE flag false 시 placeholder 우선 노출 (5/26 활성 전) */
+    if (!bsStore1Live()) { showComingSoon(); return; }
     if (isExpired()) { showExpired(); return; }
 
     fetch('/api/store/result?sig=' + encodeURIComponent(sig) + '&exp=' + exp, {
