@@ -1273,11 +1273,6 @@ html, body {
       <span>서비스 대시보드 체험하기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-1"
-       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
-      <span>🎯 베타 서비스 신청하기 (~5/29)</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
   </div>
 
   <!-- 4-A4 (5/17 채팅방 4 협업 요청 옵션 A 채택) — 결제 차단 사전 등록 swap 컴포넌트 v0.1 통째 inline paste
@@ -2855,7 +2850,7 @@ html, body {
       var betaEnd = new Date('2026-05-29T21:00:00+09:00');
       var now = new Date();
       var isBetaOpen = now < betaEnd;
-      var betaIds = ['bs-cta-beta-1', 'bs-cta-beta-2'];
+      var betaIds = ['bs-cta-beta-2'];
       betaIds.forEach(function(id) {
         var el = document.getElementById(id);
         if (!el) return;
