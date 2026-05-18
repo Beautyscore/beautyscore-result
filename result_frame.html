@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>뷰티스코어 진단 결과</title>
 <meta name="description" content="옆 매장 원장님이 한 달 뒤 알게 될 숫자, 먼저 보세요. 에스테틱 전용 경영 AI — 감이 아닌 데이터로, 숫자가 아닌 다음 액션을 드립니다. 1인샵·소규모 매장 전문, 1분 무료 진단.">
-<!-- ═══ OG / Twitter (SNS 링크 미리보기 카드 — 5/18 v2.1.1 추가) ═══ -->
+<!-- ═══ OG / Twitter (SNS 링크 미리보기 카드 — 5/18 v2.1.0 P0-1 추가, 라이브 v2.1.1 정합) ═══ -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="뷰티스코어">
 <meta property="og:title" content="옆 매장은 78점. 원장님은요? · 뷰티스코어">
@@ -438,74 +438,109 @@ html, body {
 }
 
 /* 점수 버블 (Hero급) */
+/* ═══ v2.1.0 럭셔리 리뉴얼 (5/18 KIRA-FE/RESULT) — B안 hybrid ═══
+   ─────────────────────────────────────────────────────────────
+   ① layout 가로 row → 세로 column (큰 도넛 중앙)
+   ② 도넛 size 64px → 200px (hero scale)·stroke-width 9→6 (얇은 럭셔리 ring)
+   ③ 도넛 안 3단 통합: 상단 라벨 + 중앙 점수 72px + 하단 등급 텍스트 (배지 모양 reset)
+   ④ 부가 텍스트 (상위 N%·storeType·strength·delta) 도넛 아래 sub 영역 중앙 정렬
+   ⑤ 배경 더 깊은 navy 그라데이션 (#0F1525 → #1A2438 → #243152 3-stop) + radius 20px
+   ⑥ 5등급 컬러 — 도넛 안에서는 배경 transparent + 텍스트 컬러 분기 (배지 모양 X) ═══ */
 #bs-wrap .bs-bubble-score {
-  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important;
+  background: linear-gradient(135deg, #0F1525 0%, #1A2438 55%, #243152 100%) !important;
   color: var(--bs-white) !important; border: none !important;
-  padding: 18px 20px !important;
+  padding: 32px 24px 28px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 36px rgba(15,21,37,.35), inset 0 0 0 .5px rgba(255,255,255,.06) !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-row {
-  display: flex !important; align-items: center !important; gap: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 20px !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-donut {
-  width: 64px !important; height: 64px !important; flex-shrink: 0 !important; position: relative !important;
+  width: 200px !important; height: 200px !important;
+  flex-shrink: 0 !important; position: relative !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-donut svg { width: 100% !important; height: 100% !important; transform: rotate(-90deg) !important; }
 #bs-wrap .bs-bubble-score .bs-mini-d-inner {
   position: absolute !important; inset: 0 !important;
   display: flex !important; flex-direction: column !important;
-  align-items: center !important; justify-content: center !important; line-height: 1 !important;
+  align-items: center !important; justify-content: center !important;
+  gap: 6px !important; line-height: 1 !important;
 }
-#bs-wrap .bs-bubble-score .bs-mini-d-num { font-size: 24px !important; font-weight: 900 !important; color: var(--bs-white) !important; letter-spacing: -.04em !important; }
-#bs-wrap .bs-bubble-score .bs-mini-d-lbl { font-size: 10px !important; color: rgba(255,255,255,.7) !important; font-weight: 700 !important; margin-top: 2px !important; }
-#bs-wrap .bs-bubble-score .bs-score-info { flex: 1 !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade {
+#bs-wrap .bs-bubble-score .bs-mini-d-label-top {
+  font-size: 12.5px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,.7) !important;
+  letter-spacing: -.1px !important;
+  word-break: keep-all !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-d-num-wrap {
+  display: inline-flex !important;
+  align-items: baseline !important;
+  justify-content: center !important;
+  gap: 3px !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-d-num {
+  font-size: 72px !important; font-weight: 900 !important;
+  color: var(--bs-white) !important;
+  letter-spacing: -.06em !important; line-height: 1 !important;
+}
+#bs-wrap .bs-bubble-score .bs-mini-d-lbl {
+  font-size: 18px !important; font-weight: 700 !important;
+  color: rgba(255,255,255,.8) !important;
+  letter-spacing: -.02em !important; margin: 0 !important;
+}
+#bs-wrap .bs-bubble-score .bs-score-info {
+  width: 100% !important;
+  text-align: center !important;
+}
+/* 도넛 안 등급 — 배지 모양 reset, 텍스트 only (rose 컬러 fallback)
+   applyGradeBadge() JS가 .bs-score-grade에 grade-X 클래스 부여 → 텍스트 컬러 분기 */
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade {
   display: inline-block !important;
-  background: var(--bs-rose) !important; color: var(--bs-white) !important;
-  font-size: 13px !important; font-weight: 900 !important;
-  padding: 3px 10px !important; border-radius: 10px !important; margin-bottom: 4px !important;
-  transition: background-color .25s ease !important;
+  background: transparent !important;
+  color: var(--bs-nude) !important;
+  font-size: 14px !important; font-weight: 800 !important;
+  padding: 0 !important; margin: 0 !important;
+  border-radius: 0 !important; box-shadow: none !important;
+  letter-spacing: -.1px !important;
+  transition: color .25s ease !important;
 }
-/* 5등급 컬러 (imweb 기준 5/11 박제 최종 — S 금색🏆·A 초록·B 파랑·C 노랑·D 빨강)
-   v2.0.13 P1 fix — WCAG AA 접근성 교정: 5등급 모두 color:#16213E dark text 명시
-   5/15 dry-run 발견: B(#3B82F6 L=0.236)·D(#EF4444 L=0.229) 모두 L > 0.179 → JS getWcagFg() dark
-   → CSS fallback도 dark 일관 (JS 동작 = CSS 일관성, Softr 외부 CSS override 디펜시브) */
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-s { background: #D4AF37 !important; color: #16213E !important; box-shadow: 0 2px 8px rgba(212,175,55,.30) !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-a { background: #22C55E !important; color: #16213E !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-b { background: #3B82F6 !important; color: #16213E !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-c { background: #EAB308 !important; color: #16213E !important; }
-#bs-wrap .bs-bubble-score .bs-score-grade.grade-d { background: #EF4444 !important; color: #16213E !important; }
+/* 5등급 컬러 (도넛 안) — S 금색·A 초록·B 파랑·C 노랑·D 빨강 텍스트 컬러 분기 (배경 X)
+   imweb 5/11 박제 최종 정합 + 어두운 navy 배경 위 가독성 보장 (WCAG AA 4.5:1+) */
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade.grade-s { color: #FFD757 !important; background: transparent !important; box-shadow: none !important; text-shadow: 0 0 12px rgba(255,215,87,.4) !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade.grade-a { color: #4ADE80 !important; background: transparent !important; box-shadow: none !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade.grade-b { color: #60A5FA !important; background: transparent !important; box-shadow: none !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade.grade-c { color: #FACC15 !important; background: transparent !important; box-shadow: none !important; }
+#bs-wrap .bs-bubble-score .bs-mini-d-inner .bs-score-grade.grade-d { color: #F87171 !important; background: transparent !important; box-shadow: none !important; }
 /* 5/14 patch — 등급_라벨 노출 (Phase 3, Airtable 등급_라벨 lookup fldkBtnjJbo9tnAAq) */
 #bs-wrap .bs-bubble-score .bs-grade-label-full {
-  margin-top: 6px !important; padding: 6px 12px !important;
+  margin: 0 auto 8px !important; padding: 6px 12px !important;
   background: rgba(255,255,255,.12) !important; border-radius: 8px !important;
   font-size: 13px !important; font-weight: 700 !important;
   color: var(--bs-nude) !important; letter-spacing: -.2px !important;
   word-break: keep-all !important; line-height: 1.4 !important;
-}
-#bs-wrap .bs-bubble-score .bs-score-grade-label {
-  font-size: 11px !important; font-weight: 700 !important;
-  color: rgba(255,255,255,.85) !important;
-  margin-right: 4px !important; letter-spacing: -.2px !important;
+  display: inline-block !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank {
   font-size: 14.5px !important; font-weight: 700 !important;
-  color: rgba(255,255,255,.92) !important; line-height: 1.6 !important;
+  color: rgba(255,255,255,.92) !important;
+  line-height: 1.6 !important;
+  text-align: center !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank b { color: var(--bs-nude) !important; font-weight: 900 !important; }
-#bs-wrap .bs-bubble-score .bs-score-rank-hint {
-  font-size: 12px !important; color: rgba(255,255,255,.7) !important;
-  font-weight: 600 !important; margin-bottom: 4px !important;
-  word-break: keep-all !important; line-height: 1.5 !important;
-}
 #bs-wrap .bs-bubble-score .bs-score-rank-line {
-  margin-bottom: 2px !important;
+  margin-bottom: 4px !important;
   word-break: keep-all !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-rank-delta-hint {
   font-size: 13px !important; color: rgba(255,255,255,.85) !important;
-  margin-top: 6px !important; padding-top: 6px !important;
+  margin-top: 12px !important; padding-top: 10px !important;
   border-top: 1px solid rgba(255,255,255,.15) !important;
   line-height: 1.5 !important;
+  text-align: center !important;
 }
 #bs-wrap .bs-bubble-score .bs-score-delta-explain {
   font-size: 11px !important; color: rgba(255,255,255,.7) !important;
@@ -947,18 +982,15 @@ html, body {
   --bs-sh-md: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* (2) prefers-color-scheme: dark 자동 감지 — 사용자 토글 미사용 시 fallback */
-@media (prefers-color-scheme: dark) {
-  #bs-wrap:not(.bs-light-mode) {
-    --bs-cream: #06090F;
-    --bs-cream2: #16213E;
-    --bs-white: #1A2438;
-    --bs-text: #FAF8F4;
-    --bs-muted: #9DA8BD;
-    --bs-bd: rgba(255, 255, 255, 0.12);
-    --bs-nude-soft: #2A1F1B;
-  }
-}
+/* (2) prefers-color-scheme: dark 자동 감지 — 5/18 P0 fix (KIRA-FE/RESULT)
+   ❌ 기존: @media (prefers-color-scheme: dark) { #bs-wrap:not(.bs-light-mode) { ... } }
+       → OS 다크모드 환경에서 Feature Flag bsFeatureFlags.darkMode 우회 자동 발화
+       → v2.0.13 동작 100% 보존 (regression 0) base 가설 위반
+       → 60대 원장님 OS 다크모드 환경 의도하지 않은 다크 노출 (가독성 우려)
+   ✅ Fix (A) 옵션 채택 (대표님 컨펌): @media block 제거
+       → OS 자동 감지는 JS bsInitDarkMode() 함수에서만 처리 (line 3151~3156)
+       → Feature Flag darkMode=true 시점에 JS가 matchMedia 감지 → .bs-dark-mode 추가
+       → CSS 자동 발화 차단·v2.0.13 동작 100% 복원·regression 0 */
 
 /* (3) bubble·hero·CTA 다크 영역 보정 */
 #bs-wrap.bs-dark-mode .bs-bubble {
@@ -1130,27 +1162,34 @@ html, body {
   <div class="bs-bubble-group bs-pending" id="bubble-score" style="display:none">
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
+      <!-- v2.1.0 럭셔리 리뉴얼 (5/18 KIRA-FE/RESULT) — B안 hybrid 채택
+           ─────────────────────────────────────────────────────────────
+           ① layout 가로 row → 세로 column (큰 도넛 중앙)
+           ② 도넛 size 64px → 200px (hero scale)
+           ③ 도넛 안 3단 통합: 상단 라벨 + 중앙 거대 점수 + 하단 등급 텍스트 (배지 모양 제거)
+           ④ 부가 텍스트 (상위 N%·storeType·strength·delta) 도넛 아래 sub 영역
+           ⑤ "산정등급" label 제거 (도넛 안 텍스트로 통합) + "유사 매장 비교 결과" 헬퍼 → 도넛 안 top label
+           ⑥ applyGradeBadge() 함수 정합 보존 (.bs-score-grade parentElement 5등급 클래스 자동 부여) -->
       <div class="bs-bubble bs-bubble-score">
         <div class="bs-score-row">
           <div class="bs-mini-donut">
             <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/>
-              <circle id="bs-donut-fg" cx="50" cy="50" r="42" fill="none" stroke="#E8B4A8" stroke-width="9"
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="6"/>
+              <circle id="bs-donut-fg" cx="50" cy="50" r="42" fill="none" stroke="#E8B4A8" stroke-width="6"
                 stroke-dasharray="166.5 263.89" stroke-linecap="round"/>
             </svg>
             <div class="bs-mini-d-inner">
-              <span class="bs-mini-d-num" id="bs-score">63</span>
-              <span class="bs-mini-d-lbl">점</span>
+              <span class="bs-mini-d-label-top">유사 매장 비교 결과</span>
+              <span class="bs-mini-d-num-wrap">
+                <span class="bs-mini-d-num" id="bs-score">63</span><span class="bs-mini-d-lbl">점</span>
+              </span>
+              <div class="bs-score-grade"><span id="bs-grade">C+</span> 등급</div>
             </div>
           </div>
           <div class="bs-score-info">
-            <div class="bs-score-grade"><span class="bs-score-grade-label">산정등급</span> <span id="bs-grade">C+</span></div>
             <!-- 5/14 patch — 등급_라벨 노출 (Phase 3) -->
             <div class="bs-grade-label-full" id="bs-grade-label-full" style="display:none"></div>
             <div class="bs-score-rank">
-              <div class="bs-score-rank-hint">
-                <b>유사 매장 비교 결과</b>
-              </div>
               <div class="bs-score-rank-line"><b id="bs-rank">상위 50%</b></div>
               <div class="bs-score-rank-line" id="bs-store-type-line">다양한 프로그램으로 운영하는 다인 매장</div>
               <div class="bs-score-rank-line" id="bs-store-strength-line">매출 구조가 안정적이에요</div>
@@ -1223,17 +1262,20 @@ html, body {
   <!-- 초기 CTA 옵션 (v2.0.8 — CTA 카피 정정 / v2.0.13 베타 CTA 분기) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-initial" style="display:none">
     <!-- 베타 신청 CTA (5/29 20:00 KST 마감 — JS 분기로 자동 노출/숨김) -->
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-1"
-       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
-      <span>🎯 베타 50인 신청하기 (5/29 마감)</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
+    <!-- v2.1.0 patch (5/18 KIRA-FE/RESULT) — 베타 CTA 위치 최하단 이동 (B안)
+         사유: "핵심 운영 지표 상세히보기" 클릭 시 페이지 하단으로 스크롤 → 위로 올라오는 부담 ↓
+         primary CTA를 최상단·secondary 중간·베타 CTA 최하단 순서로 배치 -->
     <button class="bs-cta-option" type="button" id="bs-detail-trigger">
       <span>핵심 운영 지표 상세히보기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
       <span>서비스 대시보드 체험하기</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-1"
+       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
+      <span>🎯 베타 서비스 신청하기 (~5/29)</span>
       <span class="bs-cta-arrow">→</span>
     </a>
   </div>
@@ -1383,9 +1425,10 @@ html, body {
       <div class="bs-pbs-divider">또는</div>
       <!-- R1 unblock (Hub 5/17 23:35 결정) — placeholder `pf.kakao.com/_xxxx` 폐기
            Softr 베타 신청 URL 직접 link 통일 (3 click → 1 click funnel)
-           색상 카카오 옐로우 유지 (5/26 MINA 시각 QC 시점 brand 정합 재결정 P3) -->
+           색상 카카오 옐로우 유지 (5/26 MINA 시각 QC 시점 brand 정합 재결정 P3)
+           v2.1.0 patch (5/18 KIRA-FE/RESULT) — 카피 단축: "🎯 베타 50인 신청하기" → "🎯 베타 서비스 신청하기 (~5/29)" -->
       <a href="https://app.beautyscore.co.kr/beta" class="bs-pbs-btn-kakao" target="_top" rel="noopener">
-        🎯 베타 50인 신청하기
+        🎯 베타 서비스 신청하기 (~5/29)
       </a>
     </form>
     <div class="bs-pbs-toast" id="bs-pbs-toast"></div>
@@ -1641,14 +1684,8 @@ html, body {
     </div>
   </div>
 
-  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정 / v2.0.13 베타 CTA 분기) -->
+  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정 / v2.0.13 베타 CTA 분기 / v2.1.0 5/18 — 베타 CTA 최하단 이동 B안 + 카피 단축) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
-    <!-- 베타 신청 CTA (5/29 20:00 KST 마감 — JS 분기) -->
-    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
-       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
-      <span>🎯 베타 50인 신청하기 (5/29 마감)</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
     <!-- α-fix (5/17) — 결제 차단 정책 v0.2 옵션 C: /pricing 직진 → form.beautyscore.co.kr (사전 등록 swap)
          해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원
          4-A4 (5/17) — Feature Flag PAYMENT_BLOCK_V02 + PRE_REGISTER_SWAP ON 시 자동 hide (data-bs-payment-cta="primary") -->
@@ -1660,6 +1697,13 @@ html, body {
       <span>나중에 다시볼게요</span>
       <span class="bs-cta-arrow">💬</span>
     </button>
+    <!-- v2.1.0 patch (5/18 KIRA-FE/RESULT) — 베타 CTA 최하단 이동 B안 + 카피 단축
+         "🎯 베타 50인 신청하기 (5/29 마감)" → "🎯 베타 서비스 신청하기 (~5/29)" -->
+    <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
+       style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
+      <span>🎯 베타 서비스 신청하기 (~5/29)</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
   </div>
 
   <!-- Phase 2 #12 OG 공유 버튼 — bsFeatureFlags.ogShare=true 시 노출 (5/24 06:00) -->
@@ -2803,11 +2847,12 @@ html, body {
         }
       });
     });
-    /* v2.0.13 — 베타 CTA 날짜 분기 (5/22 00:00 ~ 5/29 20:00 KST)
+    /* v2.1.0 P1-1 (5/18 KIRA-FE/RESULT) — 베타 CTA 날짜 분기 (5/22 00:00 ~ 5/29 21:00 KST)
        베타 기간: /beta 버튼 최상단 노출 + /pricing secondary 처리
-       5/29 20:00 KST 이후: 베타 CTA 자동 숨김, pricing 원복 */
+       5/29 21:00 KST 이후: 베타 CTA 자동 숨김, pricing 원복
+       (20:00 → 21:00 정합 — 결제 차단 정책 v0.2 카피·시스템 21:00 통일) */
     (function() {
-      var betaEnd = new Date('2026-05-29T21:00:00+09:00');  /* 5/18 v2.1.1 patch — 본방 5/16 박제 5/29 21:00 통일 결정 정합 (이전: 20:00) */
+      var betaEnd = new Date('2026-05-29T21:00:00+09:00');
       var now = new Date();
       var isBetaOpen = now < betaEnd;
       var betaIds = ['bs-cta-beta-1', 'bs-cta-beta-2'];
@@ -3038,9 +3083,13 @@ html, body {
     runSequence(DETAIL_SEQUENCE);
   }
 
-  /* ═══ 카톡 채널 추가 + 종료 ═══ */
+  /* ═══ 카톡 채널 추가 + 종료 ═══
+     v2.1.0 P1-10 (5/18 KIRA-FE/RESULT) — 3건 정합:
+       ① http://pf.kakao.com → https:// (보안)
+       ② iframe top redirect → app.beautyscore.co.kr (Softr 라이브 메인)
+       ③ self redirect → app.beautyscore.co.kr (CLAUDE.md §11 운영 도메인 정합) */
   function kakaoFollowAndExit() {
-    window.open('http://pf.kakao.com/_SXpxhX/friend', '_blank', 'noopener');
+    window.open('https://pf.kakao.com/_SXpxhX/friend', '_blank', 'noopener');
     try {
       var t = document.createElement('div');
       t.style.cssText = 'position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#16213E;color:#fff;padding:14px 22px;border-radius:14px;font-size:13.5px;font-weight:700;letter-spacing:-.2px;box-shadow:0 8px 24px rgba(22,33,62,.25);z-index:300;max-width:90%;text-align:center;font-family:"Pretendard Variable",sans-serif;line-height:1.5;';
@@ -3051,11 +3100,11 @@ html, body {
       /* iframe 안이면 부모 redirect, 아니면 자기 redirect */
       try {
         if (window.top !== window.self) {
-          window.top.location.href = 'https://beautyscore.co.kr';
+          window.top.location.href = 'https://app.beautyscore.co.kr';
           return;
         }
       } catch(e){}
-      location.href = 'https://beautyscore.co.kr';
+      location.href = 'https://app.beautyscore.co.kr';
     }, 1800);
   }
 
