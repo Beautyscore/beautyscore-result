@@ -1269,10 +1269,6 @@ html, body {
       <span>핵심 운영 지표 상세히보기</span>
       <span class="bs-cta-arrow">▼</span>
     </button>
-    <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-1">
-      <span>서비스 대시보드 체험하기</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
   </div>
 
   <!-- 4-A4 (5/17 채팅방 4 협업 요청 옵션 A 채택) — 결제 차단 사전 등록 swap 컴포넌트 v0.1 통째 inline paste
@@ -1694,6 +1690,11 @@ html, body {
     </button>
     <!-- v2.1.0 patch (5/18 KIRA-FE/RESULT) — 베타 CTA 최하단 이동 B안 + 카피 단축
          "🎯 베타 50인 신청하기 (5/29 마감)" → "🎯 베타 서비스 신청하기 (~5/29)" -->
+    <!-- v0.7 시안 반영 (5/18 KIRA-FE/RESULT) — 서비스 대시보드 체험하기 중간→최하단 이동 -->
+    <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-2">
+      <span>서비스 대시보드 체험하기</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
     <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
        style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
       <span>🎯 베타 서비스 신청하기 (~5/29)</span>
@@ -2824,7 +2825,7 @@ html, body {
     if (dashParams.length > 0) {
       dashUrl += '?' + dashParams.join('&');
     }
-    ['bs-cta-dashboard-1'].forEach(function(id){
+    ['bs-cta-dashboard-1', 'bs-cta-dashboard-2'].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       el.setAttribute('href', dashUrl);
