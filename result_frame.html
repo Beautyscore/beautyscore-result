@@ -1109,6 +1109,16 @@ html, body {
   justify-content: center !important;
 }
 
+/* ═══ Phase 2 #13 A11y — WCAG 2.1 Level AA 2.4.7 Focus Visible (5/19 cascade patch)
+   :focus-visible UA 키보드 활성화 시에만 outline (마우스 클릭 시 X) — 일반 사용자 영향 0
+   적용 범위: interactive element 전역 (.bs-a11y prefix 없이 — D-Day 5/22 즉시 정합)
+   짝 박제: 의사결정/뷰티스코어_Phase2_#13_A11y_청사진_2026-05-15.md §1.2 #2 키보드 navigate */
+#bs-wrap :focus-visible {
+  outline: 3px solid #C9856E !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
 /* ═══ 박사급 §5.3 — Reduced motion fallback (B-1 Patch #1, WCAG 2.1 motion accessibility) ═══
    - prefers-reduced-motion: reduce 시 모든 animation·transition 0.01ms (실질 정지)
    - opacity transition은 보존 (정보 노출 손실 회피, 박사급 시안 §5.3 룰)
