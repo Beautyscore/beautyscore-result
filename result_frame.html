@@ -20,6 +20,15 @@
 <meta name="twitter:title" content="옆 매장은 78점. 원장님은요? · 뷰티스코어">
 <meta name="twitter:description" content="에스테틱 전용 경영 AI · 1인샵·소규모 매장 전문 · 1분 무료 진단">
 <meta name="twitter:image" content="https://beautyscore.github.io/beautyscore-result/og_image.png">
+<!-- ═══ Phase 2 #12 Kakao SDK (5/19 사전 박제 · 5/22 D-Day windows KAKAO_JS_KEY 실 값 교체 · Feature Flag ogShare OFF 기본) ═══ -->
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+        integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka"
+        crossorigin="anonymous"></script>
+<script>
+  if (window.Kakao && !window.Kakao.isInitialized()) {
+    try { window.Kakao.init('PLACEHOLDER_KAKAO_JS_KEY'); } catch(e){} /* KIRA-OPS env 5/22 실 값 교체 */
+  }
+</script>
 <!--
   뷰티스코어 result-frame v2.1.0 (KIRA, Phase 2 #11~#15 통합 — 5/17 P1 sprint)
   ═══════════════════════════════════════════════════════════════
@@ -3210,6 +3219,44 @@ html, body {
   }
 
   /* ═══ Phase 2 #12 OG 공유 ═══ */
+  /* shareToKakao — kakao.Link.sendDefault 동적 OG (5/19 사전 박제, 청사진 §4.2 정합)
+     — imageUrl: Worker /api/og/render 동적 1200×630 PNG (KIRA-AI 5/20 deploy 후 활성)
+     — link: app.beautyscore.co.kr/r/${recordId} (Softr 라우팅)
+     — 공유 카운트: /api/premium/share-track (Worker 미배포 시 silent skip) */
+  function shareToKakao(recordId, storeName, score, grade) {
+    if (!window.Kakao || !window.Kakao.Link) return;
+    try {
+      window.Kakao.Link.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: '[뷰티스코어] ' + storeName + ' 진단 결과',
+          description: storeName + ' ' + score + '점 (' + grade + '등급) · 에스테틱 경영 AI 1분 무료 진단',
+          imageUrl: 'https://api.beautyscore.co.kr/api/og/render?recordId=' + encodeURIComponent(recordId) + '&format=opengraph',
+          imageWidth: 1200,
+          imageHeight: 630,
+          link: {
+            mobileWebUrl: 'https://app.beautyscore.co.kr/r/' + encodeURIComponent(recordId),
+            webUrl:       'https://app.beautyscore.co.kr/r/' + encodeURIComponent(recordId)
+          }
+        },
+        buttons: [{
+          title: '진단 결과 보기',
+          link: {
+            mobileWebUrl: 'https://app.beautyscore.co.kr/r/' + encodeURIComponent(recordId),
+            webUrl:       'https://app.beautyscore.co.kr/r/' + encodeURIComponent(recordId)
+          }
+        }]
+      });
+      try {
+        fetch('/api/premium/share-track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recordId: recordId })
+        }).catch(function(){});
+      } catch(e){}
+    } catch(err) {}
+  }
+
   function bsInitShare() {
     if (!window.bsFeatureFlags || !window.bsFeatureFlags.ogShare) return;
     var area = document.getElementById('bs-share-area');
@@ -3220,10 +3267,16 @@ html, body {
       var storeName  = (DATA && DATA.storeName) || '매장';
       var score      = (DATA && DATA.score)     || '?';
       var grade      = (DATA && DATA.grade)     || '';
+      var recordId   = (DATA && DATA.recordId)  || '';
       var base       = window.location.href.split('?')[0];
-      var shareUrl   = base + ((DATA && DATA.recordId && DATA.recordId !== 'demo') ? '?recordId=' + encodeURIComponent(DATA.recordId) : '');
+      var shareUrl   = base + ((recordId && recordId !== 'demo') ? '?recordId=' + encodeURIComponent(recordId) : '');
       var shareTitle = '[뷰티스코어] ' + storeName + ' 진단 결과';
       var shareText  = storeName + ' ' + score + '점 (' + grade + '등급) — 내 매장 경영진단 결과예요.\n같이 해봐요 →';
+      /* Phase 2 #12 — Kakao SDK 우선 분기 (5/19 사전 박제 · 청사진 §4.2) */
+      if (window.Kakao && window.Kakao.Link && window.Kakao.isInitialized && window.Kakao.isInitialized() && recordId && recordId !== 'demo') {
+        shareToKakao(recordId, storeName, score, grade);
+        return;
+      }
       if (navigator.share) {
         navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(function(){});
       } else {
