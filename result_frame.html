@@ -2753,8 +2753,6 @@ html, body {
     /* v2.0.6 patch — rank에서 분리한 매장유형·강점 우선, 없으면 wrapper params, 둘 다 없으면 hide */
     setLineOrHide('bs-store-type-line', parsedRank.extras[0] || DATA.storeType);
     setLineOrHide('bs-store-strength-line', parsedRank.extras[1] || DATA.storeStrength);
-    setText('bs-strength-name', KPI_NAME[DATA.strKpi] || '상담 성공률');
-    setText('bs-strength-name-2', KPI_NAME[DATA.strKpi] || '상담 성공률');
     setText('bs-strength-delta', DATA.strDelta);
     /* v2.0.11 — segment-aware 비교 라벨 ("비교축 대비" 폐기) */
     var compareLabel = buildCompareLabel();
