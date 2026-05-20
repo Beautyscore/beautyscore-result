@@ -1438,8 +1438,9 @@ html, body {
            색상 카카오 옐로우 유지 (5/26 MINA 시각 QC 시점 brand 정합 재결정 P3)
            v2.1.0 patch (5/18 KIRA-FE/RESULT) — 카피 단축: "🎯 베타 50인 신청하기" → "🎯 베타 서비스 신청하기 (~5/29)" -->
       <a href="https://app.beautyscore.co.kr/beta" class="bs-pbs-btn-kakao" target="_top" rel="noopener">
-        🎯 베타 서비스 신청하기 (~5/29)
+        🎯 베타 신청하기 (심사 선정·50명 한정)
       </a>
+      <p style="margin:6px 0 0;text-align:center;font-size:12px;color:#6B7488;word-break:keep-all;">5/22 09:00 신청 시작 · 5/30 09:00 서비스 시작</p>
     </form>
     <div class="bs-pbs-toast" id="bs-pbs-toast"></div>
   </div>
@@ -1723,9 +1724,10 @@ html, body {
     </a>
     <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
        style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
-      <span>🎯 베타 서비스 신청하기 (~5/29)</span>
+      <span>🎯 베타 신청하기 (심사 선정·50명 한정)</span>
       <span class="bs-cta-arrow">→</span>
     </a>
+    <p id="bs-cta-beta-schedule" style="display:none;margin:6px 0 0;text-align:center;font-size:12px;color:#6B7488;word-break:keep-all;">5/22 09:00 신청 시작 · 5/30 09:00 서비스 시작</p>
   </div>
 
   <!-- Phase 2 #12 OG 공유 버튼 — bsFeatureFlags.ogShare=true 시 노출 (5/24 06:00) -->
@@ -2867,10 +2869,11 @@ html, body {
         }
       });
     });
-    /* v2.1.0 P1-1 (5/18 KIRA-FE/RESULT) — 베타 CTA 날짜 분기 (5/22 00:00 ~ 5/29 21:00 KST)
+    /* v2.1.0 P1-1 (5/18 KIRA-FE/RESULT) — 베타 CTA 날짜 분기 (5/22 09:00 ~ 5/29 21:00 KST)
        베타 기간: /beta 버튼 최상단 노출 + /pricing secondary 처리
        5/29 21:00 KST 이후: 베타 CTA 자동 숨김, pricing 원복
-       (20:00 → 21:00 정합 — 결제 차단 정책 v0.2 카피·시스템 21:00 통일) */
+       (20:00 → 21:00 정합 — 결제 차단 정책 v0.2 카피·시스템 21:00 통일)
+       5/20 patch (KIRA-FUNNEL) — 시작 시각 00:00 → 09:00 KST 정합 (실제 모집 09:00 KST) */
     (function() {
       var betaStart = new Date('2026-05-22T00:00:00.000Z'); // 5/22 09:00 KST (5/20 patch — 실제 모집 09:00 KST)
       var betaEnd   = new Date('2026-05-29T12:00:00.000Z'); // 5/29 21:00 KST
@@ -2882,6 +2885,8 @@ html, body {
         if (!el) return;
         if (isBetaOpen) {
           el.style.display = '';
+          var sch = document.getElementById('bs-cta-beta-schedule');
+          if (sch) sch.style.display = '';
           el.addEventListener('click', function(e) {
             var betaUrl = 'https://app.beautyscore.co.kr/beta';
             try {
