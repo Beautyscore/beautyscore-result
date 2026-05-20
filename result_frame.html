@@ -1783,8 +1783,21 @@ html, body {
     return fb;
   }
 
+  /* ─── bsResolveIdentity: 식별자 영속화 (진단자 전환 진입 퍼널 §6-2 · 5/20 patch) ───
+     URL param 우선 → localStorage bs_record_id fallback → null
+     3 페이지 공통 함수 (result_frame·dashboard-preview·daily) */
+  function bsResolveIdentity() {
+    var qs = new URLSearchParams(location.search);
+    var rid = qs.get('recordId') || localStorage.getItem('bs_record_id') || null;
+    var tok = qs.get('token')    || localStorage.getItem('bs_beta_token') || null;
+    if (qs.get('recordId')) localStorage.setItem('bs_record_id', qs.get('recordId'));
+    if (qs.get('token'))    localStorage.setItem('bs_beta_token', qs.get('token'));
+    return { recordId: rid, token: tok };
+  }
+  var _identity = bsResolveIdentity();
+
   var DATA = {
-    recordId:    pq('recordId', 'demo'),
+    recordId:    (_identity.recordId || 'demo'),  /* 5/20 patch — URL param 우선·localStorage bs_record_id fallback */
     store:       pq('store', '윤혜뷰티'),
     period:      pq('period', ''),  /* v2.0.6 patch — 단정적 연차 표현 차단 (1~3년 범위 입력 등 모호 시 표시 X) */
     score:       pq('score', '63'),
@@ -1813,6 +1826,11 @@ html, body {
     weakScoreUp: pq('weakScoreUp', '12점'),
     monthlyGap:  pqA(['monthlyGap','im'], '___만원')
   };
+  /* 5/20 patch — Layer 1 식별자 영속화: 진단 결과 로드 직후 localStorage 저장
+     새로고침·뒤로가기 시에도 recordId 유지 (진단자 전환 진입 퍼널 §6-1) */
+  if (DATA.recordId && DATA.recordId !== 'demo') {
+    localStorage.setItem('bs_record_id', DATA.recordId);
+  }
 
   /* v2.0.8 patch — 강점·약점 동적 산출 (URL param·T15 데이터 미존재 시 점수 기반 자동 선정)
      ───────────────────────────────────────────────────────
