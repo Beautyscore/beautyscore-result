@@ -1862,7 +1862,7 @@ html, body {
      - cache miss (404) → URL params fallback (Worker primary 호출 X — KIRA-OPS 5/19+ 결정)
      - 짝 박제: 의사결정/뷰티스코어_Worker_cache_t15_HMAC_spec_2026-05-16_v0.2.md
      - v0.8.2 wrangler publish (Hub) + CACHE_T15_HMAC_SECRET 등록 (대표님) 후 활성 */
-  var WORKER_FETCH_URL = 'https://form.beautyscore.co.kr/api/cache/t15';
+  var WORKER_FETCH_URL = 'https://app.beautyscore.co.kr/api/cache/t15';
   /* recordId 정규식 — Worker v0.8.2 line 83 정합 */
   var WORKER_RECORD_ID_RE = /^rec[A-Za-z0-9]{14,}$/;
 
@@ -3368,7 +3368,7 @@ html, body {
     try { sessionToken = sessionStorage.getItem('bs_session_token_v1') || ''; } catch(e){}
     var recordId = (DATA && DATA.recordId) || '';
     if (recordId && recordId !== 'demo') {
-      fetch('https://form.beautyscore.co.kr/api/premium/check', {
+      fetch('https://app.beautyscore.co.kr/api/premium/check', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -3391,7 +3391,7 @@ html, body {
     try { sessionToken = sessionStorage.getItem('bs_session_token_v1') || ''; } catch(e){}
     var recordId = (DATA && DATA.recordId) || '';
     var weekStamp = new Date().toISOString().slice(0,10);  /* YYYY-MM-DD (주간 idempotency) */
-    fetch('https://form.beautyscore.co.kr/api/premium/ai-coach', {
+    fetch('https://app.beautyscore.co.kr/api/premium/ai-coach', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
