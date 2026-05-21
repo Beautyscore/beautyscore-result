@@ -437,7 +437,7 @@ html, body {
   padding: 13px 15px !important;
   font-size: 18px !important; color: var(--bs-text) !important;  /* Hub 5/18 task 5 — 60대 18px+ 강화 (was 16px, line-height 1.7) */
   line-height: 1.7 !important; letter-spacing: -.1px !important;
-  max-width: calc(100% - 40px) !important;
+  width: calc(100% - 40px) !important; max-width: calc(100% - 40px) !important;
   box-shadow: var(--bs-sh-sm) !important;
 }
 #bs-wrap .bs-bubble b { color: var(--bs-navy) !important; font-weight: 800 !important; }
@@ -564,7 +564,7 @@ html, body {
 /* 점수 카드 — 아바타 숨김 + 전체 폭 (우측 치우침 해소) */
 #bs-wrap #bubble-score .bs-mini-avatar { display: none !important; }
 #bs-wrap #bubble-score .bs-bubble-wrap { gap: 0 !important; }
-#bs-wrap #bubble-score .bs-bubble-score { max-width: 100% !important; }
+#bs-wrap #bubble-score .bs-bubble-score { width: 100% !important; max-width: 100% !important; }
 
 /* CTA — 전체 폭 중앙 정렬 (우측 치우침 해소) */
 #bs-wrap .bs-cta-bubble {
@@ -1700,39 +1700,26 @@ html, body {
     </div>
   </div>
 
-  <!-- 자세히 끝 새 CTA (v2.0.8 — 카피·링크 정정 / v2.0.13 베타 CTA 분기 / v2.1.0 5/18 — 베타 CTA 최하단 이동 B안 + 카피 단축) -->
+  <!-- 자세히 끝 CTA (5/21 재배치 — 사전등록 삭제·순서 정리) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
-    <!-- α-fix (5/17) — 결제 차단 정책 v0.2 옵션 C: /pricing 직진 → form.beautyscore.co.kr (사전 등록 swap)
-         해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원
-         4-A4 (5/17) — Feature Flag PAYMENT_BLOCK_V02 + PRE_REGISTER_SWAP ON 시 자동 hide (data-bs-payment-cta="primary") -->
-    <a class="bs-cta-option" href="https://form.beautyscore.co.kr" target="_top" id="bs-cta-pricing" data-bs-payment-cta="primary">
-      <span>사전 등록하고 정식 출시 안내 받기</span>
-      <span class="bs-cta-arrow">→</span>
-    </a>
-    <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-kakao-trigger">
-      <span>나중에 다시볼게요</span>
-      <span class="bs-cta-arrow">💬</span>
-    </button>
-    <!-- v2.1.1 patch (5/18 Hub) — 단품 상점 둘러보기 soft sell 보조 CTA
-         단품 10종 (한번 알아보기·매일 알려주기·함께 바꿔보기) 사전 노출
-         짝 박제: 의사결정/뷰티스코어_store_UX_UI_개선_plan_2026-05-18_v0.1.md §3 -->
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/store" target="_top" id="bs-cta-store-browse">
       <span>단품 상점 둘러보기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
-    <!-- v2.1.0 patch (5/18 KIRA-FE/RESULT) — 베타 CTA 최하단 이동 B안 + 카피 단축
-         "🎯 베타 50인 신청하기 (5/29 마감)" → "🎯 베타 서비스 신청하기 (~5/29)" -->
-    <!-- v0.7 시안 반영 (5/18 KIRA-FE/RESULT) — 서비스 대시보드 체험하기 중간→최하단 이동 -->
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-2">
-      <span>서비스 대시보드 체험하기</span>
+      <span>서비스 체험하기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
     <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
        style="display:none;background:linear-gradient(135deg,var(--bs-navy),var(--bs-navy2));color:#fff;">
-      <span>🎯 베타 신청하기 (심사 선정·50명 한정)</span>
+      <span>베타 신청하기</span>
       <span class="bs-cta-arrow">→</span>
     </a>
     <p id="bs-cta-beta-schedule" style="display:none;margin:6px 0 0;text-align:center;font-size:12px;color:#6B7488;word-break:keep-all;">5/22 09:00 신청 시작 · 5/30 09:00 서비스 시작</p>
+    <button class="bs-cta-option bs-cta-option-secondary" type="button" id="bs-kakao-trigger">
+      <span>나중에 다시볼게요</span>
+      <span class="bs-cta-arrow">💬</span>
+    </button>
   </div>
 
   <!-- Phase 2 #12 OG 공유 버튼 — bsFeatureFlags.ogShare=true 시 노출 (5/24 06:00) -->
@@ -2918,31 +2905,7 @@ html, body {
           });
         }
       });
-      /* 베타 기간엔 결제 버튼 secondary 처리 */
-      if (isBetaOpen) {
-        var pEl = document.getElementById('bs-cta-pricing');
-        if (pEl) pEl.classList.add('bs-cta-option-secondary');
-      }
     })();
-
-    /* v2.0.8 — 결제 CTA iframe-top redirect 핸들러
-       α-fix (5/17, B-1 v0.5) — 결제 차단 정책 v0.2 옵션 C: /pricing → form.beautyscore.co.kr (사전 등록 swap)
-       해제 트리거 5건 (토스 e2e·Make C·환불·sessionToken·deploy) 후 /pricing 복원 */
-    var pricingEl = document.getElementById('bs-cta-pricing');
-    if (pricingEl) {
-      var pricingUrl = 'https://form.beautyscore.co.kr';
-      pricingEl.addEventListener('click', function(e){
-        try {
-          if (window.top !== window.self) {
-            e.preventDefault();
-            window.top.location.href = pricingUrl;
-          }
-        } catch(err) {
-          e.preventDefault();
-          window.location.href = pricingUrl;
-        }
-      });
-    }
 
     /* v2.1.2 patch (5/19 KIRA-FUNNEL) — bs-cta-store-browse iframe top redirect 핸들러 추가
        결함: target="_top" 단독 의존 → cross-origin iframe 차단 시 navigate 실패
