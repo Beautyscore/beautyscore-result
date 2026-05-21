@@ -434,7 +434,7 @@ html, body {
   background: var(--bs-white) !important;
   border: 1px solid var(--bs-bd) !important;
   border-radius: 18px !important; border-bottom-left-radius: 6px !important;
-  padding: 16px 18px !important;
+  padding: 13px 15px !important;
   font-size: 18px !important; color: var(--bs-text) !important;  /* Hub 5/18 task 5 — 60대 18px+ 강화 (was 16px, line-height 1.7) */
   line-height: 1.7 !important; letter-spacing: -.1px !important;
   max-width: calc(100% - 40px) !important;
@@ -458,7 +458,7 @@ html, body {
 #bs-wrap .bs-bubble-score {
   background: linear-gradient(135deg, #0F1525 0%, #1A2438 55%, #243152 100%) !important;
   color: var(--bs-white) !important; border: none !important;
-  padding: 32px 24px 28px !important;
+  padding: 22px 18px 20px !important;
   border-radius: 20px !important;
   box-shadow: 0 8px 36px rgba(15,21,37,.35), inset 0 0 0 .5px rgba(255,255,255,.06) !important;
 }
@@ -466,10 +466,10 @@ html, body {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 20px !important;
+  gap: 14px !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-donut {
-  width: 200px !important; height: 200px !important;
+  width: 160px !important; height: 160px !important;
   flex-shrink: 0 !important; position: relative !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-donut svg { width: 100% !important; height: 100% !important; transform: rotate(-90deg) !important; }
@@ -492,12 +492,12 @@ html, body {
   gap: 3px !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-d-num {
-  font-size: 72px !important; font-weight: 900 !important;
+  font-size: 56px !important; font-weight: 900 !important;
   color: var(--bs-white) !important;
   letter-spacing: -.06em !important; line-height: 1 !important;
 }
 #bs-wrap .bs-bubble-score .bs-mini-d-lbl {
-  font-size: 18px !important; font-weight: 700 !important;
+  font-size: 16px !important; font-weight: 700 !important;
   color: rgba(255,255,255,.8) !important;
   letter-spacing: -.02em !important; margin: 0 !important;
 }
@@ -556,16 +556,21 @@ html, body {
   font-weight: 600 !important;
 }
 
-#bs-wrap .bs-bubble-group { margin-bottom: 18px !important; }
+#bs-wrap .bs-bubble-group { margin-bottom: 14px !important; }
 #bs-wrap .bs-bubble-group .bs-bubble-wrap { margin-bottom: 6px !important; }
 #bs-wrap .bs-bubble-group .bs-bubble-wrap:last-child { margin-bottom: 0 !important; }
 #bs-wrap .bs-bubble-group .bs-bubble-wrap:not(:first-child) .bs-mini-avatar { visibility: hidden !important; }
 
-/* CTA — 4개 모두 블록 내 가운데 정렬 (대표님 5/8 명시) */
+/* 점수 카드 — 아바타 숨김 + 전체 폭 (우측 치우침 해소) */
+#bs-wrap #bubble-score .bs-mini-avatar { display: none !important; }
+#bs-wrap #bubble-score .bs-bubble-wrap { gap: 0 !important; }
+#bs-wrap #bubble-score .bs-bubble-score { max-width: 100% !important; }
+
+/* CTA — 전체 폭 중앙 정렬 (우측 치우침 해소) */
 #bs-wrap .bs-cta-bubble {
   display: flex !important; flex-direction: column !important; gap: 10px !important;
-  margin-top: 14px !important; margin-left: 36px !important;
-  max-width: calc(100% - 40px) !important;
+  margin-top: 12px !important; margin-left: 0 !important;
+  max-width: 100% !important;
 }
 #bs-wrap .bs-cta-option {
   background: var(--bs-rose) !important; color: var(--bs-white) !important;
