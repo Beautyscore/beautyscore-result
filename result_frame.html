@@ -1578,6 +1578,14 @@ html, body {
   function bsApplyPaymentBlockSwap() {
     var swap = document.getElementById('bs-pbs-swap');
     if (!swap) return;
+
+    /* 5/26 patch — 베타 모집 기간 중에는 swap 숨김 (퍼널 단일화 — 베타 신청 CTA 우선)
+       베타 종료 (5/29 21:00 KST) 이후 자동 활성 → 사전 등록 흐름으로 전환 */
+    var now = new Date();
+    var betaStart = new Date('2026-05-22T00:00:00.000Z'); // 5/22 09:00 KST
+    var betaEnd   = new Date('2026-05-29T12:00:00.000Z'); // 5/29 21:00 KST
+    if (now >= betaStart && now < betaEnd) return;
+
     var flagOn = window.bsFeatureFlags.PAYMENT_BLOCK_V02 && window.bsFeatureFlags.PRE_REGISTER_SWAP;
     if (!flagOn) return;
 
