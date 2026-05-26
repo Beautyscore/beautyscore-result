@@ -3918,9 +3918,16 @@ html, body {
 
   function bootSequence() {
     applyData();
+    /* skip_overlay=1: wrapper에서 이미 오버레이 표시함 → iframe 내부 오버레이 skip */
+    var skipOv = false;
+    try { skipOv = (new URLSearchParams(window.location.search)).get('skip_overlay') === '1'; } catch(e){}
     var seen = false;
     try { seen = (localStorage.getItem(SEEN_KEY) === '1'); } catch(e){}
-    if (seen) {
+    if (skipOv) {
+      var _bsOv = document.getElementById('bs-intro-overlay');
+      if (_bsOv) _bsOv.style.display = 'none';
+      startInitialSequence();  /* 채팅 시퀀스 바로 시작 */
+    } else if (seen) {
       var _bsOv = document.getElementById('bs-intro-overlay');
       if (_bsOv) _bsOv.style.display = 'none';
       showAllImmediate(initialBubbles);
