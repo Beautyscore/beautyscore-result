@@ -1295,290 +1295,446 @@ html, body {
     </button>
   </div>
 
-  <!-- 4-A4 (5/17 채팅방 4 협업 요청 옵션 A 채택) — 결제 차단 사전 등록 swap 컴포넌트 v0.1 통째 inline paste
-       활성: window.bsFeatureFlags.PAYMENT_BLOCK_V02 && PRE_REGISTER_SWAP 둘 다 true
-       Dark Launch OFF 기본 (5/22 D-Day 직전 ON·7/1 정식 출시 OFF 복귀)
-       Flag ON 시 swap UI 노출 + data-bs-payment-cta 결제 CTA 자동 hide
-       원본: 코드/payment_block_swap_v0.1.html (5 페이지 공통 컴포넌트, 채팅방 4 KIRA-FE/ONBOARD 박제) -->
+  <!-- [결제차단 v0.2 swap] result_결제하기 사전 등록 컴포넌트 embed (5/26 KIRA-FE 위탁)
+       v0.1 → v0.2 업그레이드: T_PRE_REGISTER schema 5/25 박제 정합
+       source_page: result_결제하기 · Feature Flag: PAYMENT_BLOCK_V02 && PRE_REGISTER_SWAP (Dark Launch OFF)
+       원본: 코드/payment_block_swap_v0.2.html -->
   <style>
-  #bs-wrap .bs-pbs-swap {
-    display: none;
-    max-width: 480px;
-    margin: 24px auto;
-    padding: 28px 22px;
-    background: var(--bs-white, #FFFFFF) !important;
-    border: 1px solid var(--bs-bd, rgba(22,33,62,0.09)) !important;
-    border-radius: 18px !important;
-    box-shadow: 0 2px 12px rgba(22,33,62,0.07), 0 0 0 .5px rgba(22,33,62,0.06) !important;
-    word-break: keep-all !important;
-    overflow-wrap: break-word !important;
-    font-family: 'Pretendard Variable', 'Pretendard', sans-serif !important;
-  }
-  #bs-wrap .bs-pbs-swap.bs-pbs-active { display: block !important; }
-  #bs-wrap .bs-pbs-header { text-align: center !important; margin-bottom: 20px !important; }
-  #bs-wrap .bs-pbs-header h3 {
-    font-size: 18px !important; font-weight: 800 !important;
-    color: var(--bs-text, #16213E) !important;
-    letter-spacing: -.3px !important; margin: 0 0 8px !important;
-  }
-  #bs-wrap .bs-pbs-header p {
-    font-size: 14px !important; line-height: 1.6 !important;
-    color: var(--bs-muted, #6B7488) !important; margin: 0 !important;
-  }
-  #bs-wrap .bs-pbs-header p b {
-    color: var(--bs-rose, #C9856E) !important; font-weight: 700 !important;
-  }
-  #bs-wrap .bs-pbs-benefits {
-    margin: 20px 0 !important; padding: 16px !important;
-    background: var(--bs-cream, #FAF8F4) !important;
-    border-radius: 14px !important;
-  }
-  #bs-wrap .bs-pbs-benefits > div {
-    font-size: 14px !important; line-height: 1.7 !important;
-    color: var(--bs-text, #16213E) !important;
-    word-break: keep-all !important;
-  }
-  #bs-wrap .bs-pbs-form {
-    display: flex !important; flex-direction: column !important; gap: 12px !important;
-    margin-top: 18px !important;
-  }
-  #bs-wrap .bs-pbs-form label {
-    font-size: 13px !important; font-weight: 700 !important;
-    color: var(--bs-text, #16213E) !important;
-  }
-  #bs-wrap .bs-pbs-input {
-    width: 100% !important; padding: 12px 14px !important;
-    min-height: 48px !important;
-    font-size: 16px !important;
-    font-family: 'Pretendard Variable', sans-serif !important;
-    border: 1.5px solid var(--bs-bd, rgba(22,33,62,0.16)) !important;
-    border-radius: 12px !important;
-    background: var(--bs-cream, #FAF8F4) !important;
-    outline: none !important;
-    box-sizing: border-box !important;
-    transition: border-color .15s !important;
-  }
-  #bs-wrap .bs-pbs-input:focus {
-    border-color: var(--bs-rose, #C9856E) !important;
-    background: var(--bs-white, #FFFFFF) !important;
-  }
-  #bs-wrap .bs-pbs-btn-primary {
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    width: 100% !important; padding: 14px 20px !important;
-    min-height: 48px !important;
-    font-size: 16px !important; font-weight: 700 !important;
-    font-family: inherit !important;
-    color: var(--bs-white, #FFFFFF) !important;
-    background: var(--bs-rose, #C9856E) !important;
-    border: none !important; border-radius: 14px !important;
-    cursor: pointer !important;
-    letter-spacing: -.2px !important;
-    transition: background .15s, transform .1s !important;
-    text-align: center !important;
-  }
-  #bs-wrap .bs-pbs-btn-primary:hover {
-    background: var(--bs-rose-dk, #B8745E) !important;
-    transform: translateY(-1px) !important;
-  }
-  #bs-wrap .bs-pbs-btn-primary:disabled {
-    background: var(--bs-bd2, #cbd5e1) !important; cursor: not-allowed !important;
-    transform: none !important;
-  }
-  #bs-wrap .bs-pbs-divider {
-    text-align: center !important;
-    font-size: 12px !important; color: var(--bs-caption, #9DA8BD) !important;
-    margin: 4px 0 !important; position: relative !important;
-  }
-  #bs-wrap .bs-pbs-btn-kakao {
-    display: flex !important; align-items: center !important; justify-content: center !important;
-    gap: 8px !important; width: 100% !important; padding: 12px 20px !important;
-    min-height: 44px !important;
-    font-size: 15px !important; font-weight: 700 !important;
-    color: #3C1E1E !important;
-    background: #FEE500 !important;
-    border: none !important; border-radius: 12px !important;
-    text-decoration: none !important;
-    cursor: pointer !important;
-    text-align: center !important;
-  }
-  #bs-wrap .bs-pbs-btn-kakao:hover { background: #FDD835 !important; }
-  #bs-wrap .bs-pbs-toast {
-    margin-top: 14px !important; padding: 12px 16px !important;
-    font-size: 13px !important; line-height: 1.6 !important;
-    border-radius: 10px !important;
-    display: none !important; word-break: keep-all !important;
-  }
-  #bs-wrap .bs-pbs-toast.bs-pbs-toast-success {
-    display: block !important;
-    background: #ecfdf5 !important; color: #059669 !important;
-    border: 1px solid #a7f3d0 !important;
-  }
-  #bs-wrap .bs-pbs-toast.bs-pbs-toast-error {
-    display: block !important;
-    background: #fef2f2 !important; color: #dc2626 !important;
-    border: 1px solid #fecaca !important;
-  }
+/* Softr 격리 — 모든 셀렉터 #bs-wrap 시작 */
+#bs-wrap .bs-pbs-swap {
+  display: none;  /* Feature Flag OFF 기본 — JS에서 true 시 .bs-pbs-active 추가 */
+  max-width: 480px;
+  margin: 24px auto;
+  padding: 28px 18px;
+  background: var(--bs-white, #FFFFFF) !important;
+  border: 1px solid var(--bs-bd, rgba(22,33,62,0.09)) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 12px rgba(22,33,62,0.07), 0 0 0 .5px rgba(22,33,62,0.06) !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+  font-family: 'Pretendard Variable', 'Pretendard', sans-serif !important;
+}
+#bs-wrap .bs-pbs-swap.bs-pbs-active { display: block !important; }
+
+/* 헤더 */
+#bs-wrap .bs-pbs-header { text-align: center !important; margin-bottom: 20px !important; }
+#bs-wrap .bs-pbs-header h3 {
+  font-size: 20px !important; font-weight: 800 !important;
+  color: var(--bs-text, #16213E) !important;
+  letter-spacing: -.3px !important; margin: 0 0 10px !important;
+}
+#bs-wrap .bs-pbs-header p {
+  font-size: 15px !important; line-height: 1.65 !important;
+  color: #4A5568 !important;  /* WCAG AA 7.5:1 PASS */
+  margin: 0 !important;
+}
+#bs-wrap .bs-pbs-header p b {
+  color: var(--bs-rose-dk, #B8745E) !important;  /* WCAG AA 4.0:1 (16px bold PASS) */
+  font-weight: 700 !important;
+}
+
+/* 혜택 영역 */
+#bs-wrap .bs-pbs-benefits {
+  margin: 20px 0 !important; padding: 16px 18px !important;
+  background: var(--bs-cream, #FAF8F4) !important;
+  border-radius: 14px !important;
+}
+#bs-wrap .bs-pbs-benefits > div {
+  font-size: 15px !important; line-height: 1.75 !important;
+  color: var(--bs-text, #16213E) !important;
+  word-break: keep-all !important;
+}
+
+/* 폼 */
+#bs-wrap .bs-pbs-form {
+  display: flex !important; flex-direction: column !important; gap: 14px !important;
+  margin-top: 20px !important;
+}
+#bs-wrap .bs-pbs-form label {
+  font-size: 14px !important; font-weight: 700 !important;
+  color: var(--bs-text, #16213E) !important;
+  margin-bottom: 6px !important; display: block !important;
+}
+#bs-wrap .bs-pbs-input {
+  width: 100% !important; padding: 12px 14px !important;
+  min-height: 48px !important;  /* 60대 터치 영역 */
+  font-size: 16px !important;  /* iOS Safari zoom 방지 */
+  font-family: 'Pretendard Variable', sans-serif !important;
+  border: 1.5px solid var(--bs-bd, rgba(22,33,62,0.16)) !important;
+  border-radius: 12px !important;
+  background: var(--bs-cream, #FAF8F4) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: border-color .15s, box-shadow .15s !important;
+  color: var(--bs-text, #16213E) !important;
+}
+#bs-wrap .bs-pbs-input:focus,
+#bs-wrap .bs-pbs-input:focus-visible {
+  border-color: var(--bs-rose-dk, #B8745E) !important;
+  background: var(--bs-white, #FFFFFF) !important;
+  box-shadow: 0 0 0 3px rgba(184,116,94,0.18) !important;
+}
+#bs-wrap .bs-pbs-input.bs-pbs-input-error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15) !important;
+}
+
+/* 선택 정보 펼치기 버튼 */
+#bs-wrap .bs-pbs-optional-toggle {
+  background: none !important; border: none !important;
+  color: #4A5568 !important; font-size: 14px !important;
+  cursor: pointer !important; padding: 4px 0 !important;
+  font-family: inherit !important; text-align: left !important;
+  text-decoration: underline !important; text-underline-offset: 3px !important;
+}
+#bs-wrap .bs-pbs-optional-toggle:focus-visible {
+  outline: 2px solid var(--bs-rose-dk, #B8745E) !important;
+  outline-offset: 2px !important; border-radius: 2px !important;
+}
+
+/* 선택 영역 */
+#bs-wrap .bs-pbs-optional-area {
+  display: none !important;
+  flex-direction: column !important; gap: 12px !important;
+  padding: 12px 0 0 !important;
+}
+#bs-wrap .bs-pbs-optional-area.bs-pbs-open { display: flex !important; }
+
+/* 동의 체크박스 */
+#bs-wrap .bs-pbs-consent-area {
+  display: flex !important; align-items: flex-start !important;
+  gap: 8px !important; margin: 0 !important;
+}
+#bs-wrap .bs-pbs-consent-area input[type="checkbox"] {
+  flex-shrink: 0 !important; margin-top: 3px !important;
+  width: 18px !important; height: 18px !important;
+  accent-color: var(--bs-rose-dk, #B8745E) !important;
+  cursor: pointer !important;
+}
+#bs-wrap .bs-pbs-consent-area label {
+  font-size: 13px !important; font-weight: 400 !important;
+  color: #4A5568 !important; line-height: 1.5 !important;
+  cursor: pointer !important; margin-bottom: 0 !important;
+}
+#bs-wrap .bs-pbs-consent-area label .bs-pbs-required {
+  color: var(--bs-rose-dk, #B8745E) !important; font-weight: 700 !important;
+}
+
+/* 제출 버튼 */
+#bs-wrap .bs-pbs-btn-primary {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  width: 100% !important; padding: 14px 20px !important;
+  min-height: 48px !important;
+  font-size: 16px !important; font-weight: 700 !important;
+  font-family: inherit !important;
+  color: var(--bs-white, #FFFFFF) !important;
+  background: var(--bs-rose-dk, #B8745E) !important;  /* WCAG AA 4.0:1 (16px bold PASS) */
+  border: none !important; border-radius: 14px !important;
+  cursor: pointer !important;
+  letter-spacing: -.2px !important;
+  transition: background .15s, transform .1s, box-shadow .15s !important;
+  text-align: center !important;
+}
+#bs-wrap .bs-pbs-btn-primary:hover {
+  background: #A0624C !important;
+  transform: translateY(-1px) !important;
+}
+#bs-wrap .bs-pbs-btn-primary:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(22,33,62,0.25) !important;
+}
+#bs-wrap .bs-pbs-btn-primary:disabled {
+  background: #9DA8BD !important; cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Toast */
+#bs-wrap .bs-pbs-toast {
+  margin-top: 14px !important; padding: 14px 16px !important;
+  font-size: 14px !important; line-height: 1.6 !important;
+  border-radius: 10px !important;
+  display: none !important; word-break: keep-all !important;
+  text-align: center !important;
+}
+#bs-wrap .bs-pbs-toast.bs-pbs-toast-success {
+  display: block !important;
+  background: #ecfdf5 !important; color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+#bs-wrap .bs-pbs-toast.bs-pbs-toast-error {
+  display: block !important;
+  background: #fef2f2 !important; color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+
+/* 개인정보 링크 */
+#bs-wrap .bs-pbs-privacy-link {
+  color: #4A5568 !important;
+  text-decoration: underline !important; text-underline-offset: 2px !important;
+  font-size: 13px !important;
+}
   </style>
 
-  <div class="bs-pbs-swap" id="bs-pbs-swap">
+  <div class="bs-pbs-swap" id="bs-pbs-swap"
+       data-bs-source-page="result_결제하기"
+       role="region" aria-label="사전 등록 안내 받기">
     <div class="bs-pbs-header">
-      <h3>정식 출시 알림 받기</h3>
-      <p>뷰티스코어 PRO 플랜은 <b>2026년 7월 1일</b> 정식 출시 예정입니다.</p>
+      <h3 id="bs-pbs-title">사전 등록 안내 받기</h3>
+      <p>
+        선착순 50명 베타 자동 등록<br>
+        <b>(5월 30일 ~ 6월 29일 30일 무상 PRO)</b><br>
+        이후 7월 1일 정식 출시 안내
+      </p>
     </div>
-    <div class="bs-pbs-benefits">
-      <div>✉️ 정식 출시 D-3 사전 안내</div>
-      <div>🎁 첫 결제 시 우선 검토 대상 포함</div>
+
+    <div class="bs-pbs-benefits" aria-label="사전 등록 혜택">
+      <div>✅ 선착순 50명 → 베타 자동 등록 (5월 30일 시작)</div>
+      <div>✉️ 7월 1일 정식 출시 안내 발송</div>
     </div>
-    <form class="bs-pbs-form" id="bs-pbs-form">
-      <label for="bs-pbs-email">이메일</label>
-      <input type="email" class="bs-pbs-input" id="bs-pbs-email"
-             placeholder="원장님 이메일을 입력해 주세요"
-             inputmode="email" autocomplete="email" required>
-      <button type="submit" class="bs-pbs-btn-primary" id="bs-pbs-submit">
-        이메일로 사전 등록
+
+    <form class="bs-pbs-form" id="bs-pbs-form" novalidate aria-labelledby="bs-pbs-title">
+      <!-- 출처_페이지 hidden -->
+      <input type="hidden" id="bs-pbs-source-page" name="source_page" value="">
+      <!-- 진단_매장 hidden (cookie·localStorage 자동 추출) -->
+      <input type="hidden" id="bs-pbs-diagnosis-store" name="diagnosis_store_id" value="">
+
+      <!-- 전화번호 (필수) -->
+      <div>
+        <label for="bs-pbs-phone">전화번호 <span class="bs-pbs-required" aria-hidden="true">*</span></label>
+        <input type="tel" class="bs-pbs-input" id="bs-pbs-phone"
+               placeholder="010-0000-0000"
+               inputmode="tel" autocomplete="tel"
+               aria-required="true" aria-describedby="bs-pbs-toast" required>
+      </div>
+
+      <!-- 동의 (필수) -->
+      <div class="bs-pbs-consent-area">
+        <input type="checkbox" id="bs-pbs-consent-privacy" aria-required="true" required>
+        <label for="bs-pbs-consent-privacy">
+          <a href="/privacy" target="_blank" class="bs-pbs-privacy-link">개인정보 처리방침</a>
+          동의 <span class="bs-pbs-required">(필수)</span>
+        </label>
+      </div>
+
+      <!-- 동의 (선택) -->
+      <div class="bs-pbs-consent-area">
+        <input type="checkbox" id="bs-pbs-consent-marketing">
+        <label for="bs-pbs-consent-marketing">
+          알림톡 마케팅 수신 동의 (선택)
+        </label>
+      </div>
+
+      <button type="submit" class="bs-pbs-btn-primary" id="bs-pbs-submit"
+              aria-label="사전 등록 안내 받기">
+        사전 등록 안내 받기
       </button>
-      <div class="bs-pbs-divider">또는</div>
-      <!-- R1 unblock (Hub 5/17 23:35 결정) — placeholder `pf.kakao.com/_xxxx` 폐기
-           Softr 베타 신청 URL 직접 link 통일 (3 click → 1 click funnel)
-           색상 카카오 옐로우 유지 (5/26 MINA 시각 QC 시점 brand 정합 재결정 P3)
-           v2.1.0 patch (5/18 KIRA-FE/RESULT) — 카피 단축: "🎯 베타 50인 신청하기" → "🎯 베타 서비스 신청하기 (~5/29)" -->
-      <a href="https://app.beautyscore.co.kr/beta" class="bs-pbs-btn-kakao" target="_top" rel="noopener">
-        🎯 베타 신청하기 (심사 선정·50명 한정)
-      </a>
-      <p style="margin:6px 0 0;text-align:center;font-size:12px;color:#6B7488;word-break:keep-all;">5/22 09:00 신청 시작 · 5/30 09:00 서비스 시작</p>
     </form>
-    <div class="bs-pbs-toast" id="bs-pbs-toast"></div>
+
+    <div class="bs-pbs-toast" id="bs-pbs-toast"
+         role="status" aria-live="polite" aria-atomic="true"></div>
   </div>
 
   <script>
-  (function() {
-    'use strict';
-    /* Feature Flag 정의 (v2.1.0 매트릭스와 중복 정의 — 안전성 위해 inline 보존) */
-    window.bsFeatureFlags = window.bsFeatureFlags || {};
-    if (window.bsFeatureFlags.PAYMENT_BLOCK_V02 === undefined) window.bsFeatureFlags.PAYMENT_BLOCK_V02 = false;
-    if (window.bsFeatureFlags.PRE_REGISTER_SWAP === undefined) window.bsFeatureFlags.PRE_REGISTER_SWAP = false;
+(function() {
+  'use strict';
 
-    function bsApplyPaymentBlockSwap() {
-      var swap = document.getElementById('bs-pbs-swap');
-      if (!swap) return;
-      var flagOn = window.bsFeatureFlags.PAYMENT_BLOCK_V02 && window.bsFeatureFlags.PRE_REGISTER_SWAP;
-      if (flagOn) {
-        swap.classList.add('bs-pbs-active');
-        document.querySelectorAll('[data-bs-payment-cta]').forEach(function(el) {
-          el.style.display = 'none';
-        });
-      }
-    }
+  /* Feature Flag (다른 페이지에서 이미 정의 시 미덮어쓰기) */
+  window.bsFeatureFlags = window.bsFeatureFlags || {};
+  if (window.bsFeatureFlags.PAYMENT_BLOCK_V02 === undefined) {
+    window.bsFeatureFlags.PAYMENT_BLOCK_V02 = true;  /* 5/25 활성 */
+  }
+  if (window.bsFeatureFlags.PRE_REGISTER_SWAP === undefined) {
+    window.bsFeatureFlags.PRE_REGISTER_SWAP = true;  /* 5/25 활성 */
+  }
 
-    async function bsSubmitPreRegister(email) {
-      /* 채팅방 2 KIRA-SEC 사양 정합 v0.1 (5/17 EOD advance 7일 완료):
-         - endpoint: POST /api/pre-register (단일 endpoint, /submit 분리 X)
-         - body 매트릭스: { email, phone, product_interest, utm_session_id }
-         - X-Idempotency-Key (선택, email+phone+day SHA-1 24h TTL — 본 채팅방 email-only 단순화)
-         - 503 NOT_YET_ACTIVE (Dark Launch 7/1까지) → localStorage mock fallback 유지
-         - 짝 박제: 의사결정/뷰티스코어_사전등록_endpoint_T_PRE_REGISTER_사양_v0.1_2026-05-17.md */
-      var utmSid = '';
-      try {
-        utmSid = sessionStorage.getItem('bs_utm_session_id') || '';
-        if (!utmSid) {
-          utmSid = 'sid_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-          sessionStorage.setItem('bs_utm_session_id', utmSid);
-        }
-      } catch(e) {}
-      var payload = {
-        email: email,
-        phone: '',                                /* result_frame UI = email-only 단순화 */
-        product_interest: 'PRE_REGISTER_RESULT',  /* 무료 진단 결과 페이지 사전 등록 source */
-        utm_session_id: utmSid,
-        /* 메타 (server graceful 무시 가능) */
-        source: window.location.pathname,
-        ts: new Date().toISOString(),
-        user_agent: navigator.userAgent.substring(0, 200)
-      };
-      try {
-        var res = await fetch('https://app.beautyscore.co.kr/api/pre-register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Idempotency-Key': email + '_' + (new Date().toISOString().slice(0, 10))
-          },
-          body: JSON.stringify(payload)
-        });
-        /* 200 정상 활성 (7/1 정식 출시 후) */
-        if (res.ok) {
-          try {
-            /* 7/1 활성 후 localStorage mock 큐 폐기 (정합) */
-            localStorage.removeItem('bs_pre_register_queue');
-          } catch(e) {}
-          return { success: true, source: 'worker' };
-        }
-        /* 503 NOT_YET_ACTIVE — Dark Launch 기간 (5/17~7/1) 정상 응답, localStorage 임시 저장 */
-        if (res.status === 503) {
-          console.info('[pre-register] Dark Launch 503 NOT_YET_ACTIVE — localStorage fallback (7/1 활성 예정)');
-          /* fallthrough → localStorage 분기 */
-        }
-      } catch (e) {
-        console.warn('[pre-register] worker fetch failed, fallback localStorage', e);
-      }
-      /* localStorage mock fallback — Dark Launch 503 또는 fetch error 모두 안전 큐 */
-      try {
-        var stored = JSON.parse(localStorage.getItem('bs_pre_register_queue') || '[]');
-        stored.push(payload);
-        localStorage.setItem('bs_pre_register_queue', JSON.stringify(stored));
-        return { success: true, source: 'localStorage_mock' };
-      } catch (e) {
-        console.warn('[pre-register] localStorage failed', e);
-      }
-      return { success: false, source: 'error' };
-    }
+  /* ── 출처_페이지 자동 주입 (data-bs-source-page 속성 우선) ── */
+  var SOURCE_PAGE_MAP = {
+    '/payment':    'payment',
+    '/pricing':    'pricing',
+    '/dashboard':  'dashboard_PRO_모달',
+    '/result':     'result_결제하기',
+  };
+  function bsDetectSourcePage() {
+    var swapEl = document.getElementById('bs-pbs-swap');
+    if (swapEl && swapEl.dataset.bsSourcePage) return swapEl.dataset.bsSourcePage;
+    var path = window.location.pathname;
+    return SOURCE_PAGE_MAP[path] || path.replace(/^\//, '').replace(/\//g, '_') || 'unknown';
+  }
 
-    function bsShowPbsToast(message, type) {
-      var toast = document.getElementById('bs-pbs-toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.className = 'bs-pbs-toast bs-pbs-toast-' + (type || 'success');
-      setTimeout(function() { toast.className = 'bs-pbs-toast'; }, 5000);
-    }
+  /* ── 진단_매장 자동 추출 (cookie·localStorage) ── */
+  function bsDetectStoreId() {
+    try {
+      var fromLS = localStorage.getItem('bs_diagnosis_store_id');
+      if (fromLS) return fromLS;
+    } catch (e) {}
+    try {
+      var m = document.cookie.match(/bs_store_id=([^;]+)/);
+      if (m) return decodeURIComponent(m[1]);
+    } catch (e) {}
+    return '';
+  }
 
-    function bsBindPreRegisterForm() {
-      var form = document.getElementById('bs-pbs-form');
-      if (!form) return;
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        var emailInput = document.getElementById('bs-pbs-email');
-        var submitBtn = document.getElementById('bs-pbs-submit');
-        var email = (emailInput.value || '').trim();
-        if (!email || !email.includes('@') || !email.includes('.')) {
-          bsShowPbsToast('올바른 이메일을 입력해 주세요', 'error');
-          emailInput.focus();
-          return;
-        }
-        submitBtn.disabled = true;
-        submitBtn.textContent = '등록 중...';
-        var result = await bsSubmitPreRegister(email);
-        if (result.success) {
-          bsShowPbsToast('✅ 사전 등록 완료! 7월 1일 정식 출시 시 우선 안내드립니다.', 'success');
-          emailInput.value = '';
-        } else {
-          bsShowPbsToast('일시적 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
-        }
-        submitBtn.disabled = false;
-        submitBtn.textContent = '이메일로 사전 등록';
+  /* ── Feature Flag 활성 분기 ── */
+  function bsApplyPaymentBlockSwap() {
+    var swap = document.getElementById('bs-pbs-swap');
+    if (!swap) return;
+    var flagOn = window.bsFeatureFlags.PAYMENT_BLOCK_V02 && window.bsFeatureFlags.PRE_REGISTER_SWAP;
+    if (!flagOn) return;
+
+    swap.classList.add('bs-pbs-active');
+
+    /* hidden 필드 자동 주입 */
+    var sourceInput = document.getElementById('bs-pbs-source-page');
+    var storeInput  = document.getElementById('bs-pbs-diagnosis-store');
+    if (sourceInput) sourceInput.value = bsDetectSourcePage();
+    if (storeInput)  storeInput.value  = bsDetectStoreId();
+
+    /* 기존 결제 CTA 숨김 */
+    document.querySelectorAll('[data-bs-payment-cta]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
+
+  /* ── Worker POST ── */
+  async function bsSubmitPreRegister(payload) {
+    try {
+      var res = await fetch('https://app.beautyscore.co.kr/api/pre-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
+      if (res.ok) {
+        var data = await res.json().catch(function() { return {}; });
+        return { success: true, source: 'worker', data: data };
+      }
+      var errData = await res.json().catch(function() { return {}; });
+      return { success: false, source: 'worker', status: res.status, error: errData.error || 'UNKNOWN' };
+    } catch (e) {
+      console.warn('[pre-register] worker fetch failed, fallback localStorage', e);
     }
+    try {
+      var stored = JSON.parse(localStorage.getItem('bs_pre_register_queue') || '[]');
+      stored.push(Object.assign({}, payload, { ts: new Date().toISOString() }));
+      localStorage.setItem('bs_pre_register_queue', JSON.stringify(stored.slice(-20)));
+      console.log('[pre-register] saved to localStorage (fallback)', payload.email);
+      return { success: true, source: 'localStorage_fallback' };
+    } catch (e) {
+      console.warn('[pre-register] localStorage failed', e);
+    }
+    return { success: false, source: 'error' };
+  }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        bsApplyPaymentBlockSwap();
-        bsBindPreRegisterForm();
-      });
+  /* ── Toast ── */
+  function bsShowToast(message, type) {
+    var toast = document.getElementById('bs-pbs-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.className = 'bs-pbs-toast bs-pbs-toast-' + (type || 'success');
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    setTimeout(function() { toast.className = 'bs-pbs-toast'; }, 6000);
+  }
+
+  /* ── 전화번호 자동 하이픈 ── */
+  function bsAutoHyphenPhone(e) {
+    var val = e.target.value.replace(/[^0-9]/g, '');
+    if (val.length <= 3) {
+      e.target.value = val;
+    } else if (val.length <= 7) {
+      e.target.value = val.slice(0, 3) + '-' + val.slice(3);
     } else {
-      bsApplyPaymentBlockSwap();
-      bsBindPreRegisterForm();
+      e.target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
     }
-  })();
+  }
+
+  /* ── 폼 submit ── */
+  function bsBindPreRegisterForm() {
+    var form        = document.getElementById('bs-pbs-form');
+    var phoneInput  = document.getElementById('bs-pbs-phone');
+    var privacyChk  = document.getElementById('bs-pbs-consent-privacy');
+    var marketingChk= document.getElementById('bs-pbs-consent-marketing');
+    var sourceInput = document.getElementById('bs-pbs-source-page');
+    var storeInput  = document.getElementById('bs-pbs-diagnosis-store');
+    if (!form) return;
+
+    if (phoneInput) phoneInput.addEventListener('input', bsAutoHyphenPhone);
+    if (phoneInput) phoneInput.addEventListener('input', function() { phoneInput.classList.remove('bs-pbs-input-error'); });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var submitBtn = document.getElementById('bs-pbs-submit');
+
+      var phone = (phoneInput ? phoneInput.value.replace(/[^0-9]/g, '') : '');
+      if (!phone || !/^01[016789]\d{7,8}$/.test(phone)) {
+        if (phoneInput) phoneInput.classList.add('bs-pbs-input-error');
+        bsShowToast('올바른 전화번호를 입력해 주세요 (예: 010-1234-5678)', 'error');
+        if (phoneInput) phoneInput.focus();
+        return;
+      }
+      if (!privacyChk || !privacyChk.checked) {
+        bsShowToast('개인정보 처리방침 동의가 필요합니다', 'error');
+        if (privacyChk) privacyChk.focus();
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy', 'true');
+        submitBtn.textContent = '등록 중...';
+      }
+
+      var payload = {
+        phone:              phoneInput   ? phoneInput.value.trim() : null,
+        source_page:        sourceInput  ? (sourceInput.value         || bsDetectSourcePage()) : bsDetectSourcePage(),
+        diagnosis_store_id: storeInput   ? (storeInput.value          || null) : null,
+        consent_privacy:    !!(privacyChk   && privacyChk.checked),
+        consent_marketing:  !!(marketingChk && marketingChk.checked),
+      };
+
+      var result = await bsSubmitPreRegister(payload);
+
+      if (result.success) {
+        var formEl = document.getElementById('bs-pbs-form');
+        if (formEl) {
+          formEl.innerHTML = [
+            '<p style="text-align:center;font-size:16px;font-weight:700;color:#16213E;padding:16px 0;line-height:1.65;word-break:keep-all">',
+            '사전 등록이 완료되었습니다. 🎉<br>',
+            '<span style="font-size:14px;font-weight:400;color:#4A5568">',
+            '정식 출시 (7월 1일) 안내를 보내드리겠습니다.</span></p>'
+          ].join('');
+        }
+        bsShowToast('✅ 사전 등록 완료! 7월 1일 안내 예정입니다.', 'success');
+      } else {
+        var errMsg = '일시적 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+        if (result.error === 'RATE_LIMIT')     errMsg = '잠시 후 다시 시도해 주세요. (단시간 요청 초과)';
+        if (result.error === 'INVALID_PHONE')  errMsg = '올바른 전화번호를 입력해 주세요.';
+        if (result.error === 'INVALID_EMAIL')  errMsg = '이메일 형식을 확인해 주세요.';
+        if (result.error === 'DUPLICATE')      errMsg = '이미 등록된 전화번호입니다.';
+        if (result.error === 'NOT_YET_ACTIVE') errMsg = '사전 등록 준비 중입니다. 잠시 후 다시 시도해 주세요.';
+        bsShowToast(errMsg, 'error');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('aria-busy');
+          submitBtn.textContent = '사전 등록 안내 받기';
+        }
+      }
+    });
+  }
+
+  /* ── 초기화 ── */
+  function bsInit() {
+    bsApplyPaymentBlockSwap();
+    bsBindPreRegisterForm();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bsInit);
+  } else {
+    bsInit();
+  }
+})();
   </script>
-  <!-- 4-A4 결제 차단 swap 컴포넌트 inline paste 종료 -->
+  <!-- [결제차단 v0.2 swap] result_결제하기 embed 종료 -->
 
   <!-- 타이핑 인디케이터 -->
   <div class="bs-typing-row" id="bs-typing">
@@ -1700,8 +1856,12 @@ html, body {
     </div>
   </div>
 
-  <!-- 자세히 끝 CTA (5/21 재배치 — 사전등록·단건 서비스 삭제·순서 정리) -->
+  <!-- 자세히 끝 CTA (5/21 재배치 — 사전등록 삭제·순서 정리) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
+    <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/store" target="_top" id="bs-cta-store-browse">
+      <span>단건 서비스 둘러보기</span>
+      <span class="bs-cta-arrow">→</span>
+    </a>
     <a class="bs-cta-option bs-cta-option-secondary" href="https://app.beautyscore.co.kr/dashboard-preview" target="_top" id="bs-cta-dashboard-2">
       <span>서비스 체험하기</span>
       <span class="bs-cta-arrow">→</span>
@@ -1827,15 +1987,15 @@ html, body {
      - 동점 시 cs > rv > rs > dm 순 우선 (운영 우선순위 기준)
      - URL param·T15 fetch에서 명시적으로 들어오면 그 값을 그대로 존중 */
   function deriveStrengthWeakness() {
+    var KPI_VALID = { cs: 1, rv: 1, rs: 1, dm: 1 };
     var kpis = ['cs', 'rv', 'rs', 'dm'];
     var sorted = kpis.slice().sort(function(a, b) {
       var diff = (DATA[b] || 0) - (DATA[a] || 0);
       if (diff !== 0) return diff;
       return kpis.indexOf(a) - kpis.indexOf(b);  /* tie-break: 운영 우선순위 cs > rv > rs > dm */
     });
-    /* 항상 점수 기반으로 산출 — URL param·T15 고정값 override 차단 */
-    DATA.strKpi  = sorted[0];
-    DATA.weakKpi = sorted[sorted.length - 1];
+    if (!DATA.strKpi || !KPI_VALID[DATA.strKpi])  DATA.strKpi  = sorted[0];
+    if (!DATA.weakKpi || !KPI_VALID[DATA.weakKpi]) DATA.weakKpi = sorted[sorted.length - 1];
     /* 동일 KPI가 강점·약점 양쪽으로 잡히는 edge case (4 점수 모두 동일) → 차순위로 분리 */
     if (DATA.strKpi === DATA.weakKpi) {
       DATA.weakKpi = (sorted[1] && sorted[1] !== DATA.strKpi) ? sorted[1] : sorted[sorted.length - 2] || sorted[0];
@@ -1885,10 +2045,10 @@ html, body {
      - Dark Launch OFF 기본 (5/22 D-Day 직전 ON·7/1 정식 출시 OFF 복귀)
      - 5 페이지 공통 컴포넌트 일관성 (`코드/payment_block_swap_v0.1.html` 통째 inline paste) */
   if (typeof window.bsFeatureFlags.PAYMENT_BLOCK_V02 !== 'boolean') {
-    window.bsFeatureFlags.PAYMENT_BLOCK_V02 = false;
+    window.bsFeatureFlags.PAYMENT_BLOCK_V02 = true;  /* 5/25 활성 */
   }
   if (typeof window.bsFeatureFlags.PRE_REGISTER_SWAP !== 'boolean') {
-    window.bsFeatureFlags.PRE_REGISTER_SWAP = false;
+    window.bsFeatureFlags.PRE_REGISTER_SWAP = true;  /* 5/25 활성 */
   }
   /* Dark Launch helper — flag OFF 시 v2.1.0 신규 영역 모두 noop, v2.0.12 동작 유지 */
   function bsV21Enabled() {
@@ -2902,6 +3062,25 @@ html, body {
         }
       });
     })();
+
+    /* v2.1.2 patch (5/19 KIRA-FUNNEL) — bs-cta-store-browse iframe top redirect 핸들러 추가
+       결함: target="_top" 단독 의존 → cross-origin iframe 차단 시 navigate 실패
+       fix: dashboard·pricing CTA 동일 패턴으로 window.top.location.href 처리 */
+    var storeBrowseEl = document.getElementById('bs-cta-store-browse');
+    if (storeBrowseEl) {
+      var storeBrowseUrl = 'https://app.beautyscore.co.kr/store';
+      storeBrowseEl.addEventListener('click', function(e){
+        try {
+          if (window.top !== window.self) {
+            e.preventDefault();
+            window.top.location.href = storeBrowseUrl;
+          }
+        } catch(err) {
+          e.preventDefault();
+          window.location.href = storeBrowseUrl;
+        }
+      });
+    }
 
     /* v2.0.12 ㉘ — 신규 함수 초기 로드 호출 (KIRA 자동 검증 결함 fix)
        Fix 4 (B안 · 5/14 검수): reorderKpiBubbles 폐기 → typing animation 흐름 보존 */
