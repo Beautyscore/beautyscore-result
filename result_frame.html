@@ -594,6 +594,76 @@ html, body {
 }
 #bs-wrap .bs-cta-arrow { font-size: 16px !important; opacity: .9 !important; }
 
+/* ⭐ P0-7 후기 활용 동의 toggle (5/28 v2.1.0 patch) */
+#bs-wrap .bs-consent-review {
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+}
+#bs-wrap .bs-consent-review-wrap {
+  background: var(--bs-cream) !important;
+  border: 1px solid var(--bs-bd) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  font-family: 'Pretendard Variable','Pretendard',sans-serif !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+}
+#bs-wrap .bs-consent-review-tag {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: var(--bs-rose-dk, #B8745E) !important;
+  margin-bottom: 8px !important;
+  text-align: center !important;
+  letter-spacing: -.2px !important;
+}
+#bs-wrap .bs-consent-review-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 10px 4px !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+#bs-wrap .bs-consent-review-check {
+  width: 24px !important;
+  height: 24px !important;
+  accent-color: var(--bs-rose, #C9856E) !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  margin-top: 2px !important;
+}
+#bs-wrap .bs-consent-review-text {
+  flex: 1 !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  color: var(--bs-text, #16213E) !important;
+  font-weight: 600 !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+}
+#bs-wrap .bs-consent-review-note {
+  font-size: 12px !important;
+  color: var(--bs-muted, #6B7488) !important;
+  margin-top: 6px !important;
+  padding: 8px 10px !important;
+  background: rgba(255,255,255,.65) !important;
+  border-radius: 8px !important;
+  line-height: 1.55 !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+}
+#bs-wrap .bs-consent-review-ack {
+  margin-top: 10px !important;
+  padding: 10px 12px !important;
+  background: rgba(46,125,94,.10) !important;
+  color: #2E7D5E !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+}
+
 /* 미니 카드 */
 #bs-wrap .bs-mini-card {
   display: flex !important; align-items: center !important; gap: 10px !important;
@@ -2084,19 +2154,22 @@ html, body {
     </div>
   </div>
 
+  <!-- 5/28 v2.1.0 patch — 데이터 관리 → 데이터 입력 게이지 톤 전환 (B안·점수 영향 X 안내) -->
   <div class="bs-bubble-group bs-pending" id="bubble-detail-4b" style="display:none">
     <div class="bs-bubble-wrap">
       <div class="bs-mini-avatar">👩‍💼</div>
       <div class="bs-bubble">
-        <!-- 5/14 patch — 제목 카드 하단으로 이동 -->
         <p id="bs-kpi-dm-copy" class="bs-kpi-copy">매일 입력 빈도를 늘리면 추세가 정확해져요</p>
         <span id="bs-kpi-dm-compare-label" style="display:none">유사 매장 평균 대비</span>
         <div class="bs-kpi-mini info" id="bs-kpi-mini-dm">
-          <span class="bs-kpi-mini-name">데이터 관리</span>
+          <span class="bs-kpi-mini-name">데이터 입력 게이지</span>
           <span class="bs-kpi-mini-bar" style="--bs-kpi-w:65%; --bs-kpi-c:#243152;"><span class="bs-kpi-mini-avg-label">평균</span></span>
           <span class="bs-kpi-mini-val" id="bs-kpi-dm-val">65</span>
         </div>
-        <div class="bs-kpi-title-bottom"><span id="bs-kpi-dm-icon">🟣</span> <b>데이터 관리 <span id="bs-kpi-dm">65</span>점</b></div>
+        <div class="bs-kpi-title-bottom"><span id="bs-kpi-dm-icon">📊</span> <b>데이터 입력 게이지 <span id="bs-kpi-dm">65</span>%</b></div>
+        <div class="bs-kpi-gauge-note" style="margin-top:8px;padding:8px 12px;background:rgba(36,49,82,.06);border-radius:8px;font-size:13px;color:var(--bs-muted);line-height:1.55;word-break:keep-all;overflow-wrap:break-word;text-align:center;">
+          ⓘ 꾸준히 기록하셨는지만 보여줘요.<br>점수에는 영향 없어요.
+        </div>
       </div>
     </div>
   </div>
@@ -2124,6 +2197,27 @@ html, body {
         <b>BASIC 플랜</b>으로<br>
         시작해보시는 건 어떠세요?<br>
         <span style="font-size:13px;color:var(--bs-muted);font-weight:600;display:block;margin-top:6px;">정식 출시 시점에 사전 등록자 우선 안내드릴게요</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⭐ P0-7 후기 활용 동의 toggle (5/28 KIRA-FE v2.1.0 patch · 사양 §2.2) -->
+  <div class="bs-consent-review bs-pending" id="bs-consent-review" style="display:none">
+    <div class="bs-consent-review-wrap">
+      <div class="bs-consent-review-tag">▣ 후기 활용 동의 (익명)</div>
+      <label class="bs-consent-review-row" for="bs-consent-review-toggle">
+        <input type="checkbox" id="bs-consent-review-toggle" class="bs-consent-review-check">
+        <span class="bs-consent-review-text">
+          원장님 진단을 다른 원장님께<br>
+          익명으로 도움이 되도록 활용해도<br>
+          될까요?
+        </span>
+      </label>
+      <div class="bs-consent-review-note">
+        ※ 매장명·연락처·지역명 등 6 항목 가린 상태로만 활용됩니다
+      </div>
+      <div class="bs-consent-review-ack" id="bs-consent-review-ack" style="display:none">
+        ✅ 동의해 주셔서 감사합니다 · 익명으로만 활용됩니다
       </div>
     </div>
   </div>
@@ -3422,10 +3516,11 @@ html, body {
     { type: 'bubble', id: 'bubble-detail-4b', wait: 4200 },
     { type: 'typing', wait: 1000 },
     { type: 'bubble', id: 'bubble-detail-5', wait: 4600 },
+    { type: 'cta', id: 'bs-consent-review', wait: 1200 },
     { type: 'cta', id: 'bs-cta-detail', wait: 1800 }
   ];
   var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-2b','bubble-3','bubble-4','bs-cta-initial'];
-  var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-4b','bubble-detail-5','bs-cta-detail'];
+  var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-4b','bubble-detail-5','bs-consent-review','bs-cta-detail'];
   var pendingTimeouts = [];
   var detailShown = false;
   var initialSequenceActive = false;
@@ -3994,6 +4089,94 @@ html, body {
 
   /* ═══ expose (디버그) ═══ */
   window.bsResetSeen = function(){ try { localStorage.removeItem(SEEN_KEY); } catch(e){} location.reload(); };
+})();
+</script>
+
+<!-- ⭐ P0-7 후기 활용 동의 toggle 핸들러 (5/28 KIRA-FE v2.1.0 patch) -->
+<script>
+(function(){
+  var CONSENT_ENDPOINT = 'https://app.beautyscore.co.kr/api/consent/review';
+  var STORAGE_KEY = 'bs_consent_review_v1';
+  var LOCK_KEY = 'bs_consent_review_locked';
+
+  function getRecordId(){
+    try {
+      var qs = new URLSearchParams(location.search);
+      return qs.get('recordId') || localStorage.getItem('bs_record_id') || '';
+    } catch(e) { return ''; }
+  }
+
+  function lockToggle(toggle, ack){
+    if(toggle) toggle.disabled = true;
+    if(ack) ack.style.display = 'block';
+    try { localStorage.setItem(LOCK_KEY, '1'); } catch(e){}
+  }
+
+  function restoreLockedState(){
+    var toggle = document.getElementById('bs-consent-review-toggle');
+    var ack = document.getElementById('bs-consent-review-ack');
+    if(!toggle) return;
+    try {
+      if(localStorage.getItem(LOCK_KEY) === '1'){
+        toggle.checked = true;
+        lockToggle(toggle, ack);
+      }
+    } catch(e){}
+  }
+
+  async function submitConsent(reviewVal){
+    var recordId = getRecordId();
+    var payload = {
+      review: reviewVal,
+      source: 'result_toggle',
+      recordId: recordId,
+      ts: new Date().toISOString()
+    };
+    try {
+      var arr = JSON.parse(localStorage.getItem(STORAGE_KEY + '_queue') || '[]');
+      arr.push(payload);
+      localStorage.setItem(STORAGE_KEY + '_queue', JSON.stringify(arr.slice(-10)));
+    } catch(e){}
+    try {
+      var res = await fetch(CONSENT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if(res.ok){
+        try {
+          var arr2 = JSON.parse(localStorage.getItem(STORAGE_KEY + '_queue') || '[]');
+          localStorage.setItem(STORAGE_KEY + '_queue', JSON.stringify(arr2.filter(function(p){ return p.ts !== payload.ts; })));
+        } catch(e){}
+        return { ok: true, source: 'worker' };
+      }
+      console.warn('[consent-review] worker non-ok', res.status);
+      return { ok: false, source: 'worker_error', status: res.status };
+    } catch(e){
+      console.warn('[consent-review] fetch failed (fallback queued)', e);
+      return { ok: false, source: 'network_error' };
+    }
+  }
+
+  function init(){
+    var toggle = document.getElementById('bs-consent-review-toggle');
+    var ack = document.getElementById('bs-consent-review-ack');
+    if(!toggle) return;
+    restoreLockedState();
+    toggle.addEventListener('change', function(){
+      if(!toggle.checked) return;
+      lockToggle(toggle, ack);
+      submitConsent(true).then(function(r){
+        if(!r.ok && ack){
+          ack.style.background = 'rgba(232,131,42,.10)';
+          ack.style.color = '#B36015';
+          ack.textContent = '⚠️ 임시 저장됐어요 · 잠시 후 자동 재전송됩니다';
+        }
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
