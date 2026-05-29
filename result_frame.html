@@ -6,6 +6,20 @@
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>뷰티스코어 진단 결과</title>
+<!-- ═══════════════════════════════════════════════════════════════
+     변경 이력 (5/28 v2.1.0 누적):
+     - 5/28 v2.1.0-r2 (KIRA-FE) ⚫ P0-7 후기 동의 toggle 제거
+       사유 = 베타 미신청 무료 진단자에게 동의 노출 부적절
+              (후기 활용 자산 = 베타 매장 실데이터 base·무료 진단자 ≠ 후기 자산)
+       제거 = markup·CSS·sequence·핸들러 IIFE 4건 (~190줄)
+       후속 = 베타 토큰 시점 (beta_apply 또는 beta_start) 통합 예정
+       cross-chat = KIRA-INFRA Worker /api/consent/review endpoint 유지
+                    (dashboard·settings 토글 = 베타 활성 사용자만 진입·정상 작동)
+     - 5/28 v2.1.0-r1 (KIRA-FE) ✅ B안 데이터 관리 → 데이터 입력 게이지 톤 전환
+       bubble-detail-4b 🟣 65점 → 📊 65% + sub-text "점수에는 영향 없어요"
+       운영지표 4 가중치 유지 (Make P-2 v1.2 정합)
+     - 5/27 v2.1.0 (KIRA-FE) v0.7 시안·overlay v0.3·skip_overlay
+     ═══════════════════════════════════════════════════════════════ -->
 <meta name="description" content="옆 매장 원장님이 한 달 뒤 알게 될 숫자, 먼저 보세요. 에스테틱 전용 경영 AI — 감이 아닌 데이터로, 숫자가 아닌 다음 액션을 드립니다. 1인샵·소규모 매장 전문, 1분 무료 진단.">
 <!-- ═══ OG / Twitter (SNS 링크 미리보기 카드 — 5/18 v2.1.0 P0-1 추가, 라이브 v2.1.1 정합) ═══ -->
 <meta property="og:type" content="website">
@@ -30,15 +44,8 @@
   }
 </script>
 <!--
-  뷰티스코어 result-frame v2.1.1 (KIRA-FE sprint #2 — SWR 진단완료 localStorage 마킹 — 5/28)
+  뷰티스코어 result-frame v2.1.0 (KIRA, Phase 2 #11~#15 통합 — 5/17 P1 sprint)
   ═══════════════════════════════════════════════════════════════
-  v2.1.0 → v2.1.1 변경 (2026-05-28 · KIRA-FE sprint #2 — SWR 진단완료 마킹):
-    ⭐ bootSequence() 내 SWR localStorage 마킹 신설:
-       - recordId 존재 + 'demo' 아닌 경우 → bs_dx_completed='true' + bs_dx_last_check=now
-       - dashboard v2.6.8 SWR 가드와 정합: 진단 완료 후 dashboard 0ms 즉시 진행
-       - v2.1.0 로직·DOM·CSS 100% 보존
-    ⭐ 짝: Worker v0.10.36 check-diagnosis·dashboard v2.6.8·settings v2.0.8
-  ───────────────────────────────────────────────────────────────
   v2.1.0 Phase 2 통합 (5/17 채팅방 3 KIRA-FE/RESULT, 5/22 D-Day 13:30~16:00 deploy):
     🌟 목표: result_frame Phase 2 5건(#11~#15) 통합 + Feature Flag 5종 false 기본 (5/24 06:00 일괄 활성)
     🌟 통합 5건 (Feature Flag · CSS class toggle 패턴):
@@ -1331,6 +1338,27 @@ html, body {
 }
 @keyframes bsOvFadeSlide { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 @keyframes bsOvFadeIn    { from{opacity:0} to{opacity:1} }
+
+/* ── Sprint #4 서비스 스위처 ── */
+#bs-wrap .bs-svc-bar {
+  display: flex; gap: 0;
+  background: var(--bs-cream);
+  border-bottom: 1px solid var(--bs-bd);
+  padding: 0 16px;
+}
+#bs-wrap .bs-svc-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px; background: none; border: none;
+  border-bottom: 2.5px solid transparent; margin-bottom: -1px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--bs-muted); cursor: pointer;
+  transition: color .18s, border-color .18s; white-space: nowrap;
+}
+#bs-wrap .bs-svc-btn.bs-svc-active { color: var(--bs-navy); border-bottom-color: var(--bs-navy); }
+#bs-wrap .bs-svc-btn:hover:not(.bs-svc-active) { color: var(--bs-navy); }
+#bs-wrap .bs-svc-icon { font-size: 15px; }
+#bs-wrap .bs-svc-label { display: block; line-height: 1.2; }
+#bs-wrap .bs-svc-sub { display: block; font-size: 10px; font-weight: 400; color: var(--bs-muted); line-height: 1.2; }
 </style>
 </head>
 <body>
@@ -1419,6 +1447,16 @@ html, body {
 </div><!-- /bs-intro-overlay -->
 
 <div id="bs-wrap">
+
+<!-- ═══ Sprint #4 서비스 스위처 ═══ -->
+<div class="bs-svc-bar" id="bs-svc-bar" role="tablist" aria-label="서비스 전환">
+  <button class="bs-svc-btn bs-svc-active" type="button" role="tab" aria-selected="true" disabled>
+    <span class="bs-svc-icon">📊</span><span><span class="bs-svc-label">뷰티스코어</span><span class="bs-svc-sub">경영 진단</span></span>
+  </button>
+  <button class="bs-svc-btn" type="button" role="tab" aria-selected="false" onclick="location.href='/library'">
+    <span class="bs-svc-icon">📚</span><span><span class="bs-svc-label">뷰티인덱스</span><span class="bs-svc-sub">제품 라이브러리</span></span>
+  </button>
+</div>
 
 <header class="bs-hdr">
   <div class="bs-h-avatar">👩‍💼</div>
@@ -3928,25 +3966,9 @@ html, body {
 
   function bootSequence() {
     applyData();
-    /* ⭐ v2.1.1 — SWR 진단완료 localStorage 마킹 (통합퍼널 옵션B §13.2 · KIRA-FE sprint #2)
-       dashboard v2.6.8 SWR 가드와 정합: 진단 결과 확인 = 온보딩 완료 증거
-       demo recordId 제외 — 실제 진단 완료자만 마킹 */
-    if (DATA.recordId && DATA.recordId !== 'demo') {
-      try {
-        localStorage.setItem('bs_dx_completed', 'true');
-        localStorage.setItem('bs_dx_last_check', String(Date.now()));
-      } catch(e){}
-    }
-    /* skip_overlay=1: wrapper에서 이미 오버레이 표시함 → iframe 내부 오버레이 skip */
-    var skipOv = false;
-    try { skipOv = (new URLSearchParams(window.location.search)).get('skip_overlay') === '1'; } catch(e){}
     var seen = false;
     try { seen = (localStorage.getItem(SEEN_KEY) === '1'); } catch(e){}
-    if (skipOv) {
-      var _bsOv = document.getElementById('bs-intro-overlay');
-      if (_bsOv) _bsOv.style.display = 'none';
-      startInitialSequence();  /* 채팅 시퀀스 바로 시작 */
-    } else if (seen) {
+    if (seen) {
       var _bsOv = document.getElementById('bs-intro-overlay');
       if (_bsOv) _bsOv.style.display = 'none';
       showAllImmediate(initialBubbles);
