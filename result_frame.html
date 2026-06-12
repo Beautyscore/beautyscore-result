@@ -8,6 +8,7 @@
 <title>뷰티스코어 진단 결과</title>
 <!-- ═══════════════════════════════════════════════════════════════
      변경 이력 (5/28 v2.1.0 누적):
+     - 6/12 v2.1.5 (Hub) 사전등록 swap OFF (PRE_REGISTER_SWAP 기본 false 2곳·구 베타기 잔재 비노출·대표님 지시)
      - 6/12 v2.1.4 (KIRA-FE) 오픈기념 쿠폰 배너 B (6/16 date-gate·flag·클릭액션 0)
      - 5/28 v2.1.0-r2 (KIRA-FE) ⚫ P0-7 후기 동의 toggle 제거
        사유 = 베타 미신청 무료 진단자에게 동의 노출 부적절
@@ -1911,7 +1912,7 @@ html, body {
     window.bsFeatureFlags.PAYMENT_BLOCK_V02 = true;  /* 5/25 활성 */
   }
   if (window.bsFeatureFlags.PRE_REGISTER_SWAP === undefined) {
-    window.bsFeatureFlags.PRE_REGISTER_SWAP = true;  /* 5/25 활성 */
+    window.bsFeatureFlags.PRE_REGISTER_SWAP = false;  /* 6/12 OFF (대표님 지시) — 구 사전등록 폼 비노출·쿠폰 배너(6/16~)로 대체 */
   }
 
   /* ── 출처_페이지 자동 주입 (data-bs-source-page 속성 우선) ── */
@@ -2442,7 +2443,7 @@ html, body {
     window.bsFeatureFlags.PAYMENT_BLOCK_V02 = true;  /* 5/25 활성 */
   }
   if (typeof window.bsFeatureFlags.PRE_REGISTER_SWAP !== 'boolean') {
-    window.bsFeatureFlags.PRE_REGISTER_SWAP = true;  /* 5/25 활성 */
+    window.bsFeatureFlags.PRE_REGISTER_SWAP = false;  /* 6/12 OFF (대표님 지시) — 구 사전등록 폼 비노출 */
   }
   /* Dark Launch helper — flag OFF 시 v2.1.0 신규 영역 모두 noop, v2.0.12 동작 유지 */
   function bsV21Enabled() {
