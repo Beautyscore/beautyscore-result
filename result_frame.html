@@ -8,6 +8,7 @@
 <title>뷰티스코어 진단 결과</title>
 <!-- ═══════════════════════════════════════════════════════════════
      변경 이력 (5/28 v2.1.0 누적):
+     - 6/12 v2.1.4 (KIRA-FE) 오픈기념 쿠폰 배너 B (6/16 date-gate·flag·클릭액션 0)
      - 5/28 v2.1.0-r2 (KIRA-FE) ⚫ P0-7 후기 동의 toggle 제거
        사유 = 베타 미신청 무료 진단자에게 동의 노출 부적절
               (후기 활용 자산 = 베타 매장 실데이터 base·무료 진단자 ≠ 후기 자산)
@@ -1359,6 +1360,63 @@ html, body {
 #bs-wrap .bs-svc-icon { font-size: 15px; }
 #bs-wrap .bs-svc-label { display: block; line-height: 1.2; }
 #bs-wrap .bs-svc-sub { display: block; font-size: 10px; font-weight: 400; color: var(--bs-muted); line-height: 1.2; }
+
+/* ═══ 오픈기념 쿠폰 배너 B (6/12 v2.1.4 · date-gate 6/16 · 클릭액션 0) ═══ */
+#bs-wrap .bs-coupon-banner {
+  margin: 14px 0 4px !important;
+  padding: 22px 20px !important;
+  background: linear-gradient(135deg, var(--bs-navy) 0%, var(--bs-navy2) 100%) !important;
+  border: 1px solid rgba(232,180,168,.28) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--bs-sh-md) !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
+}
+#bs-wrap .bs-coupon-chip {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  padding: 5px 12px !important; border-radius: 20px !important;
+  background: rgba(232,180,168,.14) !important;
+  border: 1px solid rgba(232,180,168,.35) !important;
+  color: var(--bs-nude) !important;
+  font-size: 12px !important; font-weight: 800 !important; letter-spacing: .4px !important;
+}
+#bs-wrap .bs-coupon-title {
+  margin: 12px 0 0 !important;
+  color: var(--bs-white) !important;
+  font-size: 18px !important; font-weight: 800 !important; letter-spacing: -.3px !important;
+  line-height: 1.5 !important;
+}
+#bs-wrap .bs-coupon-body {
+  margin: 8px 0 0 !important;
+  color: rgba(255,255,255,.82) !important;
+  font-size: 14px !important; line-height: 1.65 !important;
+}
+#bs-wrap .bs-coupon-price {
+  margin: 14px 0 0 !important;
+  color: var(--bs-nude) !important;
+  font-size: 24px !important; font-weight: 800 !important; letter-spacing: -.05em !important;
+  line-height: 1.3 !important;
+}
+#bs-wrap .bs-coupon-price-sub {
+  display: block !important; margin-top: 4px !important;
+  color: rgba(244,220,210,.75) !important;
+  font-size: 12.5px !important; font-weight: 600 !important; letter-spacing: 0 !important;
+}
+#bs-wrap .bs-coupon-divider {
+  margin: 14px auto 0 !important; width: 44px !important; height: 1px !important;
+  background: rgba(232,180,168,.4) !important; border: 0 !important;
+}
+#bs-wrap .bs-coupon-terms {
+  margin: 12px 0 0 !important;
+  color: rgba(255,255,255,.6) !important;
+  font-size: 11.5px !important; line-height: 1.7 !important;
+}
+#bs-wrap .bs-coupon-close {
+  margin: 10px 0 0 !important;
+  color: var(--bs-nude-soft) !important;
+  font-size: 13.5px !important; font-weight: 700 !important; line-height: 1.6 !important;
+}
 </style>
 </head>
 <body>
@@ -2176,6 +2234,17 @@ html, body {
     </div>
   </div>
 
+  <!-- 오픈기념 쿠폰 배너 B (6/12 v2.1.4 · date-gate 6/16 · flag · 클릭액션 0 · 순수 안내) -->
+  <div class="bs-coupon-banner bs-pending" id="bs-coupon-banner" style="display:none" role="note" aria-label="오픈 기념 쿠폰 안내">
+    <span class="bs-coupon-chip">🎁 오픈 기념 쿠폰</span>
+    <p class="bs-coupon-title">오늘 받으신 진단,<br>매달 이어가면 어떨까요?</p>
+    <p class="bs-coupon-body">7월 1일 정식 출시를 기념해<br>BASIC 플랜 50% 쿠폰을 드립니다.</p>
+    <p class="bs-coupon-price">첫 달 14,950원<span class="bs-coupon-price-sub">(50% 쿠폰 적용 시 · 월 29,900원)</span></p>
+    <div class="bs-coupon-divider"></div>
+    <p class="bs-coupon-terms">2회차부터 월 29,900원 자동결제 · 쿠폰은 1매장 1회 · <span id="bs-coupon-expiry">7월 31일까지</span></p>
+    <p class="bs-coupon-close">매일 1분 기록으로<br>우리 매장 점수를 계속 확인하세요.</p>
+  </div>
+
   <!-- 자세히 끝 CTA (5/26 재정렬 — 베타 신청하기 최상단 primary) -->
   <div class="bs-cta-bubble bs-pending" id="bs-cta-detail" style="display:none">
     <a class="bs-cta-option" href="https://app.beautyscore.co.kr/beta" target="_top" id="bs-cta-beta-2"
@@ -2238,6 +2307,11 @@ html, body {
 <script>
 (function(){
   'use strict';
+
+  /* ═══ 오픈기념 쿠폰 배너 B 설정 (6/12 v2.1.4 · kill switch + date-gate) ═══ */
+  var BS_COUPON_BANNER_ENABLED = true;  /* kill switch */
+  var BS_COUPON_BANNER_START = '2026-06-16T00:00:00+09:00';  /* 노출 시작 (KST) */
+  var BS_COUPON_EXPIRY_LABEL = '7월 31일까지';  /* 쿠폰 유효 표기 (대표님 확정 시 1줄 수정) */
 
   /* ═══ URL params + mock fallback ═══ */
   var p = new URLSearchParams(window.location.search);
@@ -3474,6 +3548,14 @@ html, body {
   ];
   var initialBubbles = ['bubble-1','bubble-score','bubble-2','bubble-2b','bubble-3','bubble-4','bs-cta-initial'];
   var detailBubbles = ['bubble-detail-1','bubble-detail-2','bubble-detail-3','bubble-detail-4','bubble-detail-4b','bubble-detail-5','bs-cta-detail'];
+  /* 오픈기념 쿠폰 배너 B (6/12 v2.1.4) · ENABLED + date-gate 충족 시에만 detail 시퀀스 편입
+     미충족 = display:none 유지 (기본 hidden이 안전선) · 클릭액션 0 (7/1 전 결제 차단 정합) */
+  if (BS_COUPON_BANNER_ENABLED && Date.now() >= Date.parse(BS_COUPON_BANNER_START)) {
+    var bsCouponExpiryEl = document.getElementById('bs-coupon-expiry');
+    if (bsCouponExpiryEl) bsCouponExpiryEl.textContent = BS_COUPON_EXPIRY_LABEL;
+    DETAIL_SEQUENCE.splice(DETAIL_SEQUENCE.length - 1, 0, { type: 'bubble', id: 'bs-coupon-banner', wait: 1600 });
+    detailBubbles.splice(detailBubbles.indexOf('bs-cta-detail'), 0, 'bs-coupon-banner');
+  }
   var pendingTimeouts = [];
   var detailShown = false;
   var initialSequenceActive = false;
